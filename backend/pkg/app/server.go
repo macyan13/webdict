@@ -1,22 +1,25 @@
 package app
 
 import (
+	"github.com/Yan-Matskevich/webdict/backend/pkg/domain/service"
 	"github.com/gin-gonic/gin"
 	"log"
 )
 
 type Server struct {
-	router *gin.Engine
+	router             *gin.Engine
+	translationService service.TranslationService
 }
 
-func NewServer(router *gin.Engine) *Server {
+func NewServer(router *gin.Engine, translationService service.TranslationService) *Server {
 	return &Server{
-		router: router,
+		router:             router,
+		translationService: translationService,
 	}
 }
 
-func (server *Server) Run() error {
-	routes := server.Routes()
+func (s *Server) Run() error {
+	routes := s.Routes()
 
 	err := routes.Run(":4000") // todo: move to config
 
