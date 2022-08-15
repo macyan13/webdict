@@ -6,13 +6,13 @@ import (
 )
 
 type Translation struct {
-	Id            string    `json:"id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	Transcription string    `json:"transcription"`
-	Translation   string    `json:"translation"`
-	Text          string    `json:"text"`
-	Example       string    `json:"example"`
+	Id            string `json:"id"`
+	CreatedAt     int64  `json:"created_at"`
+	UpdatedAt     int64  `json:"updated_at"`
+	Transcription string `json:"transcription"`
+	Translation   string `json:"translation"`
+	Text          string `json:"text"`
+	Example       string `json:"example"`
 }
 
 type TranslationRequest struct {
@@ -23,10 +23,11 @@ type TranslationRequest struct {
 }
 
 func NewTranslation(request TranslationRequest) *Translation {
+	now := time.Now().Unix()
 	return &Translation{
 		Id:            uuid.New().String(),
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+		CreatedAt:     now,
+		UpdatedAt:     now,
 		Translation:   request.Translation,
 		Transcription: request.Transcription,
 		Text:          request.Text,
@@ -35,7 +36,7 @@ func NewTranslation(request TranslationRequest) *Translation {
 }
 
 func (t *Translation) ApplyChanges(request TranslationRequest) {
-	t.UpdatedAt = time.Now()
+	t.UpdatedAt = time.Now().Unix()
 	t.Transcription = request.Transcription
 	t.Text = request.Text
 	t.Translation = request.Translation

@@ -14,12 +14,12 @@ func NewTranslationRepository() *translationRepo {
 	}
 }
 
-func (r translationRepo) Save(translation domain.Translation) error {
+func (r *translationRepo) Save(translation domain.Translation) error {
 	r.storage[translation.Id] = translation
 	return nil
 }
 
-func (r translationRepo) Get() []domain.Translation {
+func (r *translationRepo) Get() []domain.Translation {
 	result := make([]domain.Translation, 0, len(r.storage))
 
 	for _, translation := range r.storage {
@@ -29,7 +29,7 @@ func (r translationRepo) Get() []domain.Translation {
 	return result
 }
 
-func (r translationRepo) GetById(id string) *domain.Translation {
+func (r *translationRepo) GetById(id string) *domain.Translation {
 	translation, ok := r.storage[id]
 
 	if ok {
@@ -39,7 +39,7 @@ func (r translationRepo) GetById(id string) *domain.Translation {
 	return nil
 }
 
-func (r translationRepo) Delete(id string) error {
+func (r *translationRepo) Delete(id string) error {
 	delete(r.storage, id)
 	return nil
 }
