@@ -1,4 +1,4 @@
-module github.com/Yan-Matskevich/webdict/backend
+module github.com/macyan13/webdict/backend
 
 go 1.18
 

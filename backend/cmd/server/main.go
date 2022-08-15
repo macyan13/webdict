@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/app"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain/service"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/macyan13/webdict/backend/pkg/app"
+	"github.com/macyan13/webdict/backend/pkg/domain/service"
+	"github.com/macyan13/webdict/backend/pkg/repository"
 	"os"
 )
 

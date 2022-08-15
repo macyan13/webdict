@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	domain "github.com/Yan-Matskevich/webdict/backend/pkg/domain"
+	domain "github.com/macyan13/webdict/backend/pkg/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 

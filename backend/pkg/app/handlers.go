@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/macyan13/webdict/backend/pkg/domain"
 	"log"
 	"net/http"
 )

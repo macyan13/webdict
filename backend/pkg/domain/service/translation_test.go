@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain/service/mocks"
+	"github.com/macyan13/webdict/backend/pkg/domain"
+	"github.com/macyan13/webdict/backend/pkg/domain/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"

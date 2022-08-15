@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain"
+	"github.com/macyan13/webdict/backend/pkg/domain"
 )
 
 type translationRepo struct {

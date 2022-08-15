@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/domain"
+	"github.com/macyan13/webdict/backend/pkg/domain"
 )
 
 type TranslationRepository interface {
