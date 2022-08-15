@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/Yan-Matskevich/webdict/backend/pkg/app"
 	"github.com/gin-gonic/gin"
+	"github.com/macyan13/webdict/backend/pkg/app"
+	"github.com/macyan13/webdict/backend/pkg/domain/service"
+	"github.com/macyan13/webdict/backend/pkg/repository"
 	"os"
 )
 
@@ -29,5 +31,7 @@ func initServer() *app.Server {
 	router := gin.Default()
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
-	return app.NewServer(router)
+
+	translationService := service.NewTranslationService(repository.NewTranslationRepository())
+	return app.NewServer(router, *translationService)
 }
