@@ -1,0 +1,16 @@
+version: "2"
+
+services:
+  webdict:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SKIP_BACKEND_TEST
+    image: macyan13/webdict:dev
+    container_name: "webdict"
+    hostname: "webdict-dev"
+
+    # uncomment to expose directly (no proxy)
+    ports:
+      - "4000:4000"

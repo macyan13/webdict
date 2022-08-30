@@ -1,26 +1,26 @@
 package repository
 
 import (
-	"github.com/macyan13/webdict/backend/pkg/domain"
+	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 )
 
 type translationRepo struct {
-	storage map[string]domain.Translation
+	storage map[string]translation.Translation
 }
 
 func NewTranslationRepository() *translationRepo {
 	return &translationRepo{
-		storage: map[string]domain.Translation{},
+		storage: map[string]translation.Translation{},
 	}
 }
 
-func (r *translationRepo) Save(translation domain.Translation) error {
+func (r *translationRepo) Save(translation translation.Translation) error {
 	r.storage[translation.Id] = translation
 	return nil
 }
 
-func (r *translationRepo) Get() []domain.Translation {
-	result := make([]domain.Translation, 0, len(r.storage))
+func (r *translationRepo) Get() []translation.Translation {
+	result := make([]translation.Translation, 0, len(r.storage))
 
 	for _, translation := range r.storage {
 		result = append(result, translation)
@@ -29,7 +29,7 @@ func (r *translationRepo) Get() []domain.Translation {
 	return result
 }
 
-func (r *translationRepo) GetById(id string) *domain.Translation {
+func (r *translationRepo) GetById(id string) *translation.Translation {
 	translation, ok := r.storage[id]
 
 	if ok {

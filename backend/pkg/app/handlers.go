@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/macyan13/webdict/backend/pkg/domain"
+	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"log"
 	"net/http"
 )
@@ -13,7 +13,7 @@ func (s *Server) CreateTranslation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		var request domain.TranslationRequest
+		var request translation.Request
 		err := c.ShouldBindJSON(&request)
 
 		if err != nil {
@@ -56,7 +56,7 @@ func (s *Server) UpdateTranslation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		var request domain.TranslationRequest
+		var request translation.Request
 		err := c.ShouldBindJSON(&request)
 
 		if err != nil {

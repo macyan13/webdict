@@ -1,44 +1,42 @@
-package service
+package translation
 
 import (
 	"errors"
 	"fmt"
-	"github.com/macyan13/webdict/backend/pkg/domain"
-	"github.com/macyan13/webdict/backend/pkg/domain/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
 func TestTranslationService_CreateTranslation(t *testing.T) {
-	repository := mocks.TranslationRepository{}
+	repository := MockRepository{}
 	service := NewTranslationService(&repository)
 
 	mockCall := repository.On("Save", mock.Anything).Return(nil)
-	err := service.CreateTranslation(domain.TranslationRequest{})
+	err := service.CreateTranslation(Request{})
 	assert.Nil(t, err)
 
 	mockCall.Unset()
 
 	repository.On("Save", mock.Anything).Return(errors.New("testError"))
-	err = service.CreateTranslation(domain.TranslationRequest{})
+	err = service.CreateTranslation(Request{})
 	assert.Equal(t, "testError", err.Error())
 }
 
 func TestTranslationService_UpdateTranslation(t *testing.T) {
-	repository := mocks.TranslationRepository{}
+	repository := MockRepository{}
 	service := NewTranslationService(&repository)
 
 	id := "testId"
-	request := domain.TranslationRequest{
+	request := Request{
 		Transcription: "test",
 		Translation:   "test",
 		Text:          "test",
 		Example:       "test",
 	}
 
-	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&domain.Translation{})
-	repository.On("Save", mock.MatchedBy(func(t domain.Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
+	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&Translation{})
+	repository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
 	err := service.UpdateTranslation(id, request)
 	assert.Nil(t, err)
 
@@ -50,14 +48,14 @@ func TestTranslationService_UpdateTranslation(t *testing.T) {
 }
 
 func TestTranslationService_GetTranslations(t *testing.T) {
-	repository := mocks.TranslationRepository{}
+	repository := MockRepository{}
 	service := NewTranslationService(&repository)
-	repository.On("Get").Times(1).Return([]domain.Translation{})
+	repository.On("Get").Times(1).Return([]Translation{})
 	service.GetTranslations()
 }
 
 func TestTranslationService_GetById(t *testing.T) {
-	repository := mocks.TranslationRepository{}
+	repository := MockRepository{}
 	service := NewTranslationService(&repository)
 	id := "testId"
 
@@ -67,15 +65,15 @@ func TestTranslationService_GetById(t *testing.T) {
 }
 
 func TestTranslationService_DeleteById(t *testing.T) {
-	repository := mocks.TranslationRepository{}
+	repository := MockRepository{}
 	service := NewTranslationService(&repository)
 	id := "testId"
 
-	repository.On("DeleteById", id).Times(1).Return(nil)
+	repository.On("Delete", id).Times(1).Return(nil)
 	translation := service.DeleteById(id)
 	assert.Nil(t, translation)
 
-	repository.On("Save", mock.Anything).Return(errors.New("testError"))
+	repository.On("Delete", mock.Anything).Return(errors.New("testError"))
 	err := service.DeleteById(id)
 	assert.Equal(t, "testError", err.Error())
 }

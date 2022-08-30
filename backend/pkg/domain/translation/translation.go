@@ -1,4 +1,4 @@
-package domain
+package translation
 
 import (
 	"github.com/google/uuid"
@@ -15,14 +15,14 @@ type Translation struct {
 	Example       string `json:"example"`
 }
 
-type TranslationRequest struct {
+type Request struct {
 	Transcription string `json:"transcription"`
 	Translation   string `json:"translation"`
 	Text          string `json:"text"`
 	Example       string `json:"example"`
 }
 
-func NewTranslation(request TranslationRequest) *Translation {
+func NewTranslation(request Request) *Translation {
 	now := time.Now().Unix()
 	return &Translation{
 		Id:            uuid.New().String(),
@@ -35,7 +35,7 @@ func NewTranslation(request TranslationRequest) *Translation {
 	}
 }
 
-func (t *Translation) ApplyChanges(request TranslationRequest) {
+func (t *Translation) ApplyChanges(request Request) {
 	t.UpdatedAt = time.Now().Unix()
 	t.Transcription = request.Transcription
 	t.Text = request.Text
