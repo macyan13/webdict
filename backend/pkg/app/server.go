@@ -2,16 +2,16 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/macyan13/webdict/backend/pkg/domain/service"
+	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"log"
 )
 
 type Server struct {
 	router             *gin.Engine
-	translationService service.TranslationService
+	translationService translation.Service
 }
 
-func NewServer(router *gin.Engine, translationService service.TranslationService) *Server {
+func NewServer(router *gin.Engine, translationService translation.Service) *Server {
 	return &Server{
 		router:             router,
 		translationService: translationService,

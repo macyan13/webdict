@@ -1,4 +1,4 @@
-package domain
+package translation
 
 import (
 	"testing"
@@ -8,19 +8,19 @@ import (
 import "github.com/stretchr/testify/assert"
 
 func TestNewTranslation(t *testing.T) {
-	translation := NewTranslation(TranslationRequest{})
+	translation := NewTranslation(Request{})
 	assert.Equal(t, translation.UpdatedAt, translation.CreatedAt)
 }
 
 func TestTranslation_ApplyChanges(t *testing.T) {
-	entity := NewTranslation(TranslationRequest{})
+	entity := NewTranslation(Request{})
 	updatedAt := entity.UpdatedAt
 
 	translation := "test"
 	transcription := "[test]"
 	text := "text"
 	example := "exampleTest"
-	request := TranslationRequest{
+	request := Request{
 		Transcription: transcription,
 		Translation:   translation,
 		Text:          text,

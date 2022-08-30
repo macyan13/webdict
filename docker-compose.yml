@@ -1,0 +1,13 @@
+version: "2"
+
+services:
+  webdict:
+    build: .
+    image: macyan13/webdict:latest
+    container_name: "webdict"
+    hostname: "webdict"
+    restart: always
+
+    # uncomment to expose directly (no proxy)
+    ports:
+      - "4000:4000"
