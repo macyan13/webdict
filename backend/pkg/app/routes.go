@@ -2,10 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) Routes() *gin.Engine {
+func (s *Server) BuildRoutes() {
 	router := s.router
 
 	// group all routes under /v1/api
@@ -20,6 +19,4 @@ func (s *Server) Routes() *gin.Engine {
 			translationApi.DELETE(fmt.Sprintf("/:%s", translationIdParam), s.DeleteTranslationById())
 		}
 	}
-
-	return router
 }
