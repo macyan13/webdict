@@ -30,25 +30,14 @@ func (s *Server) CreateTranslation() gin.HandlerFunc {
 			return
 		}
 
-		response := map[string]string{
-			"status": "success",
-			"data":   "New Translation Created",
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusCreated, nil)
 	}
 }
 
 func (s *Server) GetTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-
-		response := map[string]any{
-			"status": "success",
-			"data":   s.translationService.GetTranslations(),
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, s.translationService.GetTranslations())
 	}
 }
 
@@ -85,18 +74,13 @@ func (s *Server) GetTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		translation := s.translationService.GetById(c.Param(translationIdParam))
+		record := s.translationService.GetById(c.Param(translationIdParam))
 
-		if translation == nil {
-			c.JSON(http.StatusBadRequest, "Can not find requested translation")
+		if record == nil {
+			c.JSON(http.StatusBadRequest, "Can not find requested record")
 		}
 
-		response := map[string]any{
-			"status": "success",
-			"data":   translation,
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, record)
 	}
 }
 

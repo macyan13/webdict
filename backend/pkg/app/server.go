@@ -19,9 +19,7 @@ func NewServer(router *gin.Engine, translationService translation.Service) *Serv
 }
 
 func (s *Server) Run() error {
-	routes := s.Routes()
-
-	err := routes.Run(":4000") // todo: move to config
+	err := s.router.Run(":4000") // todo: move to config
 
 	if err != nil {
 		log.Printf("Server - there was an error calling Run on router: %v", err)

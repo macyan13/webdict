@@ -33,5 +33,7 @@ func initServer() *app.Server {
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
 
 	translationService := translation.NewTranslationService(repository.NewTranslationRepository())
-	return app.NewServer(router, *translationService)
+	s := app.NewServer(router, *translationService)
+	s.BuildRoutes()
+	return s
 }
