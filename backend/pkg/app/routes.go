@@ -18,5 +18,14 @@ func (s *Server) BuildRoutes() {
 			translationApi.GET(fmt.Sprintf("/:%s", translationIdParam), s.GetTranslationById())
 			translationApi.DELETE(fmt.Sprintf("/:%s", translationIdParam), s.DeleteTranslationById())
 		}
+
+		tagApi := v1.Group("/tags")
+		{
+			tagApi.POST("", s.CreateTag())
+			tagApi.GET("", s.GetTag())
+			tagApi.PUT(fmt.Sprintf("/:%s", tagIdParam), s.UpdateTag())
+			tagApi.GET(fmt.Sprintf("/:%s", tagIdParam), s.GetTagById())
+			tagApi.DELETE(fmt.Sprintf("/:%s", tagIdParam), s.DeleteTagById())
+		}
 	}
 }

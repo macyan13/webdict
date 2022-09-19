@@ -16,7 +16,7 @@ type Service struct {
 	repository Repository
 }
 
-func NewTranslationService(repository Repository) *Service {
+func NewService(repository Repository) *Service {
 	return &Service{
 		repository: repository,
 	}
