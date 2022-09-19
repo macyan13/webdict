@@ -1,4 +1,4 @@
-package translation
+package tag
 
 import (
 	"errors"
@@ -8,50 +8,47 @@ import (
 	"testing"
 )
 
-func TestService_CreateTranslation(t *testing.T) {
+func TestService_CreateTag(t *testing.T) {
 	repository := MockRepository{}
 	service := NewService(&repository)
 
 	mockCall := repository.On("Save", mock.Anything).Return(nil)
-	err := service.CreateTranslation(Request{})
+	err := service.CreateTag(Request{})
 	assert.Nil(t, err)
 
 	mockCall.Unset()
 
 	repository.On("Save", mock.Anything).Return(errors.New("testError"))
-	err = service.CreateTranslation(Request{})
+	err = service.CreateTag(Request{})
 	assert.Equal(t, "testError", err.Error())
 }
 
-func TestService_UpdateTranslation(t *testing.T) {
+func TestService_UpdateTag(t *testing.T) {
 	repository := MockRepository{}
 	service := NewService(&repository)
 
 	id := "testId"
 	request := Request{
-		Transcription: "test",
-		Translation:   "test",
-		Text:          "test",
-		Example:       "test",
+		Tag: "test",
 	}
 
-	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&Translation{})
-	repository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
-	err := service.UpdateTranslation(id, request)
+	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&Tag{})
+	repository.On("Save", mock.MatchedBy(func(t Tag) bool { return t.Tag == "test" })).Times(1).Return(nil)
+	err := service.UpdateTag(id, request)
 	assert.Nil(t, err)
 
 	mockGetByIdCall.Unset()
 
 	repository.On("GetById", id).Times(1).Return(nil)
-	err = service.UpdateTranslation(id, request)
-	assert.Equal(t, fmt.Sprintf("Can not find translation by ID: %s", id), err.Error())
+	err = service.UpdateTag(id, request)
+	assert.Equal(t, fmt.Sprintf("Can not find tag by ID: %s", id), err.Error())
 }
 
-func TestService_GetTranslations(t *testing.T) {
+func TestService_GetTag(t *testing.T) {
 	repository := MockRepository{}
 	service := NewService(&repository)
-	repository.On("Get").Times(1).Return([]Translation{})
-	service.GetTranslations()
+	repository.On("Get").Times(1).Return([]Tag{})
+	service.GetTag()
 }
 
 func TestService_GetById(t *testing.T) {
@@ -60,8 +57,8 @@ func TestService_GetById(t *testing.T) {
 	id := "testId"
 
 	repository.On("GetById", id).Times(1).Return(nil)
-	translation := service.GetById(id)
-	assert.Nil(t, translation)
+	tag := service.GetById(id)
+	assert.Nil(t, tag)
 }
 
 func TestService_DeleteById(t *testing.T) {
@@ -70,8 +67,8 @@ func TestService_DeleteById(t *testing.T) {
 	id := "testId"
 
 	repository.On("Delete", id).Times(1).Return(nil)
-	translation := service.DeleteById(id)
-	assert.Nil(t, translation)
+	tag := service.DeleteById(id)
+	assert.Nil(t, tag)
 
 	repository.On("Delete", mock.Anything).Return(errors.New("testError"))
 	err := service.DeleteById(id)

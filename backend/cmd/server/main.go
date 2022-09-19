@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
+	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/repository"
 	"os"
@@ -32,8 +33,11 @@ func initServer() *app.Server {
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
 
-	translationService := translation.NewTranslationService(repository.NewTranslationRepository())
-	s := app.NewServer(router, *translationService)
+	s := app.NewServer(
+		router,
+		*translation.NewService(repository.NewTranslationRepository()),
+		*tag.NewService(repository.NewTagRepository()),
+	)
 	s.BuildRoutes()
 	return s
 }

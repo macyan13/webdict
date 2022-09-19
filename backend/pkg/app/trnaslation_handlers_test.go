@@ -3,9 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
-	"github.com/macyan13/webdict/backend/pkg/repository"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -34,7 +32,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	s.router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	records := getExistingRecords(s)
+	records := getExistingTranslations(s)
 	created := records[0]
 
 	assert.Equal(t, tr, created.Translation)
@@ -51,12 +49,12 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
 	s.router.ServeHTTP(httptest.NewRecorder(), req)
 
-	id := getExistingRecords(s)[0].Id
+	id := getExistingTranslations(s)[0].Id
 	req, _ = http.NewRequest("DELETE", v1TranslationApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Zero(t, len(getExistingRecords(s)))
+	assert.Zero(t, len(getExistingTranslations(s)))
 }
 
 func TestServer_UpdateTranslation(t *testing.T) {
@@ -66,7 +64,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
 	s.router.ServeHTTP(httptest.NewRecorder(), req)
-	id := getExistingRecords(s)[0].Id
+	id := getExistingTranslations(s)[0].Id
 
 	transcription := "[updateTranscription]"
 	tr := "UpdateTranslation"
@@ -98,7 +96,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	assert.Equal(t, example, record.Example)
 }
 
-func getExistingRecords(s *Server) []translation.Translation {
+func getExistingTranslations(s *Server) []translation.Translation {
 	req, _ := http.NewRequest("GET", v1TranslationApi, nil)
 	w := httptest.NewRecorder()
 	s.router.ServeHTTP(w, req)
@@ -106,12 +104,4 @@ func getExistingRecords(s *Server) []translation.Translation {
 	var records []translation.Translation
 	json.Unmarshal(w.Body.Bytes(), &records)
 	return records
-}
-
-func initTestServer() *Server {
-	router := gin.Default()
-	translationService := translation.NewTranslationService(repository.NewTranslationRepository())
-	s := NewServer(router, *translationService)
-	s.BuildRoutes()
-	return s
 }
