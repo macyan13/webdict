@@ -3,29 +3,45 @@ package translation
 import (
 	"errors"
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
 func TestService_CreateTranslation(t *testing.T) {
-	repository := MockRepository{}
-	service := NewService(&repository)
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
 
-	mockCall := repository.On("Save", mock.Anything).Return(nil)
+	mockCall := translationRepository.On("Save", mock.Anything).Return(nil)
 	err := service.CreateTranslation(Request{})
 	assert.Nil(t, err)
 
 	mockCall.Unset()
 
-	repository.On("Save", mock.Anything).Return(errors.New("testError"))
+	translationRepository.On("Save", mock.Anything).Return(errors.New("testError"))
 	err = service.CreateTranslation(Request{})
 	assert.Equal(t, "testError", err.Error())
 }
 
+func TestService_CreateTranslationErrorOnMissedTagInDB(t *testing.T) {
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
+
+	tagRepository.On("GetByIds", mock.Anything).Return([]*tag.Tag{})
+
+	err := service.CreateTranslation(Request{
+		TagIds: []string{"notExistedTag"},
+	})
+	assert.Equal(t, "can not apply changes for translation tags, some passed tag are not found", err.Error())
+}
+
 func TestService_UpdateTranslation(t *testing.T) {
-	repository := MockRepository{}
-	service := NewService(&repository)
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
 
 	id := "testId"
 	request := Request{
@@ -35,45 +51,48 @@ func TestService_UpdateTranslation(t *testing.T) {
 		Example:       "test",
 	}
 
-	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&Translation{})
-	repository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
+	mockGetByIdCall := translationRepository.On("GetById", id).Times(1).Return(&Translation{})
+	translationRepository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
 	err := service.UpdateTranslation(id, request)
 	assert.Nil(t, err)
 
 	mockGetByIdCall.Unset()
 
-	repository.On("GetById", id).Times(1).Return(nil)
+	translationRepository.On("GetById", id).Times(1).Return(nil)
 	err = service.UpdateTranslation(id, request)
 	assert.Equal(t, fmt.Sprintf("Can not find translation by ID: %s", id), err.Error())
 }
 
 func TestService_GetTranslations(t *testing.T) {
-	repository := MockRepository{}
-	service := NewService(&repository)
-	repository.On("Get").Times(1).Return([]Translation{})
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
+	translationRepository.On("Get").Times(1).Return([]Translation{})
 	service.GetTranslations()
 }
 
 func TestService_GetById(t *testing.T) {
-	repository := MockRepository{}
-	service := NewService(&repository)
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
 	id := "testId"
 
-	repository.On("GetById", id).Times(1).Return(nil)
+	translationRepository.On("GetById", id).Times(1).Return(nil)
 	translation := service.GetById(id)
 	assert.Nil(t, translation)
 }
 
 func TestService_DeleteById(t *testing.T) {
-	repository := MockRepository{}
-	service := NewService(&repository)
+	translationRepository := MockRepository{}
+	tagRepository := tag.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository)
 	id := "testId"
 
-	repository.On("Delete", id).Times(1).Return(nil)
+	translationRepository.On("Delete", id).Times(1).Return(nil)
 	translation := service.DeleteById(id)
 	assert.Nil(t, translation)
 
-	repository.On("Delete", mock.Anything).Return(errors.New("testError"))
+	translationRepository.On("Delete", mock.Anything).Return(errors.New("testError"))
 	err := service.DeleteById(id)
 	assert.Equal(t, "testError", err.Error())
 }

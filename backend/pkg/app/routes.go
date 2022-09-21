@@ -22,7 +22,7 @@ func (s *Server) BuildRoutes() {
 		tagApi := v1.Group("/tags")
 		{
 			tagApi.POST("", s.CreateTag())
-			tagApi.GET("", s.GetTag())
+			tagApi.GET("", s.GetTags())
 			tagApi.PUT(fmt.Sprintf("/:%s", tagIdParam), s.UpdateTag())
 			tagApi.GET(fmt.Sprintf("/:%s", tagIdParam), s.GetTagById())
 			tagApi.DELETE(fmt.Sprintf("/:%s", tagIdParam), s.DeleteTagById())

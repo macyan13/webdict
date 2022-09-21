@@ -8,6 +8,7 @@ import (
 type Repository interface {
 	Save(tag Tag) error
 	GetById(id string) *Tag
+	GetByIds(ids []string) []*Tag
 	Get() []Tag
 	Delete(id string) error
 }
@@ -38,7 +39,7 @@ func (s *Service) UpdateTag(id string, request Request) error {
 	return s.repository.Save(*tag)
 }
 
-func (s *Service) GetTag() []Tag {
+func (s *Service) GetTags() []Tag {
 	return s.repository.Get()
 }
 

@@ -33,10 +33,11 @@ func initServer() *app.Server {
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
 
+	tagRepository := repository.NewTagRepository()
 	s := app.NewServer(
 		router,
-		*translation.NewService(repository.NewTranslationRepository()),
-		*tag.NewService(repository.NewTagRepository()),
+		*translation.NewService(repository.NewTranslationRepository(), tagRepository),
+		*tag.NewService(tagRepository),
 	)
 	s.BuildRoutes()
 	return s
