@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -18,12 +19,18 @@ func TestServer_CreateTranslation(t *testing.T) {
 	tr := "CreateTranslation"
 	text := "CreateText"
 	example := "CreateExample"
+	tg := "testTag"
+
+	tagRequest := tag.Request{Tag: tg}
+	s.tagService.CreateTag(tagRequest)
+	tagId := s.tagService.GetTags()[0].Id
 
 	request := translation.Request{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
 		Example:       example,
+		TagIds:        []string{tagId},
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -39,6 +46,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	assert.Equal(t, text, created.Text)
 	assert.Equal(t, transcription, created.Transcription)
 	assert.Equal(t, example, created.Example)
+	assert.Equal(t, tagId, created.Tags[0].Id)
 }
 
 func TestServer_DeleteTranslationById(t *testing.T) {

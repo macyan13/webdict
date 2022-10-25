@@ -48,7 +48,7 @@ func TestService_GetTag(t *testing.T) {
 	repository := MockRepository{}
 	service := NewService(&repository)
 	repository.On("Get").Times(1).Return([]Tag{})
-	service.GetTag()
+	service.GetTags()
 }
 
 func TestService_GetById(t *testing.T) {

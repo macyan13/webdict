@@ -1,6 +1,7 @@
 package translation
 
 import (
+	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"testing"
 	"time"
 )
@@ -8,33 +9,41 @@ import (
 import "github.com/stretchr/testify/assert"
 
 func TestNewTranslation(t *testing.T) {
-	translation := NewTranslation(Request{})
+	translation := newTranslation(data{})
 	assert.Equal(t, translation.UpdatedAt, translation.CreatedAt)
 }
 
 func TestTranslation_ApplyChanges(t *testing.T) {
-	entity := NewTranslation(Request{})
-	updatedAt := entity.UpdatedAt
+	tr := newTranslation(data{})
+	updatedAt := tr.UpdatedAt
 
 	translation := "test"
 	transcription := "[test]"
 	text := "text"
 	example := "exampleTest"
-	request := Request{
-		Transcription: transcription,
-		Translation:   translation,
-		Text:          text,
-		Example:       example,
+	tg := "testTag"
+
+	data := data{
+		Request: Request{
+			Transcription: transcription,
+			Translation:   translation,
+			Text:          text,
+			Example:       example,
+		},
+		Tags: []*tag.Tag{{
+			Tag: tg,
+		}},
 	}
 
 	time.Sleep(time.Second)
 
-	entity.ApplyChanges(request)
+	tr.applyChanges(data)
 
 	assert := assert.New(t)
-	assert.Equal(entity.Translation, translation)
-	assert.Equal(entity.Text, text)
-	assert.Equal(entity.Example, example)
-	assert.Equal(entity.Translation, translation)
-	assert.Greaterf(entity.UpdatedAt, updatedAt, "error message %s", "formatted")
+	assert.Equal(tr.Translation, translation)
+	assert.Equal(tr.Text, text)
+	assert.Equal(tr.Example, example)
+	assert.Equal(tr.Translation, translation)
+	assert.Greaterf(tr.UpdatedAt, updatedAt, "error message %s", "formatted")
+	assert.Equal(tr.Tags[0].Tag, tg)
 }

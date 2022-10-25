@@ -43,3 +43,16 @@ func (r *tagRepo) Delete(id string) error {
 	delete(r.storage, id)
 	return nil
 }
+
+func (r *tagRepo) GetByIds(ids []string) []*tag.Tag {
+	var tags []*tag.Tag
+	for _, id := range ids {
+		el, ok := r.storage[id]
+
+		if ok {
+			tags = append(tags, &el)
+		}
+	}
+
+	return tags
+}

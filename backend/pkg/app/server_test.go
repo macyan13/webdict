@@ -9,10 +9,11 @@ import (
 
 func initTestServer() *Server {
 	router := gin.Default()
+	tagRepo := repository.NewTagRepository()
 	s := NewServer(
 		router,
-		*translation.NewService(repository.NewTranslationRepository()),
-		*tag.NewService(repository.NewTagRepository()),
+		*translation.NewService(repository.NewTranslationRepository(), tagRepo),
+		*tag.NewService(tagRepo),
 	)
 	s.BuildRoutes()
 	return s

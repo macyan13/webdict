@@ -57,6 +57,22 @@ func (_m *MockRepository) GetById(id string) *Tag {
 	return r0
 }
 
+// GetByIds provides a mock function with given fields: ids
+func (_m *MockRepository) GetByIds(ids []string) []*Tag {
+	ret := _m.Called(ids)
+
+	var r0 []*Tag
+	if rf, ok := ret.Get(0).(func([]string) []*Tag); ok {
+		r0 = rf(ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*Tag)
+		}
+	}
+
+	return r0
+}
+
 // Save provides a mock function with given fields: _a0
 func (_m *MockRepository) Save(_a0 Tag) error {
 	ret := _m.Called(_a0)

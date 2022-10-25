@@ -34,10 +34,10 @@ func (s *Server) CreateTag() gin.HandlerFunc {
 	}
 }
 
-func (s *Server) GetTag() gin.HandlerFunc {
+func (s *Server) GetTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, s.tagService.GetTag())
+		c.JSON(http.StatusOK, s.tagService.GetTags())
 	}
 }
 
