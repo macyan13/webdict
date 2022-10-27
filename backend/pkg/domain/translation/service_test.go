@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -12,15 +13,17 @@ import (
 func TestService_CreateTranslation(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 
+	userRepository.On("Exist", mock.Anything).Times(2).Return(true)
 	mockCall := translationRepository.On("Save", mock.Anything).Return(nil)
 	err := service.CreateTranslation(Request{})
 	assert.Nil(t, err)
 
 	mockCall.Unset()
-
 	translationRepository.On("Save", mock.Anything).Return(errors.New("testError"))
+
 	err = service.CreateTranslation(Request{})
 	assert.Equal(t, "testError", err.Error())
 }
@@ -28,9 +31,11 @@ func TestService_CreateTranslation(t *testing.T) {
 func TestService_CreateTranslationErrorOnMissedTagInDB(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 
 	tagRepository.On("GetByIds", mock.Anything).Return([]*tag.Tag{})
+	userRepository.On("Exist", mock.Anything).Times(1).Return(true)
 
 	err := service.CreateTranslation(Request{
 		TagIds: []string{"notExistedTag"},
@@ -41,7 +46,8 @@ func TestService_CreateTranslationErrorOnMissedTagInDB(t *testing.T) {
 func TestService_UpdateTranslation(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 
 	id := "testId"
 	request := Request{
@@ -53,6 +59,8 @@ func TestService_UpdateTranslation(t *testing.T) {
 
 	mockGetByIdCall := translationRepository.On("GetById", id).Times(1).Return(&Translation{})
 	translationRepository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
+	userRepository.On("Exist", mock.Anything).Times(1).Return(true)
+
 	err := service.UpdateTranslation(id, request)
 	assert.Nil(t, err)
 
@@ -60,13 +68,14 @@ func TestService_UpdateTranslation(t *testing.T) {
 
 	translationRepository.On("GetById", id).Times(1).Return(nil)
 	err = service.UpdateTranslation(id, request)
-	assert.Equal(t, fmt.Sprintf("Can not find translation by ID: %s", id), err.Error())
+	assert.Equal(t, fmt.Sprintf("can not find translation by ID: %s", id), err.Error())
 }
 
 func TestService_GetTranslations(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 	translationRepository.On("Get").Times(1).Return([]Translation{})
 	service.GetTranslations()
 }
@@ -74,7 +83,8 @@ func TestService_GetTranslations(t *testing.T) {
 func TestService_GetById(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 	id := "testId"
 
 	translationRepository.On("GetById", id).Times(1).Return(nil)
@@ -85,7 +95,8 @@ func TestService_GetById(t *testing.T) {
 func TestService_DeleteById(t *testing.T) {
 	translationRepository := MockRepository{}
 	tagRepository := tag.MockRepository{}
-	service := NewService(&translationRepository, &tagRepository)
+	userRepository := user.MockRepository{}
+	service := NewService(&translationRepository, &tagRepository, &userRepository)
 	id := "testId"
 
 	translationRepository.On("Delete", id).Times(1).Return(nil)
