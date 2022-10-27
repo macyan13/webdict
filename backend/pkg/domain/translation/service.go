@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/domain/user"
 )
 
 type Repository interface {
@@ -14,22 +15,27 @@ type Repository interface {
 }
 
 type Service struct {
-	repository    Repository
-	tagRepository tag.Repository
+	repository     Repository
+	tagRepository  tag.Repository
+	userRepository user.Repository
 }
 
-func NewService(repository Repository, tagRepository tag.Repository) *Service {
+func NewService(repository Repository, tagRepository tag.Repository, userRepository user.Repository) *Service {
 	return &Service{
-		repository:    repository,
-		tagRepository: tagRepository,
+		repository:     repository,
+		tagRepository:  tagRepository,
+		userRepository: userRepository,
 	}
 }
 
 func (s *Service) CreateTranslation(request Request) error {
-	data := data{}
-	err := s.convertToData(request, &data)
+	if err := s.validateRequest(request); err != nil {
+		return err
+	}
 
-	if err != nil {
+	data := data{}
+
+	if err := s.convertToData(request, &data); err != nil {
 		return err
 	}
 
@@ -41,13 +47,12 @@ func (s *Service) UpdateTranslation(id string, request Request) error {
 	translation := s.repository.GetById(id)
 
 	if translation == nil {
-		return errors.New(fmt.Sprintf("Can not find translation by ID: %s", id))
+		return fmt.Errorf("can not find translation by ID: %s", id)
 	}
 
 	data := data{}
-	err := s.convertToData(request, &data)
 
-	if err != nil {
+	if err := s.convertToData(request, &data); err != nil {
 		return err
 	}
 
@@ -65,6 +70,13 @@ func (s *Service) GetById(id string) *Translation {
 
 func (s *Service) DeleteById(id string) error {
 	return s.repository.Delete(id)
+}
+
+func (s *Service) validateRequest(request Request) error {
+	if !s.userRepository.Exist(request.AuthorId) {
+		return fmt.Errorf("can not find user by passed AuthorId: %s", request.AuthorId)
+	}
+	return nil
 }
 
 func (s *Service) convertToData(request Request, data *data) error {

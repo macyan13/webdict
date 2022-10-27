@@ -14,17 +14,14 @@ func (s *Server) CreateTranslation() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		var request translation.Request
-		err := c.ShouldBindJSON(&request)
-
-		if err != nil {
+		if err := c.ShouldBindJSON(&request); err != nil {
 			log.Printf("[Error] Can not parse new Translation request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
-		err = s.translationService.CreateTranslation(request)
-
-		if err != nil {
+		request.AuthorId = s.userService.GetByEmail(adminEmail).Id
+		if err := s.translationService.CreateTranslation(request); err != nil {
 			log.Printf("[Error] Can not create new Translation: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
@@ -46,17 +43,16 @@ func (s *Server) UpdateTranslation() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		var request translation.Request
-		err := c.ShouldBindJSON(&request)
 
-		if err != nil {
+		if err := c.ShouldBindJSON(&request); err != nil {
 			log.Printf("[Error] Can not parse new Translation request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
-		err = s.translationService.UpdateTranslation(c.Param(translationIdParam), request)
+		request.AuthorId = s.userService.GetByEmail(adminEmail).Id
 
-		if err != nil {
+		if err := s.translationService.UpdateTranslation(c.Param(translationIdParam), request); err != nil {
 			log.Printf("[Error] Can not Update Existing Translation: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
@@ -78,6 +74,7 @@ func (s *Server) GetTranslationById() gin.HandlerFunc {
 
 		if record == nil {
 			c.JSON(http.StatusBadRequest, "Can not find requested record")
+			return
 		}
 
 		c.JSON(http.StatusOK, record)
@@ -88,9 +85,7 @@ func (s *Server) DeleteTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		err := s.translationService.DeleteById(c.Param(translationIdParam))
-
-		if err != nil {
+		if err := s.translationService.DeleteById(c.Param(translationIdParam)); err != nil {
 			log.Printf("[Error] Can not delete translation: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return

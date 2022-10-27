@@ -8,6 +8,7 @@ import (
 
 type Translation struct {
 	Id            string     `json:"id"`
+	AuthorId      string     `json:"-"`
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`
 	Transcription string     `json:"transcription"`
@@ -23,6 +24,7 @@ type Request struct {
 	Text          string   `json:"text"`
 	Example       string   `json:"example"`
 	TagIds        []string `json:"tag_ids"`
+	AuthorId      string
 }
 
 type data struct {
@@ -34,6 +36,7 @@ func newTranslation(data data) *Translation {
 	now := time.Now()
 	return &Translation{
 		Id:            uuid.New().String(),
+		AuthorId:      data.AuthorId,
 		CreatedAt:     now,
 		UpdatedAt:     now,
 		Translation:   data.Translation,
