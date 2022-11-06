@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,11 +8,11 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/repository"
 )
 
-func initTestServer() *Server {
+func initTestServer() *HttpServer {
 	router := gin.Default()
 	tagRepository := repository.NewTagRepository()
 	userRepository := repository.NewUserRepository()
-	s := NewServer(
+	s := NewAppServer(
 		router,
 		*translation.NewService(repository.NewTranslationRepository(), tagRepository, userRepository),
 		*tag.NewService(tagRepository),

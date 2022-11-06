@@ -13,7 +13,7 @@ type User struct {
 	CreatedAt time.Time
 }
 
-func newUser(name, email, password string) *User {
+func NewUser(name, email, password string) *User {
 	return &User{
 		Id:        uuid.New().String(),
 		Name:      name,

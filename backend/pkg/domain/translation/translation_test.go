@@ -9,12 +9,12 @@ import (
 import "github.com/stretchr/testify/assert"
 
 func TestNewTranslation(t *testing.T) {
-	translation := newTranslation(data{})
+	translation := NewTranslation(Data{})
 	assert.Equal(t, translation.UpdatedAt, translation.CreatedAt)
 }
 
 func TestTranslation_ApplyChanges(t *testing.T) {
-	tr := newTranslation(data{})
+	tr := NewTranslation(Data{})
 	updatedAt := tr.UpdatedAt
 
 	translation := "test"
@@ -23,7 +23,7 @@ func TestTranslation_ApplyChanges(t *testing.T) {
 	example := "exampleTest"
 	tg := "testTag"
 
-	data := data{
+	data := Data{
 		Request: Request{
 			Transcription: transcription,
 			Translation:   translation,
@@ -45,5 +45,5 @@ func TestTranslation_ApplyChanges(t *testing.T) {
 	assert.Equal(tr.Example, example)
 	assert.Equal(tr.Translation, translation)
 	assert.Greaterf(tr.UpdatedAt, updatedAt, "error message %s", "formatted")
-	assert.Equal(tr.Tags[0].Tag, tg)
+	assert.Equal(tr.TagIds[0].Tag, tg)
 }

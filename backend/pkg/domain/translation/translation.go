@@ -2,20 +2,19 @@ package translation
 
 import (
 	"github.com/google/uuid"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"time"
 )
 
 type Translation struct {
-	Id            string     `json:"id"`
-	AuthorId      string     `json:"-"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	Transcription string     `json:"transcription"`
-	Translation   string     `json:"translation"`
-	Text          string     `json:"text"`
-	Example       string     `json:"example"`
-	Tags          []*tag.Tag `json:"tags"`
+	Id            string    `json:"id"`
+	AuthorId      string    `json:"-"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Transcription string    `json:"transcription"`
+	Translation   string    `json:"translation"`
+	Text          string    `json:"text"`
+	Example       string    `json:"example"`
+	TagIds        []string  `json:"tags"`
 }
 
 type Request struct {
@@ -27,31 +26,30 @@ type Request struct {
 	AuthorId      string
 }
 
-type data struct {
-	Request
-	Tags []*tag.Tag
-}
-
-func newTranslation(data data) *Translation {
+func NewTranslation(translation, transcription, text, example, authorId string, tagIds []string) *Translation {
 	now := time.Now()
 	return &Translation{
 		Id:            uuid.New().String(),
-		AuthorId:      data.AuthorId,
+		AuthorId:      authorId,
 		CreatedAt:     now,
 		UpdatedAt:     now,
-		Translation:   data.Translation,
-		Transcription: data.Transcription,
-		Text:          data.Text,
-		Example:       data.Example,
-		Tags:          data.Tags,
+		Translation:   translation,
+		Transcription: transcription,
+		Text:          text,
+		Example:       example,
+		TagIds:        tagIds,
 	}
 }
 
-func (t *Translation) applyChanges(data data) {
-	t.Tags = data.Tags
+func (t *Translation) ApplyChanges(translation, transcription, text, example string, tagIds []string) {
+	t.TagIds = tagIds
+	t.Transcription = transcription
+	t.Text = text
+	t.Translation = translation
+	t.Example = example
 	t.UpdatedAt = time.Now()
-	t.Transcription = data.Transcription
-	t.Text = data.Text
-	t.Translation = data.Translation
-	t.Example = data.Example
+}
+
+func (t *Translation) IsAuthor(authorId string) bool {
+	return t.AuthorId == authorId
 }

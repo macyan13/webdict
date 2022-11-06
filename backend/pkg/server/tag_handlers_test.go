@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ func TestServer_CreateTag(t *testing.T) {
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	records := getExistingTags(s)
@@ -38,12 +38,12 @@ func TestServer_DeleteTagById(t *testing.T) {
 	request := tag.Request{}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
 	id := getExistingTags(s)[0].Id
 	req, _ = http.NewRequest("DELETE", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Zero(t, len(getExistingTags(s)))
 }
@@ -53,7 +53,7 @@ func TestServer_UpdateTag(t *testing.T) {
 	request := tag.Request{}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 	id := getExistingTags(s)[0].Id
 	tg := "UpdateTag"
 
@@ -64,12 +64,12 @@ func TestServer_UpdateTag(t *testing.T) {
 	jsonValue, _ = json.Marshal(request)
 	req, _ = http.NewRequest("PUT", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	req, _ = http.NewRequest("GET", v1TagApi+"/"+id, nil)
 	w = httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
 	var record tag.Tag
 	json.Unmarshal(w.Body.Bytes(), &record)
@@ -77,10 +77,10 @@ func TestServer_UpdateTag(t *testing.T) {
 	assert.Equal(t, tg, record.Tag)
 }
 
-func getExistingTags(s *Server) []tag.Tag {
+func getExistingTags(s *HttpServer) []tag.Tag {
 	req, _ := http.NewRequest("GET", v1TagApi, nil)
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
 	var records []tag.Tag
 	json.Unmarshal(w.Body.Bytes(), &records)

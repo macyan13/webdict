@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"bytes"
@@ -36,7 +36,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	records := getExistingTranslations(s)
@@ -46,7 +46,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	assert.Equal(t, text, created.Text)
 	assert.Equal(t, transcription, created.Transcription)
 	assert.Equal(t, example, created.Example)
-	assert.Equal(t, tagId, created.Tags[0].Id)
+	assert.Equal(t, tagId, created.TagIds[0].Id)
 }
 
 func TestServer_DeleteTranslationById(t *testing.T) {
@@ -55,12 +55,12 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 	request := translation.Request{}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
 	id := getExistingTranslations(s)[0].Id
 	req, _ = http.NewRequest("DELETE", v1TranslationApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Zero(t, len(getExistingTranslations(s)))
 }
@@ -71,7 +71,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 	id := getExistingTranslations(s)[0].Id
 
 	transcription := "[updateTranscription]"
@@ -88,12 +88,12 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	jsonValue, _ = json.Marshal(request)
 	req, _ = http.NewRequest("PUT", v1TranslationApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	req, _ = http.NewRequest("GET", v1TranslationApi+"/"+id, nil)
 	w = httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
 	var record translation.Translation
 	json.Unmarshal(w.Body.Bytes(), &record)
@@ -104,10 +104,10 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	assert.Equal(t, example, record.Example)
 }
 
-func getExistingTranslations(s *Server) []translation.Translation {
+func getExistingTranslations(s *HttpServer) []translation.Translation {
 	req, _ := http.NewRequest("GET", v1TranslationApi, nil)
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
 	var records []translation.Translation
 	json.Unmarshal(w.Body.Bytes(), &records)

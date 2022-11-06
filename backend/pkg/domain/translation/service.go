@@ -11,7 +11,7 @@ type Repository interface {
 	Save(translation Translation) error
 	GetById(id string) *Translation
 	Get() []Translation
-	Delete(id string) error
+	Delete(translation Translation) error
 }
 
 type Service struct {
@@ -33,13 +33,13 @@ func (s *Service) CreateTranslation(request Request) error {
 		return err
 	}
 
-	data := data{}
+	data := Data{}
 
 	if err := s.convertToData(request, &data); err != nil {
 		return err
 	}
 
-	translation := newTranslation(data)
+	translation := NewTranslation(data)
 	return s.repository.Save(*translation)
 }
 
@@ -50,7 +50,7 @@ func (s *Service) UpdateTranslation(id string, request Request) error {
 		return fmt.Errorf("can not find translation by ID: %s", id)
 	}
 
-	data := data{}
+	data := Data{}
 
 	if err := s.convertToData(request, &data); err != nil {
 		return err
@@ -79,7 +79,7 @@ func (s *Service) validateRequest(request Request) error {
 	return nil
 }
 
-func (s *Service) convertToData(request Request, data *data) error {
+func (s *Service) convertToData(request Request, data *Data) error {
 	data.Request = request
 
 	if len(request.TagIds) == 0 {

@@ -1,7 +1,7 @@
 package user
 
 type Repository interface {
-	Exist(id string) bool
+	Exist(email string) bool
 	Save(user *User) error
 	GetByEmail(email string) *User
 }
@@ -15,7 +15,7 @@ func NewService(repository Repository) *Service {
 }
 
 func (s *Service) CreateUser(name, email, password string) error {
-	user := newUser(name, email, password)
+	user := NewUser(name, email, password)
 	return s.repository.Save(user)
 }
 
