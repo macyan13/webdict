@@ -3,8 +3,8 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -15,17 +15,21 @@ const v1TranslationApi = "/v1/api/translations"
 
 func TestServer_CreateTranslation(t *testing.T) {
 	s := initTestServer()
-	transcription := "[CreateTranscription]"
+	transcription := "CreateTranscription"
 	tr := "CreateTranslation"
 	text := "CreateText"
 	example := "CreateExample"
 	tg := "testTag"
+	author := "testAuthor"
 
-	tagRequest := tag.Request{Tag: tg}
-	s.tagService.CreateTag(tagRequest)
-	tagId := s.tagService.GetTags()[0].Id
+	s.app.Commands.AddTag.Handle(command.AddTag{
+		Tag:      tg,
+		AuthorId: author,
+	})
 
-	request := translation.Request{
+	tagId := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: author})[0].Id
+
+	request := translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
@@ -46,13 +50,13 @@ func TestServer_CreateTranslation(t *testing.T) {
 	assert.Equal(t, text, created.Text)
 	assert.Equal(t, transcription, created.Transcription)
 	assert.Equal(t, example, created.Example)
-	assert.Equal(t, tagId, created.TagIds[0].Id)
+	assert.Equal(t, tagId, created.Tags[0].Id)
 }
 
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
 
-	request := translation.Request{}
+	request := translationRequest{}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -67,7 +71,7 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
-	request := translation.Request{}
+	request := translationRequest{}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
@@ -79,7 +83,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	text := "UpdateText"
 	example := "UpdateExample"
 
-	request = translation.Request{
+	request = translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
@@ -95,7 +99,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
-	var record translation.Translation
+	var record translationResponse
 	json.Unmarshal(w.Body.Bytes(), &record)
 
 	assert.Equal(t, tr, record.Translation)
@@ -104,12 +108,12 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	assert.Equal(t, example, record.Example)
 }
 
-func getExistingTranslations(s *HttpServer) []translation.Translation {
-	req, _ := http.NewRequest("GET", v1TranslationApi, nil)
+func getExistingTranslations(s *HttpServer) []translationResponse {
+	req, _ := http.NewRequest("GET", v1TranslationApi+"/last?limit=10", nil)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
-	var records []translation.Translation
+	var records []translationResponse
 	json.Unmarshal(w.Body.Bytes(), &records)
 	return records
 }

@@ -6,7 +6,7 @@ type LastTranslations struct {
 }
 
 type LastTranslationsRepository interface {
-	getLastTranslations(authorId string, limit int) []Translation
+	GetLastTranslations(authorId string, limit int) []Translation
 }
 
 type LastTranslationsHandler struct {
@@ -24,5 +24,5 @@ func (h LastTranslationsHandler) Handle(cmd LastTranslations) []Translation {
 		limit = 10
 	}
 
-	return h.translationRepo.getLastTranslations(cmd.AuthorId, limit)
+	return h.translationRepo.GetLastTranslations(cmd.AuthorId, limit)
 }

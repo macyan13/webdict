@@ -16,8 +16,15 @@ type AddTranslation struct {
 }
 
 type AddTranslationHandler struct {
-	translationRep translation.Repository
-	tagRepo        tag.Repository
+	translationRepo translation.Repository
+	tagRepo         tag.Repository
+}
+
+func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository) AddTranslationHandler {
+	return AddTranslationHandler{
+		translationRepo: translationRep,
+		tagRepo:         tagRepo,
+	}
 }
 
 func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
@@ -26,15 +33,15 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 	}
 
 	tr := translation.NewTranslation(
-		cmd.Transcription,
 		cmd.Translation,
+		cmd.Transcription,
 		cmd.Text,
 		cmd.Example,
 		cmd.AuthorId,
 		cmd.TagIds,
 	)
 
-	return h.translationRep.Save(*tr)
+	return h.translationRepo.Save(*tr)
 }
 
 func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {

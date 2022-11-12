@@ -17,12 +17,19 @@ type UpdateTranslation struct {
 }
 
 type UpdateTranslationHandler struct {
-	translationRep translation.Repository
-	tagRepo        tag.Repository
+	translationRepo translation.Repository
+	tagRepo         tag.Repository
+}
+
+func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository) UpdateTranslationHandler {
+	return UpdateTranslationHandler{
+		translationRepo: translationRep,
+		tagRepo:         tagRepo,
+	}
 }
 
 func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
-	tr := h.translationRep.GetById(cmd.Id)
+	tr := h.translationRepo.GetById(cmd.Id)
 
 	if !tr.IsAuthor(cmd.AuthorId) {
 		return errors.New("can not handle translation update request, translation is not belongs to author")
@@ -34,7 +41,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 
 	tr.ApplyChanges(cmd.Translation, cmd.Transcription, cmd.Text, cmd.Example, cmd.TagIds)
 
-	return h.translationRep.Save(*tr)
+	return h.translationRepo.Save(*tr)
 }
 
 func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {

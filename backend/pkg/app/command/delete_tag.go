@@ -14,6 +14,10 @@ type DeleteTagHandler struct {
 	tagRepo tag.Repository
 }
 
+func NewDeleteTagHandler(tagRepo tag.Repository) DeleteTagHandler {
+	return DeleteTagHandler{tagRepo: tagRepo}
+}
+
 func (h DeleteTagHandler) Handle(cmd DeleteTag) error {
 	tg := h.tagRepo.GetById(cmd.Id)
 

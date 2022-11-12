@@ -33,7 +33,7 @@ func TestService_UpdateTag(t *testing.T) {
 	}
 
 	mockGetByIdCall := repository.On("GetById", id).Times(1).Return(&Tag{})
-	repository.On("Save", mock.MatchedBy(func(t Tag) bool { return t.Tag == "test" })).Times(1).Return(nil)
+	repository.On("Save", mock.MatchedBy(func(t Tag) bool { return t.tag == "test" })).Times(1).Return(nil)
 	err := service.UpdateTag(id, request)
 	assert.Nil(t, err)
 

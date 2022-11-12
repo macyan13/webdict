@@ -25,6 +25,6 @@ func TestTag_ApplyChanges(t *testing.T) {
 	entity.ApplyChanges(request)
 
 	assert := assert.New(t)
-	assert.Equal(entity.Tag, tag)
+	assert.Equal(entity.tag, tag)
 	assert.Greaterf(entity.UpdatedAt, updatedAt, "error message %s", "formatted")
 }

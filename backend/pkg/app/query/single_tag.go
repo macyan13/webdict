@@ -6,7 +6,7 @@ type SingleTag struct {
 }
 
 type SingleTagRepository interface {
-	getTag(id, authorId string) *Tag
+	GetTag(id, authorId string) *Tag
 }
 
 type SingleTagHandler struct {
@@ -18,5 +18,5 @@ func NewSingleTagHandler(tagRepo SingleTagRepository) SingleTagHandler {
 }
 
 func (h SingleTagHandler) Handle(cmd SingleTag) *Tag {
-	return h.tagRepo.getTag(cmd.Id, cmd.AuthorId)
+	return h.tagRepo.GetTag(cmd.Id, cmd.AuthorId)
 }

@@ -16,6 +16,10 @@ type AddUserHandler struct {
 	userRepo user.Repository
 }
 
+func NewAddUserHandler(userRepo user.Repository) AddUserHandler {
+	return AddUserHandler{userRepo: userRepo}
+}
+
 func (h AddUserHandler) Handle(cmd AddUser) error {
 	return h.userRepo.Save(user.NewUser(cmd.Name, cmd.Email, cmd.Password))
 }

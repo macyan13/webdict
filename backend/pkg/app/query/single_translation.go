@@ -6,7 +6,7 @@ type SingleTranslation struct {
 }
 
 type SingleTranslationRepository interface {
-	getTranslation(id, authorId string) *Translation
+	GetTranslation(id, authorId string) *Translation
 }
 
 type SingleTranslationHandler struct {
@@ -18,5 +18,5 @@ func NewSingleTranslationHandler(translationRepo SingleTranslationRepository) Si
 }
 
 func (h SingleTranslationHandler) Handle(cmd SingleTranslation) *Translation {
-	return h.translationRepo.getTranslation(cmd.Id, cmd.AuthorId)
+	return h.translationRepo.GetTranslation(cmd.Id, cmd.AuthorId)
 }

@@ -58,7 +58,7 @@ func TestService_UpdateTranslation(t *testing.T) {
 	}
 
 	mockGetByIdCall := translationRepository.On("GetById", id).Times(1).Return(&Translation{})
-	translationRepository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.Translation == "test" })).Times(1).Return(nil)
+	translationRepository.On("Save", mock.MatchedBy(func(t Translation) bool { return t.translation == "test" })).Times(1).Return(nil)
 	userRepository.On("Exist", mock.Anything).Times(1).Return(true)
 
 	err := service.UpdateTranslation(id, request)

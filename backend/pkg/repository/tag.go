@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 )
 
@@ -15,7 +16,7 @@ func NewTagRepository() *tagRepo {
 }
 
 func (r *tagRepo) Save(tag tag.Tag) error {
-	r.storage[tag.Id] = tag
+	r.storage[tag.Id()] = tag
 	return nil
 }
 
@@ -39,11 +40,6 @@ func (r *tagRepo) GetById(id string) *tag.Tag {
 	return nil
 }
 
-func (r *tagRepo) Delete(id string) error {
-	delete(r.storage, id)
-	return nil
-}
-
 func (r *tagRepo) GetByIds(ids []string) []*tag.Tag {
 	var tags []*tag.Tag
 	for _, id := range ids {
@@ -55,4 +51,66 @@ func (r *tagRepo) GetByIds(ids []string) []*tag.Tag {
 	}
 
 	return tags
+}
+
+func (r *tagRepo) GetAll(authorId string) []query.Tag {
+	tags := make([]query.Tag, 0)
+
+	for _, t := range r.storage {
+		if t.AuthorId() == authorId {
+			tags = append(tags, query.Tag{
+				Id:        t.Id(),
+				Tag:       t.Tag(),
+				CreatedAd: t.CreatedAt(),
+			})
+		}
+	}
+
+	return tags
+}
+
+func (r *tagRepo) GetTag(id, authorId string) *query.Tag {
+	t, ok := r.storage[id]
+
+	if ok && t.AuthorId() == authorId {
+		return &query.Tag{
+			Id:        t.Id(),
+			Tag:       t.Tag(),
+			CreatedAd: t.CreatedAt(),
+		}
+	}
+
+	return nil
+}
+
+func (r *tagRepo) getTagsById(ids []string) []query.Tag {
+	tags := make([]query.Tag, 0)
+
+	for _, id := range ids {
+		t, ok := r.storage[id]
+		if ok {
+			tags = append(tags, query.Tag{
+				Id:        t.Id(),
+				Tag:       t.Tag(),
+				CreatedAd: t.CreatedAt(),
+			})
+		}
+	}
+
+	return tags
+}
+
+func (r *tagRepo) Delete(tag tag.Tag) error {
+	delete(r.storage, tag.Id())
+	return nil
+}
+
+func (r *tagRepo) AllExist(ids []string, AuthorId string) bool {
+	for _, id := range ids {
+		if _, ok := r.storage[id]; !ok {
+			return false
+		}
+	}
+
+	return true
 }

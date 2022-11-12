@@ -16,19 +16,19 @@ func (s *HttpServer) CreateTag() gin.HandlerFunc {
 		var request tagRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse new Tag request: %v", err)
+			log.Printf("[Error] Can not parse new tag request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.AddTag.Handle(command.AddTag{
 			Tag:      request.Tag,
 			AuthorId: authorId,
 		}); err != nil {
-			log.Printf("[Error] Can not create new Tag: %v", err)
+			log.Printf("[Error] Can not create new tag: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
@@ -42,7 +42,7 @@ func (s *HttpServer) GetTags() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 		c.JSON(http.StatusOK, s.tagModelsToResponse(s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: authorId})))
 	}
 }
@@ -53,20 +53,20 @@ func (s *HttpServer) UpdateTag() gin.HandlerFunc {
 		var request tagRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse Tag update request: %v", err)
+			log.Printf("[Error] Can not parse tag update request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
 			TagId:    c.Param(tagIdParam),
 			Tag:      request.Tag,
 			AuthorId: authorId,
 		}); err != nil {
-			log.Printf("[Error] Can not Update Existing Tag: %v", err)
+			log.Printf("[Error] Can not Update Existing tag: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
@@ -84,7 +84,7 @@ func (s *HttpServer) GetTagById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		record := s.app.Queries.SingleTag.Handle(query.SingleTag{
 			Id:       c.Param(tagIdParam),
@@ -104,7 +104,7 @@ func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
 			Id:       c.Param(tagIdParam),

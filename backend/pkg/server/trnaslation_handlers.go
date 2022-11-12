@@ -17,13 +17,13 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 
 		var request translationRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse new Translation request: %v", err)
+			log.Printf("[Error] Can not parse new translation request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
@@ -33,7 +33,7 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 			TagIds:        request.TagIds,
 			AuthorId:      authorId,
 		}); err != nil {
-			log.Printf("[Error] Can not create new Translation: %v", err)
+			log.Printf("[Error] Can not create new translation: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
@@ -46,7 +46,7 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 		limit, err := strconv.Atoi(c.Query("limit"))
 
 		if err != nil {
@@ -71,12 +71,12 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 		var request translationRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse new Translation request: %v", err)
+			log.Printf("[Error] Can not parse new translation request: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
 			Id:            c.Param(translationIdParam),
@@ -87,7 +87,7 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 			TagIds:        request.TagIds,
 			AuthorId:      authorId,
 		}); err != nil {
-			log.Printf("[Error] Can not Update Existing Translation: %v", err)
+			log.Printf("[Error] Can not Update Existing translation: %v", err)
 			c.JSON(http.StatusBadRequest, nil)
 			return
 		}
@@ -105,7 +105,7 @@ func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 		translation := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
 			Id:       c.Param(translationIdParam),
 			AuthorId: authorId,
@@ -124,7 +124,7 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userService.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id
 
 		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
 			Id:       c.Param(translationIdParam),
