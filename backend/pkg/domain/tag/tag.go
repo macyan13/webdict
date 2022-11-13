@@ -5,28 +5,51 @@ import (
 	"time"
 )
 
+// todo: clean up unused getter after read DB repository implementation
 type Tag struct {
-	Id        string `json:"id"`
-	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
-	Tag       string `json:"tag"`
+	id        string
+	createdAt time.Time
+	updatedAt time.Time
+	tag       string
+	authorId  string
 }
 
-type Request struct {
-	Tag string `json:"tag"`
-}
-
-func NewTag(request Request) *Tag {
-	now := time.Now().Unix()
+func NewTag(tag, AuthorId string) *Tag {
+	now := time.Now()
 	return &Tag{
-		Id:        uuid.New().String(),
-		CreatedAt: now,
-		UpdatedAt: now,
-		Tag:       request.Tag,
+		id:        uuid.New().String(),
+		createdAt: now,
+		updatedAt: now,
+		tag:       tag,
+		authorId:  AuthorId,
 	}
 }
 
-func (t *Tag) ApplyChanges(request Request) {
-	t.UpdatedAt = time.Now().Unix()
-	t.Tag = request.Tag
+func (t *Tag) Id() string {
+	return t.id
+}
+
+func (t *Tag) Tag() string {
+	return t.tag
+}
+
+func (t *Tag) AuthorId() string {
+	return t.authorId
+}
+
+func (t *Tag) CreatedAt() time.Time {
+	return t.createdAt
+}
+
+func (t *Tag) UpdatedAt() time.Time {
+	return t.updatedAt
+}
+
+func (t *Tag) ApplyChanges(tag string) {
+	t.updatedAt = time.Now()
+	t.tag = tag
+}
+
+func (t *Tag) IsAuthor(authorId string) bool {
+	return t.authorId == authorId
 }

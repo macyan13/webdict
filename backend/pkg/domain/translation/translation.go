@@ -2,56 +2,82 @@ package translation
 
 import (
 	"github.com/google/uuid"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"time"
 )
 
+// todo: clean up unused getter after read DB repository implementation
 type Translation struct {
-	Id            string     `json:"id"`
-	AuthorId      string     `json:"-"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	Transcription string     `json:"transcription"`
-	Translation   string     `json:"translation"`
-	Text          string     `json:"text"`
-	Example       string     `json:"example"`
-	Tags          []*tag.Tag `json:"tags"`
+	id            string
+	authorId      string
+	createdAt     time.Time
+	updatedAt     time.Time
+	transcription string
+	translation   string
+	text          string
+	example       string
+	tagIds        []string
 }
 
-type Request struct {
-	Transcription string   `json:"transcription"`
-	Translation   string   `json:"translation"`
-	Text          string   `json:"text"`
-	Example       string   `json:"example"`
-	TagIds        []string `json:"tag_ids"`
-	AuthorId      string
-}
-
-type data struct {
-	Request
-	Tags []*tag.Tag
-}
-
-func newTranslation(data data) *Translation {
+func NewTranslation(translation, transcription, text, example, authorId string, tagIds []string) *Translation {
 	now := time.Now()
 	return &Translation{
-		Id:            uuid.New().String(),
-		AuthorId:      data.AuthorId,
-		CreatedAt:     now,
-		UpdatedAt:     now,
-		Translation:   data.Translation,
-		Transcription: data.Transcription,
-		Text:          data.Text,
-		Example:       data.Example,
-		Tags:          data.Tags,
+		id:            uuid.New().String(),
+		authorId:      authorId,
+		createdAt:     now,
+		updatedAt:     now,
+		translation:   translation,
+		transcription: transcription,
+		text:          text,
+		example:       example,
+		tagIds:        tagIds,
 	}
 }
 
-func (t *Translation) applyChanges(data data) {
-	t.Tags = data.Tags
-	t.UpdatedAt = time.Now()
-	t.Transcription = data.Transcription
-	t.Text = data.Text
-	t.Translation = data.Translation
-	t.Example = data.Example
+func (t *Translation) Id() string {
+	return t.id
+}
+
+func (t *Translation) AuthorId() string {
+	return t.authorId
+}
+
+func (t *Translation) CreatedAt() time.Time {
+	return t.createdAt
+}
+
+func (t *Translation) UpdatedAt() time.Time {
+	return t.updatedAt
+}
+
+func (t *Translation) Transcription() string {
+	return t.transcription
+}
+
+func (t *Translation) Translation() string {
+	return t.translation
+}
+
+func (t *Translation) Text() string {
+	return t.text
+}
+
+func (t *Translation) Example() string {
+	return t.example
+}
+
+func (t *Translation) TagIds() []string {
+	return t.tagIds
+}
+
+func (t *Translation) ApplyChanges(translation, transcription, text, example string, tagIds []string) {
+	t.tagIds = tagIds
+	t.transcription = transcription
+	t.text = text
+	t.translation = translation
+	t.example = example
+	t.updatedAt = time.Now()
+}
+
+func (t *Translation) IsAuthor(authorId string) bool {
+	return t.authorId == authorId
 }

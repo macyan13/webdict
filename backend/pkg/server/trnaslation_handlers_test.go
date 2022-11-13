@@ -1,10 +1,10 @@
-package app
+package server
 
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -15,17 +15,21 @@ const v1TranslationApi = "/v1/api/translations"
 
 func TestServer_CreateTranslation(t *testing.T) {
 	s := initTestServer()
-	transcription := "[CreateTranscription]"
+	transcription := "CreateTranscription"
 	tr := "CreateTranslation"
 	text := "CreateText"
 	example := "CreateExample"
 	tg := "testTag"
+	author := "testAuthor"
 
-	tagRequest := tag.Request{Tag: tg}
-	s.tagService.CreateTag(tagRequest)
-	tagId := s.tagService.GetTags()[0].Id
+	s.app.Commands.AddTag.Handle(command.AddTag{
+		Tag:      tg,
+		AuthorId: author,
+	})
 
-	request := translation.Request{
+	tagId := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: author})[0].Id
+
+	request := translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
@@ -36,7 +40,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	records := getExistingTranslations(s)
@@ -52,26 +56,26 @@ func TestServer_CreateTranslation(t *testing.T) {
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
 
-	request := translation.Request{}
+	request := translationRequest{}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
 	id := getExistingTranslations(s)[0].Id
 	req, _ = http.NewRequest("DELETE", v1TranslationApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Zero(t, len(getExistingTranslations(s)))
 }
 
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
-	request := translation.Request{}
+	request := translationRequest{}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationApi, bytes.NewBuffer(jsonValue))
-	s.router.ServeHTTP(httptest.NewRecorder(), req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 	id := getExistingTranslations(s)[0].Id
 
 	transcription := "[updateTranscription]"
@@ -79,7 +83,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	text := "UpdateText"
 	example := "UpdateExample"
 
-	request = translation.Request{
+	request = translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
@@ -88,14 +92,14 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	jsonValue, _ = json.Marshal(request)
 	req, _ = http.NewRequest("PUT", v1TranslationApi+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	req, _ = http.NewRequest("GET", v1TranslationApi+"/"+id, nil)
 	w = httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
-	var record translation.Translation
+	var record translationResponse
 	json.Unmarshal(w.Body.Bytes(), &record)
 
 	assert.Equal(t, tr, record.Translation)
@@ -104,12 +108,12 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	assert.Equal(t, example, record.Example)
 }
 
-func getExistingTranslations(s *Server) []translation.Translation {
-	req, _ := http.NewRequest("GET", v1TranslationApi, nil)
+func getExistingTranslations(s *HttpServer) []translationResponse {
+	req, _ := http.NewRequest("GET", v1TranslationApi+"/last?limit=10", nil)
 	w := httptest.NewRecorder()
-	s.router.ServeHTTP(w, req)
+	s.engine.ServeHTTP(w, req)
 
-	var records []translation.Translation
+	var records []translationResponse
 	json.Unmarshal(w.Body.Bytes(), &records)
 	return records
 }
