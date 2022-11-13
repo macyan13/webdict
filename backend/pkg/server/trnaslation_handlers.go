@@ -23,7 +23,7 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 		}
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
@@ -46,7 +46,7 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 		limit, err := strconv.Atoi(c.Query("limit"))
 
 		if err != nil {
@@ -76,7 +76,7 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 			return
 		}
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
 			Id:            c.Param(translationIdParam),
@@ -105,7 +105,7 @@ func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 		translation := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
 			Id:       c.Param(translationIdParam),
 			AuthorId: authorId,
@@ -124,7 +124,7 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
 			Id:       c.Param(translationIdParam),

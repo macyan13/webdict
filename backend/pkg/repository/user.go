@@ -18,13 +18,13 @@ func (u *userRepo) Exist(id string) bool {
 }
 
 func (u userRepo) Save(user *user.User) error {
-	u.storage[user.Id] = *user
+	u.storage[user.Id()] = *user
 	return nil
 }
 
 func (u userRepo) GetByEmail(email string) *user.User {
 	for _, el := range u.storage {
-		if el.Email == email {
+		if el.Email() == email {
 			return &el
 		}
 	}

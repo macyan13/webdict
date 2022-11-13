@@ -22,7 +22,7 @@ func (s *HttpServer) CreateTag() gin.HandlerFunc {
 		}
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.AddTag.Handle(command.AddTag{
 			Tag:      request.Tag,
@@ -42,7 +42,7 @@ func (s *HttpServer) GetTags() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 		c.JSON(http.StatusOK, s.tagModelsToResponse(s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: authorId})))
 	}
 }
@@ -59,7 +59,7 @@ func (s *HttpServer) UpdateTag() gin.HandlerFunc {
 		}
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
 			TagId:    c.Param(tagIdParam),
@@ -84,7 +84,7 @@ func (s *HttpServer) GetTagById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		record := s.app.Queries.SingleTag.Handle(query.SingleTag{
 			Id:       c.Param(tagIdParam),
@@ -104,7 +104,7 @@ func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
 		c.Header("Content-Type", "application/json")
 
 		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id
+		authorId := s.userRepo.GetByEmail(adminEmail).Id()
 
 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
 			Id:       c.Param(tagIdParam),

@@ -7,24 +7,19 @@ import (
 )
 
 func TestNewTag(t *testing.T) {
-	tag := NewTag(Request{})
-	assert.Equal(t, tag.UpdatedAt, tag.CreatedAt)
+	tag := NewTag("", "")
+	assert.Equal(t, tag.updatedAt, tag.createdAt)
 }
 
 func TestTag_ApplyChanges(t *testing.T) {
-	entity := NewTag(Request{})
-	updatedAt := entity.UpdatedAt
-
-	tag := "tag"
-	request := Request{
-		Tag: tag,
-	}
+	entity := NewTag("", "")
+	updatedAt := entity.updatedAt
+	tag := "testTag"
 
 	time.Sleep(time.Second)
-
-	entity.ApplyChanges(request)
+	entity.ApplyChanges(tag)
 
 	assert := assert.New(t)
 	assert.Equal(entity.tag, tag)
-	assert.Greaterf(entity.UpdatedAt, updatedAt, "error message %s", "formatted")
+	assert.Greaterf(entity.updatedAt, updatedAt, "Tag.ApplyChanges - updatedAt should be greater createdAt")
 }
