@@ -3,7 +3,6 @@ package auth
 import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
-	"time"
 )
 
 type JWTClaim struct {
@@ -17,8 +16,7 @@ type AuthenticationToken struct {
 }
 
 type RefreshToken struct {
-	Token     string
-	ExpiresAt time.Time
+	Token string
 }
 
 type User struct {

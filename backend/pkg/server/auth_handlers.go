@@ -5,6 +5,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"log"
 	"net/http"
+	"time"
 )
 
 const refreshTokenCookieName = "refreshToken"
@@ -32,11 +33,11 @@ func (s *HttpServer) SighIn() gin.HandlerFunc {
 		refreshToken, err := s.authHandler.GenerateRefreshToken(request.Email)
 
 		if err != nil {
-			log.Printf("[Error] Can not generate refresh token: %v", err)
+			log.Printf("[Error] Can not generate Refresh token: %v", err)
 			c.JSON(http.StatusUnauthorized, nil)
 		}
 
-		c.SetCookie(refreshTokenCookieName, refreshToken.Token, int(refreshToken.ExpiresAt.Unix()), "/", "", false, true) // todo: get domain from config
+		c.SetCookie(refreshTokenCookieName, refreshToken.Token, int(time.Now().Add(time.Hour*24*30*12).Unix()), "/", "", false, true) // todo: get domain from config
 
 		c.JSON(http.StatusOK, AuthTokenResponse{
 			AccessToken: authToken.Token,
@@ -45,7 +46,7 @@ func (s *HttpServer) SighIn() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) refresh() gin.HandlerFunc {
+func (s *HttpServer) Refresh() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
@@ -59,7 +60,7 @@ func (s *HttpServer) refresh() gin.HandlerFunc {
 
 		if err != nil {
 			if err != auth.ErrExpiredRefreshToken {
-				log.Printf("[Error] Can not handle refresh token request: %v", err)
+				log.Printf("[Error] Can not handle Refresh token request: %v", err)
 			}
 			c.JSON(http.StatusUnauthorized, nil)
 		}

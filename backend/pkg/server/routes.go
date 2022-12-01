@@ -29,8 +29,8 @@ func (s *HttpServer) BuildRoutes() {
 
 		authApi := v1.Group("/auth")
 		{
-			authApi.POST("/signin", s.CreateTag())
-			authApi.POST("refresh", s.CreateTag())
+			authApi.POST("/signin", s.SighIn())
+			authApi.POST("/refresh", s.Refresh())
 		}
 	}
 }

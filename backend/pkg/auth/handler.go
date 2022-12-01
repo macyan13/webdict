@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"log"
 	"net/http"
@@ -13,26 +12,32 @@ import (
 )
 
 const userContextKey = "user"
+const authType = "Bearer"
 
 var ErrInvalidCredentials = errors.New("auth: can not authenticate, invalid email or password")
 var ErrExpiredRefreshToken = errors.New("auth: can not refresh auth token, refresh token is expired")
 
 // todo move to config
 var jwtKey = []byte("supersecretkey")
-var authType = "Bearer"
+
+type tokener interface {
+	generateToken(email string, expiresAt time.Time) (string, error)
+	parseToken(signedToken string) (*JWTClaim, error)
+}
 
 type Handler struct {
 	userRepo user.Repository
+	tokener  tokener
 }
 
 func NewHandler(userRepo user.Repository) *Handler {
-	return &Handler{userRepo: userRepo}
+	return &Handler{userRepo: userRepo, tokener: jwtTokener{}}
 }
 
 func (h Handler) Authenticate(email, password string) (AuthenticationToken, error) {
 	usr := h.userRepo.GetByEmail(email)
 
-	if usr == nil || usr.IsPasswordValid(password) {
+	if usr == nil || !usr.IsPasswordValid(password) {
 		return AuthenticationToken{}, ErrInvalidCredentials
 	}
 
@@ -41,20 +46,19 @@ func (h Handler) Authenticate(email, password string) (AuthenticationToken, erro
 
 func (h Handler) GenerateRefreshToken(email string) (RefreshToken, error) {
 	expiresAt := time.Now().Add(time.Hour * 24) // todo: move to configs
-	token, err := h.generateToken(email, expiresAt)
+	token, err := h.tokener.generateToken(email, expiresAt)
 
 	if err != nil {
 		return RefreshToken{}, err
 	}
 
 	return RefreshToken{
-		Token:     token,
-		ExpiresAt: expiresAt,
+		Token: token,
 	}, nil
 }
 
 func (h Handler) Refresh(token string) (AuthenticationToken, error) {
-	claims, err := h.parseToken(token)
+	claims, err := h.tokener.parseToken(token)
 
 	if err != nil {
 		return AuthenticationToken{}, err
@@ -63,45 +67,8 @@ func (h Handler) Refresh(token string) (AuthenticationToken, error) {
 	return h.generateAuthToken(claims.Email)
 }
 
-func (h Handler) generateToken(email string, expiresAt time.Time) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, JWTClaim{
-		Email: email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiresAt),
-		},
-	})
-
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func (h Handler) parseToken(signedToken string) (*JWTClaim, error) {
-	claims := JWTClaim{}
-	_, err := jwt.ParseWithClaims(
-		signedToken,
-		&claims,
-		func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
-		},
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if claims.ExpiresAt.Unix() < time.Now().Unix() {
-		return nil, ErrExpiredRefreshToken
-	}
-
-	return &claims, nil
-}
-
 func (h Handler) generateAuthToken(email string) (AuthenticationToken, error) {
-	token, err := h.generateToken(email, time.Now().Add(time.Minute*10)) // todo: move to configs
+	token, err := h.tokener.generateToken(email, time.Now().Add(time.Minute*10)) // todo: move to configs
 
 	if err != nil {
 		return AuthenticationToken{}, err
@@ -119,20 +86,23 @@ func (h Handler) Middleware() gin.HandlerFunc {
 
 		if token == "" {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
-		claims, err := h.parseToken(token)
+		claims, err := h.tokener.parseToken(token)
 
 		if err != nil {
 			log.Printf("[Error] Can not parse auth token: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		usr := h.userRepo.GetByEmail(claims.Email)
 
-		if usr != nil {
+		if usr == nil {
 			log.Printf("[Error] Attempt to authenticate with not existing user and valid token")
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		c.Set(userContextKey, User{
@@ -153,7 +123,7 @@ func (h Handler) UserFromContext(c *gin.Context) (User, error) {
 	usr, ok := value.(User)
 
 	if !ok {
-		return User{}, fmt.Errorf("can not get authorised user")
+		return User{}, fmt.Errorf("can not cast authorised user")
 	}
 
 	return usr, nil
@@ -162,8 +132,8 @@ func (h Handler) UserFromContext(c *gin.Context) (User, error) {
 func (h Handler) tokenFromHeader(r *http.Request) string {
 	headerValue := r.Header.Get("Authorization")
 
-	if len(headerValue) > 7 && strings.ToLower(headerValue[0:6]) == authType {
-		return headerValue[7:]
+	if len(headerValue) > 8 && strings.ToLower(headerValue[0:6]) == strings.ToLower(authType) {
+		return headerValue[8:]
 	}
 
 	return ""
