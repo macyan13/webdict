@@ -7,10 +7,9 @@ import (
 func (s *HttpServer) BuildRoutes() {
 	router := s.engine
 
-	// group all routes under /v1/api
 	v1 := router.Group("/v1/api")
 	{
-		translationApi := v1.Group("/translations")
+		translationApi := v1.Group("/translations", s.authHandler.Middleware())
 		{
 			translationApi.POST("", s.CreateTranslation())
 			translationApi.GET("/last", s.GetLastTranslations())
@@ -19,13 +18,19 @@ func (s *HttpServer) BuildRoutes() {
 			translationApi.DELETE(fmt.Sprintf("/:%s", translationIdParam), s.DeleteTranslationById())
 		}
 
-		tagApi := v1.Group("/tags")
+		tagApi := v1.Group("/tags", s.authHandler.Middleware())
 		{
 			tagApi.POST("", s.CreateTag())
 			tagApi.GET("", s.GetTags())
 			tagApi.PUT(fmt.Sprintf("/:%s", tagIdParam), s.UpdateTag())
 			tagApi.GET(fmt.Sprintf("/:%s", tagIdParam), s.GetTagById())
 			tagApi.DELETE(fmt.Sprintf("/:%s", tagIdParam), s.DeleteTagById())
+		}
+
+		authApi := v1.Group("/auth")
+		{
+			authApi.POST("/signin", s.SighIn())
+			authApi.POST("/refresh", s.Refresh())
 		}
 	}
 }

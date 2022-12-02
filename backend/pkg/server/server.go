@@ -5,17 +5,21 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
+	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/repository"
 	"log"
+	"net/http"
+	"runtime"
 )
 
 const adminEmail = "admin@email.com"
+const adminPassword = "12345678"
 
 type HttpServer struct {
-	engine   *gin.Engine
-	app      app.Application
-	userRepo user.Repository // todo: remove after auth implementation
+	engine      *gin.Engine
+	app         app.Application
+	authHandler auth.Handler
 }
 
 func InitServer() *HttpServer {
@@ -25,9 +29,9 @@ func InitServer() *HttpServer {
 	userRepo := repository.NewUserRepository()
 
 	s := HttpServer{
-		engine:   router,
-		app:      newApplication(userRepo),
-		userRepo: userRepo,
+		engine:      router,
+		app:         newApplication(userRepo),
+		authHandler: *auth.NewHandler(userRepo),
 	}
 
 	s.BuildRoutes()
@@ -62,14 +66,6 @@ func newApplication(userRepo user.Repository) app.Application {
 	}
 }
 
-func NewAppServer(router *gin.Engine, app app.Application, userRepo user.Repository) *HttpServer {
-	return &HttpServer{
-		engine:   router,
-		app:      app,
-		userRepo: userRepo,
-	}
-}
-
 func (s *HttpServer) Run() error {
 	err := s.engine.Run(":4000") // todo: move to config
 
@@ -82,10 +78,25 @@ func (s *HttpServer) Run() error {
 }
 
 func (s *HttpServer) PopulateInitData() {
-	// Ignore errors for now "admin", adminEmail, "password"
+	// Ignore errors for now
 	s.app.Commands.AddUser.Handle(command.AddUser{
 		Name:     "admin",
 		Email:    adminEmail,
-		Password: "password",
+		Password: adminPassword,
 	})
+}
+
+func (s *HttpServer) unauthorised(c *gin.Context, err error) {
+	pc := make([]uintptr, 15)
+	n := runtime.Callers(2, pc)
+	frames := runtime.CallersFrames(pc[:n])
+	frame, _ := frames.Next()
+
+	log.Printf("[Error] Can not authorise action: %s:%s: %v", frame.File, frame.Function, err)
+	c.JSON(http.StatusUnauthorized, nil)
+}
+
+func (s *HttpServer) badRequest(c *gin.Context, err error) {
+	log.Printf("[Error] Can not handle request - %v", err)
+	c.JSON(http.StatusBadRequest, nil)
 }

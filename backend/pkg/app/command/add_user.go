@@ -20,7 +20,7 @@ func NewAddUserHandler(userRepo user.Repository) AddUserHandler {
 }
 
 func (h AddUserHandler) Handle(cmd AddUser) error {
-	u, err := user.NewUser(cmd.Name, cmd.Email, cmd.Password)
+	u, err := user.NewUser(cmd.Name, cmd.Email, cmd.Password, user.Admin)
 
 	if err != nil {
 		return err

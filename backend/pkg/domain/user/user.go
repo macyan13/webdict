@@ -12,15 +12,24 @@ type User struct {
 	email     string
 	password  string
 	createdAt time.Time
+	role      Role
 }
 
-func NewUser(name, email, password string) (*User, error) {
+type Role int
+
+const (
+	Admin  Role = 1
+	Author Role = 2
+)
+
+func NewUser(name, email, password string, role Role) (*User, error) {
 	u := User{
 		id:        uuid.New().String(),
 		name:      name,
 		email:     email,
 		password:  password,
 		createdAt: time.Now(),
+		role:      role,
 	}
 
 	if err := u.validate(); err != nil {
@@ -38,6 +47,10 @@ func (u *User) Email() string {
 	return u.email
 }
 
+func (u *User) Role() Role {
+	return u.role
+}
+
 func (u *User) validate() error {
 	// todo: add validation for email
 	if len(u.name) < 3 {
@@ -49,4 +62,8 @@ func (u *User) validate() error {
 	}
 
 	return nil
+}
+
+func (u *User) IsPasswordValid(password string) bool {
+	return u.password == password
 }

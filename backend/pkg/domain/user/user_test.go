@@ -12,6 +12,7 @@ func TestNewUser(t *testing.T) {
 		name     string
 		email    string
 		password string
+		role     Role
 	}
 	tests := []struct {
 		name    string
@@ -24,6 +25,7 @@ func TestNewUser(t *testing.T) {
 				"t",
 				"test@test.com",
 				"12345678",
+				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "can not create new user, the name must contain at least 3 character", err.Error(), i)
@@ -36,6 +38,7 @@ func TestNewUser(t *testing.T) {
 				"tes",
 				"test@test.com",
 				"1234567",
+				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "can not create new user, the password must contain at least 3 character", err.Error(), i)
@@ -48,6 +51,7 @@ func TestNewUser(t *testing.T) {
 				"test",
 				"test@test.com",
 				"12345678",
+				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err)
@@ -57,7 +61,7 @@ func TestNewUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewUser(tt.args.name, tt.args.email, tt.args.password)
+			got, err := NewUser(tt.args.name, tt.args.email, tt.args.password, tt.args.role)
 			if tt.wantErr(t, err, fmt.Sprintf("NewUser(%v, %v, %v)", tt.args.name, tt.args.email, tt.args.password)) {
 				return
 			}
@@ -65,6 +69,7 @@ func TestNewUser(t *testing.T) {
 			assert.Equal(t, got.name, tt.args.name)
 			assert.Equal(t, got.password, tt.args.password)
 			assert.Equal(t, got.email, tt.args.email)
+			assert.Equal(t, got.role, tt.args.role)
 		})
 	}
 }

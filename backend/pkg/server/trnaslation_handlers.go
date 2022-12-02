@@ -1,10 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -17,13 +17,14 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 
 		var request translationRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse new translation request: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not parse new translation request: %v", err))
 			return
 		}
 
-		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id()
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorised(c, err)
+		}
 
 		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
@@ -31,10 +32,9 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorId:      authorId,
+			AuthorId:      user.Id,
 		}); err != nil {
-			log.Printf("[Error] Can not create new translation: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not create new translation: %v", err))
 			return
 		}
 
@@ -46,17 +46,20 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id()
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorised(c, err)
+		}
+
 		limit, err := strconv.Atoi(c.Query("limit"))
 
 		if err != nil {
-			log.Printf("[Error] Can not return last translations, can not parse limit param: %v", c.Query("limit"))
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not return last translations, can not parse limit param: %v", c.Query("limit")))
 			return
 		}
 
 		translations := s.translationModelsToResponse(s.app.Queries.LastTranslations.Handle(query.LastTranslations{
-			AuthorId: authorId,
+			AuthorId: user.Id,
 			Limit:    limit,
 		}))
 
@@ -71,12 +74,14 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 		var request translationRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse new translation request: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not parse update translation request: %v", err))
 			return
 		}
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id()
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorised(c, err)
+		}
 
 		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
 			Id:            c.Param(translationIdParam),
@@ -85,10 +90,9 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorId:      authorId,
+			AuthorId:      user.Id,
 		}); err != nil {
-			log.Printf("[Error] Can not Update Existing translation: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
 		}
 
@@ -104,15 +108,18 @@ func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		// todo get user details from auth context
-		authorId := s.userRepo.GetByEmail(adminEmail).Id()
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorised(c, err)
+		}
+
 		translation := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
 			Id:       c.Param(translationIdParam),
-			AuthorId: authorId,
+			AuthorId: user.Id,
 		})
 
 		if translation == nil {
-			c.JSON(http.StatusBadRequest, "Can not find requested record")
+			s.badRequest(c, fmt.Errorf("can not find requested record"))
 			return
 		}
 
@@ -124,14 +131,16 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
-		authorId := s.userRepo.GetByEmail(adminEmail).Id()
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorised(c, err)
+		}
 
 		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
 			Id:       c.Param(translationIdParam),
-			AuthorId: authorId,
+			AuthorId: user.Id,
 		}); err != nil {
-			log.Printf("[Error] Can not delete translation: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("can not delete translation: %v", err))
 			return
 		}
 
