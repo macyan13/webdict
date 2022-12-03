@@ -47,6 +47,10 @@ func (u *User) Email() string {
 	return u.email
 }
 
+func (u *User) Password() string {
+	return u.password
+}
+
 func (u *User) Role() Role {
 	return u.role
 }
@@ -62,8 +66,4 @@ func (u *User) validate() error {
 	}
 
 	return nil
-}
-
-func (u *User) IsPasswordValid(password string) bool {
-	return u.password == password
 }

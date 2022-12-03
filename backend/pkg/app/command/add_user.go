@@ -11,16 +11,27 @@ type AddUser struct {
 	Password string
 }
 
-type AddUserHandler struct {
-	userRepo user.Repository
+type Cipher interface {
+	GenerateHash(pwd string) (string, error)
 }
 
-func NewAddUserHandler(userRepo user.Repository) AddUserHandler {
-	return AddUserHandler{userRepo: userRepo}
+type AddUserHandler struct {
+	userRepo user.Repository
+	cipher   Cipher
+}
+
+func NewAddUserHandler(userRepo user.Repository, cipher Cipher) AddUserHandler {
+	return AddUserHandler{userRepo: userRepo, cipher: cipher}
 }
 
 func (h AddUserHandler) Handle(cmd AddUser) error {
-	u, err := user.NewUser(cmd.Name, cmd.Email, cmd.Password, user.Admin)
+	hashedPwd, err := h.cipher.GenerateHash(cmd.Password)
+
+	if err != nil {
+		return err
+	}
+
+	u, err := user.NewUser(cmd.Name, cmd.Email, hashedPwd, user.Admin)
 
 	if err != nil {
 		return err

@@ -27,11 +27,12 @@ func InitServer() *HttpServer {
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
 	userRepo := repository.NewUserRepository()
+	cipher := auth.Cipher{}
 
 	s := HttpServer{
 		engine:      router,
-		app:         newApplication(userRepo),
-		authHandler: *auth.NewHandler(userRepo),
+		app:         newApplication(userRepo, cipher),
+		authHandler: *auth.NewHandler(userRepo, cipher),
 	}
 
 	s.BuildRoutes()
@@ -39,7 +40,7 @@ func InitServer() *HttpServer {
 	return &s
 }
 
-func newApplication(userRepo user.Repository) app.Application {
+func newApplication(userRepo user.Repository, cipher auth.Cipher) app.Application {
 	tagRepo := repository.NewTagRepository()
 	translationRepo := repository.NewTranslationRepository(*tagRepo)
 
@@ -50,7 +51,7 @@ func newApplication(userRepo user.Repository) app.Application {
 		AddTag:            command.NewAddTagHandler(tagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo),
-		AddUser:           command.NewAddUserHandler(userRepo),
+		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 	}
 
 	queries := app.Queries{

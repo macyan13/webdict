@@ -13,6 +13,9 @@ import (
 )
 
 func TestHandler_Authenticate(t *testing.T) {
+	var cipher = Cipher{}
+	var hashedPwd, _ = cipher.GenerateHash("password")
+
 	type fields struct {
 		userRepo user.Repository
 		tokener  tokener
@@ -52,7 +55,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"Password is not valid",
 			func() fields {
 				email := "testEmail"
-				existingUser, err := user.NewUser("test", email, "password", user.Admin)
+				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
@@ -76,7 +79,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"Error on token generation",
 			func() fields {
 				email := "testEmail"
-				existingUser, err := user.NewUser("test", email, "password", user.Admin)
+				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
@@ -103,7 +106,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"Positive Case",
 			func() fields {
 				email := "testEmail"
-				existingUser, err := user.NewUser("test", email, "password", user.Admin)
+				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
@@ -136,6 +139,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			h := Handler{
 				userRepo: fields.userRepo,
 				tokener:  fields.tokener,
+				cipher:   cipher,
 			}
 			got, err := h.Authenticate(tt.args.email, tt.args.password)
 			if !tt.wantErr(t, err, fmt.Sprintf("Authenticate(%v, %v)", tt.args.email, tt.args.password)) {
