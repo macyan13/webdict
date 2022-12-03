@@ -28,16 +28,17 @@ type tokener interface {
 type Handler struct {
 	userRepo user.Repository
 	tokener  tokener
+	cipher   Cipher
 }
 
-func NewHandler(userRepo user.Repository) *Handler {
-	return &Handler{userRepo: userRepo, tokener: jwtTokener{}}
+func NewHandler(userRepo user.Repository, cipher Cipher) *Handler {
+	return &Handler{userRepo: userRepo, tokener: jwtTokener{}, cipher: cipher}
 }
 
 func (h Handler) Authenticate(email, password string) (AuthenticationToken, error) {
 	usr := h.userRepo.GetByEmail(email)
 
-	if usr == nil || !usr.IsPasswordValid(password) {
+	if usr == nil || !h.cipher.ComparePasswords(usr.Password(), password) {
 		return AuthenticationToken{}, ErrInvalidCredentials
 	}
 
