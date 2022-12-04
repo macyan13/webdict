@@ -25,4 +25,4 @@ WORKDIR /srv
 
 COPY --from=build-backend /build/backend/webdict /srv/webdict
 
-CMD ["/srv/webdict", "server"]
+CMD ["/srv/webdict"]

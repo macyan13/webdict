@@ -37,7 +37,7 @@ func (s *HttpServer) SighIn() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, nil)
 		}
 
-		c.SetCookie(refreshTokenCookieName, refreshToken.Token, int(time.Now().Add(time.Hour*24*30*12).Unix()), "/", "", false, true) // todo: get domain from config
+		c.SetCookie(refreshTokenCookieName, refreshToken.Token, int(time.Now().Add(s.opts.Auth.TTL.Cookie).Unix()), "/", s.opts.WebdictURL, false, true)
 
 		c.JSON(http.StatusOK, AuthTokenResponse{
 			AccessToken: authToken.Token,

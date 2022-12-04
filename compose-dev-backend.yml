@@ -13,4 +13,10 @@ services:
 
     # uncomment to expose directly (no proxy)
     ports:
-      - "4000:4000"
+      - "4000:${PORT}"
+
+    environment:
+      - AUTH_SECRET=secret_string
+      - PORT=4000
+      - DEBUG=1
+      - GIN_MODE=debug

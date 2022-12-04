@@ -10,4 +10,16 @@ services:
 
     # uncomment to expose directly (no proxy)
     ports:
-      - "4000:4000"
+      - "4000:${PORT}"
+
+    environment:
+      - AUTH_TTL_AUTH
+      - AUTH_TTL_REFRESH
+      - AUTH_TTL_COOKIE
+      - AUTH_SECRET
+      - ADMIN_PASSWD
+      - ADMIN_EMAIL
+      - PORT
+      - URL
+      - DEBUG
+      - GIN_MODE
