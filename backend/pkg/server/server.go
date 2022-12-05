@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
@@ -13,16 +14,14 @@ import (
 	"runtime"
 )
 
-const adminEmail = "admin@email.com"
-const adminPassword = "12345678"
-
 type HttpServer struct {
 	engine      *gin.Engine
 	app         app.Application
 	authHandler auth.Handler
+	opts        Opts
 }
 
-func InitServer() *HttpServer {
+func InitServer(opts Opts) *HttpServer {
 	router := gin.Default()
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
@@ -30,9 +29,14 @@ func InitServer() *HttpServer {
 	cipher := auth.Cipher{}
 
 	s := HttpServer{
-		engine:      router,
-		app:         newApplication(userRepo, cipher),
-		authHandler: *auth.NewHandler(userRepo, cipher),
+		engine: router,
+		app:    newApplication(userRepo, cipher),
+		authHandler: *auth.NewHandler(userRepo, cipher, auth.Params{
+			AuthTTL:    opts.Auth.TTL.Auth,
+			RefreshTTL: opts.Auth.TTL.Refresh,
+			Secret:     opts.Auth.Secret,
+		}),
+		opts: opts,
 	}
 
 	s.BuildRoutes()
@@ -68,7 +72,7 @@ func newApplication(userRepo user.Repository, cipher auth.Cipher) app.Applicatio
 }
 
 func (s *HttpServer) Run() error {
-	err := s.engine.Run(":4000") // todo: move to config
+	err := s.engine.Run(fmt.Sprintf(":%d", s.opts.Port))
 
 	if err != nil {
 		log.Printf("HttpServer - there was an error calling Run on engine: %v", err)
@@ -79,12 +83,13 @@ func (s *HttpServer) Run() error {
 }
 
 func (s *HttpServer) PopulateInitData() {
-	// Ignore errors for now
-	s.app.Commands.AddUser.Handle(command.AddUser{
+	if err := s.app.Commands.AddUser.Handle(command.AddUser{
 		Name:     "admin",
-		Email:    adminEmail,
-		Password: adminPassword,
-	})
+		Email:    s.opts.Admin.AdminEmail,
+		Password: s.opts.Admin.AdminPasswd,
+	}); err != nil {
+		log.Printf("[WARN] can not create admin user - %s", err)
+	}
 }
 
 func (s *HttpServer) unauthorised(c *gin.Context, err error) {

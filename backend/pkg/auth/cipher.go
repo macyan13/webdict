@@ -8,7 +8,7 @@ type Cipher struct {
 }
 
 func (c Cipher) GenerateHash(pwd string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), 16)
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), 8)
 	return string(hash), err
 }
 

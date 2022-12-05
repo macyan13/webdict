@@ -17,12 +17,12 @@ func (u *userRepo) Exist(id string) bool {
 	return ok
 }
 
-func (u userRepo) Save(user *user.User) error {
+func (u *userRepo) Save(user *user.User) error {
 	u.storage[user.Id()] = *user
 	return nil
 }
 
-func (u userRepo) GetByEmail(email string) *user.User {
+func (u *userRepo) GetByEmail(email string) *user.User {
 	for _, el := range u.storage {
 		if el.Email() == email {
 			return &el

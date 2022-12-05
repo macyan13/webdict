@@ -6,6 +6,7 @@ import (
 )
 
 type jwtTokener struct {
+	params Params
 }
 
 func (t jwtTokener) generateToken(email string, expiresAt time.Time) (string, error) {
@@ -16,7 +17,7 @@ func (t jwtTokener) generateToken(email string, expiresAt time.Time) (string, er
 		},
 	})
 
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString([]byte(t.params.Secret))
 	if err != nil {
 		return "", err
 	}
@@ -30,7 +31,7 @@ func (t jwtTokener) parseToken(signedToken string) (*JWTClaim, error) {
 		signedToken,
 		&claims,
 		func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return []byte(t.params.Secret), nil
 		},
 	)
 

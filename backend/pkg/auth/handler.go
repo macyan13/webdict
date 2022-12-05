@@ -17,9 +17,6 @@ const authType = "Bearer"
 var ErrInvalidCredentials = errors.New("auth: can not authenticate, invalid email or password")
 var ErrExpiredRefreshToken = errors.New("auth: can not refresh auth token, refresh token is expired")
 
-// todo move to config
-var jwtKey = []byte("supersecretkey")
-
 type tokener interface {
 	generateToken(email string, expiresAt time.Time) (string, error)
 	parseToken(signedToken string) (*JWTClaim, error)
@@ -29,10 +26,11 @@ type Handler struct {
 	userRepo user.Repository
 	tokener  tokener
 	cipher   Cipher
+	params   Params
 }
 
-func NewHandler(userRepo user.Repository, cipher Cipher) *Handler {
-	return &Handler{userRepo: userRepo, tokener: jwtTokener{}, cipher: cipher}
+func NewHandler(userRepo user.Repository, cipher Cipher, params Params) *Handler {
+	return &Handler{userRepo: userRepo, tokener: jwtTokener{params: params}, cipher: cipher, params: params}
 }
 
 func (h Handler) Authenticate(email, password string) (AuthenticationToken, error) {
@@ -46,7 +44,7 @@ func (h Handler) Authenticate(email, password string) (AuthenticationToken, erro
 }
 
 func (h Handler) GenerateRefreshToken(email string) (RefreshToken, error) {
-	expiresAt := time.Now().Add(time.Hour * 24) // todo: move to configs
+	expiresAt := time.Now().Add(h.params.RefreshTTL)
 	token, err := h.tokener.generateToken(email, expiresAt)
 
 	if err != nil {
@@ -69,7 +67,7 @@ func (h Handler) Refresh(token string) (AuthenticationToken, error) {
 }
 
 func (h Handler) generateAuthToken(email string) (AuthenticationToken, error) {
-	token, err := h.tokener.generateToken(email, time.Now().Add(time.Minute*10)) // todo: move to configs
+	token, err := h.tokener.generateToken(email, time.Now().Add(h.params.AuthTTL))
 
 	if err != nil {
 		return AuthenticationToken{}, err

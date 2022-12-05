@@ -31,6 +31,10 @@ func (h AddUserHandler) Handle(cmd AddUser) error {
 		return err
 	}
 
+	if err := h.validate(cmd); err != nil {
+		return err
+	}
+
 	u, err := user.NewUser(cmd.Name, cmd.Email, hashedPwd, user.Admin)
 
 	if err != nil {

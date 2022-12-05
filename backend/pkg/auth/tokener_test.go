@@ -8,7 +8,7 @@ import (
 )
 
 func TestJwtToken_parseExpiredToken(t *testing.T) {
-	tokener := jwtTokener{}
+	tokener := jwtTokener{params: Params{Secret: "secret"}}
 	token, err := tokener.generateToken("testEmail", time.Now().Add(-time.Minute))
 	assert.Nil(t, err)
 
@@ -17,7 +17,7 @@ func TestJwtToken_parseExpiredToken(t *testing.T) {
 }
 
 func TestJwtToken_parseGeneratedToken(t *testing.T) {
-	tokener := jwtTokener{}
+	tokener := jwtTokener{params: Params{Secret: "secret"}}
 	email := "testEmail"
 	token, err := tokener.generateToken(email, time.Now().Add(time.Minute))
 	assert.Nil(t, err)

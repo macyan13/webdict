@@ -38,6 +38,9 @@ github.com/golang-jwt/jwt/v4
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
+# github.com/jessevdk/go-flags v1.5.0
+## explicit; go 1.15
+github.com/jessevdk/go-flags
 # github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
 github.com/json-iterator/go

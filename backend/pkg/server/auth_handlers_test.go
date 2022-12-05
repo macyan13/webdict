@@ -17,8 +17,8 @@ func TestServer_SighIn(t *testing.T) {
 	s := initTestServer()
 
 	request := SignInRequest{
-		Email:    adminEmail,
-		Password: adminPassword,
+		Email:    s.opts.Admin.AdminEmail,
+		Password: s.opts.Admin.AdminPasswd,
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -60,8 +60,8 @@ func TestServer_Refresh(t *testing.T) {
 
 func getRefreshToken(s *HttpServer) string {
 	request := SignInRequest{
-		Email:    adminEmail,
-		Password: adminPassword,
+		Email:    s.opts.Admin.AdminEmail,
+		Password: s.opts.Admin.AdminPasswd,
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -77,7 +77,7 @@ var authenticationToken *auth.AuthenticationToken
 
 func setAuthToken(s *HttpServer, r *http.Request) {
 	if authenticationToken == nil {
-		token, _ := s.authHandler.Authenticate(adminEmail, adminPassword)
+		token, _ := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
 		authenticationToken = &token
 	}
 	r.Header.Set("Authorization", authenticationToken.Type+": "+authenticationToken.Token)
