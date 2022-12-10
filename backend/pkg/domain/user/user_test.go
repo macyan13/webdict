@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
 func TestNewUser(t *testing.T) {
@@ -65,11 +64,22 @@ func TestNewUser(t *testing.T) {
 			if tt.wantErr(t, err, fmt.Sprintf("NewUser(%v, %v, %v)", tt.args.name, tt.args.email, tt.args.password)) {
 				return
 			}
-			assert.Equal(t, time.Now().Format("2006-01-02 15:04:05"), got.createdAt.Format("2006-01-02 15:04:05"))
 			assert.Equal(t, got.name, tt.args.name)
 			assert.Equal(t, got.password, tt.args.password)
 			assert.Equal(t, got.email, tt.args.email)
 			assert.Equal(t, got.role, tt.args.role)
 		})
 	}
+}
+
+func TestUnmarshalFromDB(t *testing.T) {
+	user := User{
+		id:       "testId",
+		name:     "testName",
+		email:    "testEmail",
+		password: "testPassword",
+		role:     0,
+	}
+
+	assert.Equal(t, user, *UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role)))
 }

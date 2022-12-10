@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 )
@@ -24,11 +23,5 @@ func NewDeleteTranslationHandler(translationRepo translation.Repository, tagRepo
 }
 
 func (h DeleteTranslationHandler) Handle(cmd DeleteTranslation) error {
-	tr := h.translationRepo.GetById(cmd.Id)
-
-	if !tr.IsAuthor(cmd.AuthorId) {
-		return errors.New("can not handle translation delete request, translation is not belongs to author")
-	}
-
-	return h.translationRepo.Delete(*tr)
+	return h.translationRepo.Delete(cmd.Id, cmd.AuthorId)
 }

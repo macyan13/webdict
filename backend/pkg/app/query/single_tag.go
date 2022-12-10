@@ -5,18 +5,14 @@ type SingleTag struct {
 	AuthorId string
 }
 
-type SingleTagRepository interface {
-	GetTag(id, authorId string) *Tag
-}
-
 type SingleTagHandler struct {
-	tagRepo SingleTagRepository
+	tagRepo TagViewRepository
 }
 
-func NewSingleTagHandler(tagRepo SingleTagRepository) SingleTagHandler {
+func NewSingleTagHandler(tagRepo TagViewRepository) SingleTagHandler {
 	return SingleTagHandler{tagRepo: tagRepo}
 }
 
-func (h SingleTagHandler) Handle(cmd SingleTag) *Tag {
-	return h.tagRepo.GetTag(cmd.Id, cmd.AuthorId)
+func (h SingleTagHandler) Handle(cmd SingleTag) (TagView, error) {
+	return h.tagRepo.GetView(cmd.Id, cmd.AuthorId)
 }

@@ -6,6 +6,7 @@ import "time"
 type Opts struct {
 	Auth  AuthGroup  `group:"auth" namespace:"auth" env-namespace:"AUTH"`
 	Admin AdminGroup `group:"admin" namespace:"admin" env-namespace:"ADMIN"`
+	Mongo MongoGroup `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 
 	Port       int    `long:"port" env:"PORT" default:"4000" description:"port"`
 	WebdictURL string `long:"url" env:"URL" description:"url to webdict"`
@@ -15,7 +16,7 @@ type Opts struct {
 // AuthGroup defines options group for auth params
 type AuthGroup struct {
 	TTL struct {
-		Auth    time.Duration `long:"auth" env:"AUTH" default:"10m" description:"auth JWT TTL"`
+		Auth    time.Duration `long:"auth" env:"AUTH" default:"2h" description:"auth JWT TTL"`
 		Refresh time.Duration `long:"refresh" env:"REFRESH" default:"24h" description:"refresh JWT TTL"`
 		Cookie  time.Duration `long:"cookie" env:"COOKIE" default:"200h" description:"refresh cookie TTL"`
 	} `group:"ttl" namespace:"ttl" env-namespace:"TTL"`
@@ -27,4 +28,13 @@ type AuthGroup struct {
 type AdminGroup struct {
 	AdminPasswd string `long:"passwd" env:"PASSWD" default:"admin_password" description:"admin user password"`
 	AdminEmail  string `long:"email" env:"EMAIL" default:"admin@email.com" description:"admin user email"`
+}
+
+// MongoGroup defines options group for mongo connection
+type MongoGroup struct {
+	Database string `long:"database" env:"DB" default:"webdict" description:"name of the mongo DB"`
+	Host     string `long:"host" env:"HOST" default:"localhost" description:"mongo DB host"`
+	Port     int    `long:"port" env:"PORT" default:"27017" description:"mongo DB port"`
+	Username string `long:"username" env:"USERNAME" default:"root" description:"name of the mongo username"`
+	Passwd   string `long:"password" env:"PASSWD" default:"example" description:"mongo password"`
 }

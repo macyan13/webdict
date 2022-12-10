@@ -5,18 +5,14 @@ type SingleTranslation struct {
 	AuthorId string
 }
 
-type SingleTranslationRepository interface {
-	GetTranslation(id, authorId string) *Translation
-}
-
 type SingleTranslationHandler struct {
-	translationRepo SingleTranslationRepository
+	translationRepo TranslationViewRepository
 }
 
-func NewSingleTranslationHandler(translationRepo SingleTranslationRepository) SingleTranslationHandler {
+func NewSingleTranslationHandler(translationRepo TranslationViewRepository) SingleTranslationHandler {
 	return SingleTranslationHandler{translationRepo: translationRepo}
 }
 
-func (h SingleTranslationHandler) Handle(cmd SingleTranslation) *Translation {
-	return h.translationRepo.GetTranslation(cmd.Id, cmd.AuthorId)
+func (h SingleTranslationHandler) Handle(cmd SingleTranslation) (TranslationView, error) {
+	return h.translationRepo.GetView(cmd.Id, cmd.AuthorId)
 }

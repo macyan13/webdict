@@ -41,11 +41,17 @@ func (h AddUserHandler) Handle(cmd AddUser) error {
 		return err
 	}
 
-	return h.userRepo.Save(u)
+	return h.userRepo.Create(u)
 }
 
 func (h AddUserHandler) validate(cmd AddUser) error {
-	if h.userRepo.Exist(cmd.Email) {
+	exists, err := h.userRepo.Exist(cmd.Email)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
 		return fmt.Errorf("can not create new user, a user with passed email: %s already exists", cmd.Email)
 	}
 

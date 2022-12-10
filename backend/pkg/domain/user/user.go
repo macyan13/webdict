@@ -3,16 +3,14 @@ package user
 import (
 	"errors"
 	"github.com/google/uuid"
-	"time"
 )
 
 type User struct {
-	id        string
-	name      string
-	email     string
-	password  string
-	createdAt time.Time
-	role      Role
+	id       string
+	name     string
+	email    string
+	password string
+	role     Role
 }
 
 type Role int
@@ -24,12 +22,11 @@ const (
 
 func NewUser(name, email, password string, role Role) (*User, error) {
 	u := User{
-		id:        uuid.New().String(),
-		name:      name,
-		email:     email,
-		password:  password,
-		createdAt: time.Now(),
-		role:      role,
+		id:       uuid.New().String(),
+		name:     name,
+		email:    email,
+		password: password,
+		role:     role,
 	}
 
 	if err := u.validate(); err != nil {
@@ -53,6 +50,32 @@ func (u *User) Password() string {
 
 func (u *User) Role() Role {
 	return u.role
+}
+
+func (u *User) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":       u.id,
+		"name":     u.name,
+		"email":    u.email,
+		"password": u.password,
+		"role":     int(u.role),
+	}
+}
+
+func UnmarshalFromDB(
+	id string,
+	name string,
+	email string,
+	password string,
+	role int,
+) *User {
+	return &User{
+		id:       id,
+		name:     name,
+		email:    email,
+		password: password,
+		role:     Role(role),
+	}
 }
 
 func (u *User) validate() error {

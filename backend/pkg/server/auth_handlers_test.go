@@ -80,5 +80,5 @@ func setAuthToken(s *HttpServer, r *http.Request) {
 		token, _ := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
 		authenticationToken = &token
 	}
-	r.Header.Set("Authorization", authenticationToken.Type+": "+authenticationToken.Token)
+	r.Header.Set("Authorization", authenticationToken.Type+" "+authenticationToken.Token)
 }

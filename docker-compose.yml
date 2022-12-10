@@ -23,3 +23,6 @@ services:
       - URL
       - DEBUG
       - GIN_MODE
+      - MONGO_DB
+      - MONGO_HOST
+      - MONGO_PORT

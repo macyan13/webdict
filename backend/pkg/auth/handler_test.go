@@ -35,7 +35,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"User does not exist",
 			func() fields {
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", "notExist").Return(nil)
+				repository.On("GetByEmail", "notExist").Return(user.User{}, user.NotFoundErr)
 				return fields{
 					userRepo: &repository,
 					tokener:  &mockTokener{},
@@ -59,7 +59,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", email).Return(existingUser)
+				repository.On("GetByEmail", email).Return(existingUser, nil)
 				return fields{
 					userRepo: &repository,
 					tokener:  &mockTokener{},
@@ -479,7 +479,7 @@ func TestHandler_tokenFromHeader(t *testing.T) {
 			"Invalid auth type",
 			fields{},
 			func() args {
-				r := http.Request{Header: http.Header{"Authorization": {"buarer: 234234"}}}
+				r := http.Request{Header: http.Header{"Authorization": {"buarer 234234"}}}
 				return args{r: &r}
 			},
 			"",
@@ -488,19 +488,19 @@ func TestHandler_tokenFromHeader(t *testing.T) {
 			"Positive Case",
 			fields{},
 			func() args {
-				r := http.Request{Header: http.Header{"Authorization": {"Bearer: authToken"}}}
+				r := http.Request{Header: http.Header{"Authorization": {"Bearer authToken"}}}
 				return args{r: &r}
 			},
 			"authToken",
 		},
 		{
-			"Positive Case: check case insensitive",
+			"Positive Case: check case sensitive",
 			fields{},
 			func() args {
-				r := http.Request{Header: http.Header{"Authorization": {"BeAreR: authToken"}}}
+				r := http.Request{Header: http.Header{"Authorization": {"BeAreR authToken"}}}
 				return args{r: &r}
 			},
-			"authToken",
+			"",
 		},
 	}
 	for _, tt := range tests {

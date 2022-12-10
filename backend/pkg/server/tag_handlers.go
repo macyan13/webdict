@@ -46,7 +46,14 @@ func (s *HttpServer) GetTags() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		c.JSON(http.StatusOK, s.tagModelsToResponse(s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: user.Id})))
+		tag, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: user.Id})
+
+		if err != nil {
+			s.badRequest(c, fmt.Errorf("can not get tags from DB - %v", err))
+			return
+		}
+
+		c.JSON(http.StatusOK, s.tagViewsToResponse(tag))
 	}
 }
 
@@ -91,16 +98,16 @@ func (s *HttpServer) GetTagById() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		record := s.app.Queries.SingleTag.Handle(query.SingleTag{
+		view, err := s.app.Queries.SingleTag.Handle(query.SingleTag{
 			Id:       c.Param(tagIdParam),
 			AuthorId: user.Id,
 		})
 
-		if record == nil {
-			s.badRequest(c, fmt.Errorf("can not find requested tag"))
+		if err != nil {
+			s.badRequest(c, fmt.Errorf("can get find requested tag - %v", err))
 		}
 
-		c.JSON(http.StatusOK, s.tagModelToResponse(*record))
+		c.JSON(http.StatusOK, s.tagModelToResponse(view))
 	}
 }
 
@@ -129,14 +136,14 @@ func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) tagModelToResponse(tag query.Tag) tagResponse {
+func (s *HttpServer) tagModelToResponse(tag query.TagView) tagResponse {
 	return tagResponse{
 		Id:  tag.Id,
 		Tag: tag.Tag,
 	}
 }
 
-func (s *HttpServer) tagModelsToResponse(tags []query.Tag) []tagResponse {
+func (s *HttpServer) tagViewsToResponse(tags []query.TagView) []tagResponse {
 	responses := make([]tagResponse, len(tags))
 
 	for i, t := range tags {

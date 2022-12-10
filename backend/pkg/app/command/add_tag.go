@@ -20,5 +20,5 @@ func NewAddTagHandler(tagRepo tag.Repository) AddTagHandler {
 }
 
 func (h AddTagHandler) Handle(cmd AddTag) error {
-	return h.tagRepo.Save(*tag.NewTag(cmd.Tag, cmd.AuthorId))
+	return h.tagRepo.Create(*tag.NewTag(cmd.Tag, cmd.AuthorId))
 }

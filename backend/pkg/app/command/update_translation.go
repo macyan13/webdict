@@ -29,10 +29,10 @@ func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo 
 }
 
 func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
-	tr := h.translationRepo.GetById(cmd.Id)
+	tr, err := h.translationRepo.Get(cmd.Id, cmd.AuthorId)
 
-	if !tr.IsAuthor(cmd.AuthorId) {
-		return errors.New("can not handle translation update request, translation is not belongs to author")
+	if err != nil {
+		return err
 	}
 
 	if err := h.validateTags(cmd); err != nil {
@@ -41,7 +41,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 
 	tr.ApplyChanges(cmd.Translation, cmd.Transcription, cmd.Text, cmd.Example, cmd.TagIds)
 
-	return h.translationRepo.Save(*tr)
+	return h.translationRepo.Update(*tr)
 }
 
 func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {
@@ -49,7 +49,13 @@ func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {
 		return nil
 	}
 
-	if !h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId) {
+	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId)
+
+	if err != nil {
+		return err
+	}
+
+	if !exists {
 		return errors.New("can not apply changes for translation tags, some passed tag are not found")
 	}
 

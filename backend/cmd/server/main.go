@@ -20,9 +20,12 @@ func run() error {
 		return err
 	}
 
-	s := server.InitServer(opts)
-	log.Printf("[INFO] start server on port %s:%d", opts.WebdictURL, opts.Port)
+	s, err := server.InitServer(opts)
+	if err != nil {
+		return err
+	}
 
+	log.Printf("[INFO] starting server on port %s:%d", opts.WebdictURL, opts.Port)
 	if err := s.Run(); err != nil {
 		return err
 	}
