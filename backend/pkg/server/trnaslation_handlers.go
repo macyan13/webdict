@@ -51,19 +51,29 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		limit, err := strconv.Atoi(c.Query("limit"))
+		var limit int
+		requestLimit, exist := c.GetQuery("limit")
+
+		if exist {
+			limit, err = strconv.Atoi(requestLimit)
+
+			if err != nil {
+				s.badRequest(c, fmt.Errorf("can not return last translations, can not parse limit param: %v, %v", c.Query("limit"), err))
+				return
+			}
+		}
+
+		views, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
+			AuthorId: user.Id,
+			Limit:    limit,
+		})
 
 		if err != nil {
-			s.badRequest(c, fmt.Errorf("can not return last translations, can not parse limit param: %v", c.Query("limit")))
+			s.badRequest(c, fmt.Errorf("can not return last translations, can not perform DB query - %v", err))
 			return
 		}
 
-		translations := s.translationModelsToResponse(s.app.Queries.LastTranslations.Handle(query.LastTranslations{
-			AuthorId: user.Id,
-			Limit:    limit,
-		}))
-
-		c.JSON(http.StatusOK, translations)
+		c.JSON(http.StatusOK, s.translationViewsToResponse(views))
 	}
 }
 
@@ -113,17 +123,17 @@ func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		translation := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
+		view, err := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
 			Id:       c.Param(translationIdParam),
 			AuthorId: user.Id,
 		})
 
-		if translation == nil {
-			s.badRequest(c, fmt.Errorf("can not find requested record"))
+		if err != nil {
+			s.badRequest(c, fmt.Errorf("can not get requested record - %v", err))
 			return
 		}
 
-		c.JSON(http.StatusOK, s.translationModelToResponse(*translation))
+		c.JSON(http.StatusOK, s.translationViewToResponse(view))
 	}
 }
 
@@ -152,17 +162,17 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) translationModelsToResponse(translations []query.Translation) []translationResponse {
+func (s *HttpServer) translationViewsToResponse(translations []query.TranslationView) []translationResponse {
 	responses := make([]translationResponse, len(translations))
 
 	for i, translation := range translations {
-		responses[i] = s.translationModelToResponse(translation)
+		responses[i] = s.translationViewToResponse(translation)
 	}
 
 	return responses
 }
 
-func (s *HttpServer) translationModelToResponse(translation query.Translation) translationResponse {
+func (s *HttpServer) translationViewToResponse(translation query.TranslationView) translationResponse {
 	tags := make([]tagResponse, len(translation.Tags))
 
 	for i, tag := range translation.Tags {

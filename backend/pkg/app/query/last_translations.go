@@ -5,24 +5,20 @@ type LastTranslations struct {
 	Limit    int
 }
 
-type LastTranslationsRepository interface {
-	GetLastTranslations(authorId string, limit int) []Translation
-}
-
 type LastTranslationsHandler struct {
-	translationRepo LastTranslationsRepository
+	translationRepo TranslationViewRepository
 }
 
-func NewLastTranslationsHandler(translationRepo LastTranslationsRepository) LastTranslationsHandler {
+func NewLastTranslationsHandler(translationRepo TranslationViewRepository) LastTranslationsHandler {
 	return LastTranslationsHandler{translationRepo: translationRepo}
 }
 
-func (h LastTranslationsHandler) Handle(cmd LastTranslations) []Translation {
+func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView, error) {
 	limit := cmd.Limit
 
 	if limit == 0 {
 		limit = 10
 	}
 
-	return h.translationRepo.GetLastTranslations(cmd.AuthorId, limit)
+	return h.translationRepo.GetLastViews(cmd.AuthorId, limit)
 }

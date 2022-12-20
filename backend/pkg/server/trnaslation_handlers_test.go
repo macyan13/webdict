@@ -20,14 +20,19 @@ func TestServer_CreateTranslation(t *testing.T) {
 	text := "CreateText"
 	example := "CreateExample"
 	tg := "testTag"
-	author := "testAuthor"
 
-	s.app.Commands.AddTag.Handle(command.AddTag{
+	user, err := s.userRepo.GetByEmail(s.opts.Admin.AdminEmail)
+	assert.Nil(t, err)
+
+	err = s.app.Commands.AddTag.Handle(command.AddTag{
 		Tag:      tg,
-		AuthorId: author,
+		AuthorId: user.Id(),
 	})
+	assert.Nil(t, err)
 
-	tagId := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: author})[0].Id
+	tags, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: user.Id()})
+	assert.Nil(t, err)
+	tagId := tags[0].Id
 
 	request := translationRequest{
 		Transcription: transcription,
@@ -60,22 +65,13 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 	tr := "CreateTranslation"
 	text := "CreateText"
 	example := "CreateExample"
-	tg := "testTag"
-	author := "testAuthor"
-
-	s.app.Commands.AddTag.Handle(command.AddTag{
-		Tag:      tg,
-		AuthorId: author,
-	})
-
-	tagId := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: author})[0].Id
 
 	request := translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
 		Example:       example,
-		TagIds:        []string{tagId},
+		TagIds:        []string{},
 	}
 
 	jsonValue, _ := json.Marshal(request)

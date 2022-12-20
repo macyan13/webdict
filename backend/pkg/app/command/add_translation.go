@@ -41,7 +41,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 		cmd.TagIds,
 	)
 
-	return h.translationRepo.Save(*tr)
+	return h.translationRepo.Create(*tr)
 }
 
 func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
@@ -49,7 +49,12 @@ func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
 		return nil
 	}
 
-	if !h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId) {
+	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId)
+
+	if err != nil {
+		return err
+	}
+	if !exists {
 		return errors.New("can not apply changes for translation tags, some passed tag are not found")
 	}
 

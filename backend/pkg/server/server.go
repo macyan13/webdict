@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
@@ -8,45 +9,60 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
-	"github.com/macyan13/webdict/backend/pkg/repository"
+	"github.com/macyan13/webdict/backend/pkg/storage/mongo"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 )
 
 type HttpServer struct {
 	engine      *gin.Engine
-	app         app.Application
-	authHandler auth.Handler
+	app         *app.Application
+	authHandler *auth.Handler
 	opts        Opts
+	userRepo    user.Repository // todo: need only for tests, remove after query for user
 }
 
-func InitServer(opts Opts) *HttpServer {
-	router := gin.Default()
-	// 	"github.com/gin-contrib/cors"
-	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
-	userRepo := repository.NewUserRepository()
-	cipher := auth.Cipher{}
+func InitServer(opts Opts) (*HttpServer, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() { // catch signal and invoke graceful termination
+		stop := make(chan os.Signal, 1)
+		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+		<-stop
+		log.Printf("[WARN] interrupt signal")
+		cancel()
+	}()
 
-	s := HttpServer{
-		engine: router,
-		app:    newApplication(userRepo, cipher),
-		authHandler: *auth.NewHandler(userRepo, cipher, auth.Params{
-			AuthTTL:    opts.Auth.TTL.Auth,
-			RefreshTTL: opts.Auth.TTL.Refresh,
-			Secret:     opts.Auth.Secret,
-		}),
-		opts: opts,
+	dbConnect, err := mongo.InitDatabase(ctx, mongo.Opts{
+		Database: opts.Mongo.Database,
+		Host:     opts.Mongo.Host,
+		Port:     opts.Mongo.Port,
+		Username: opts.Mongo.Username,
+		Passwd:   opts.Mongo.Passwd,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	s.BuildRoutes()
-	s.PopulateInitData()
-	return &s
-}
+	tagRepo, err := mongo.NewTagRepo(ctx, dbConnect)
+	if err != nil {
+		return nil, err
+	}
 
-func newApplication(userRepo user.Repository, cipher auth.Cipher) app.Application {
-	tagRepo := repository.NewTagRepository()
-	translationRepo := repository.NewTranslationRepository(*tagRepo)
+	translationRepo, err := mongo.NewTranslationRepo(ctx, dbConnect, tagRepo)
+	if err != nil {
+		return nil, err
+	}
+
+	userRepo, err := mongo.NewUserRepo(ctx, dbConnect)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher := auth.Cipher{}
 
 	cmd := app.Commands{
 		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo),
@@ -65,10 +81,31 @@ func newApplication(userRepo user.Repository, cipher auth.Cipher) app.Applicatio
 		AllTags:           query.NewAllTagsHandler(tagRepo),
 	}
 
-	return app.Application{
+	application := app.Application{
 		Commands: cmd,
 		Queries:  queries,
 	}
+
+	authHandler := auth.NewHandler(userRepo, cipher, auth.Params{
+		AuthTTL:    opts.Auth.TTL.Auth,
+		RefreshTTL: opts.Auth.TTL.Refresh,
+		Secret:     opts.Auth.Secret,
+	})
+
+	router := gin.Default()
+	// 	"github.com/gin-contrib/cors"
+	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
+
+	s := HttpServer{
+		engine:      router,
+		app:         &application,
+		authHandler: authHandler,
+		opts:        opts,
+	}
+
+	s.BuildRoutes()
+	s.PopulateInitData()
+	return &s, nil
 }
 
 func (s *HttpServer) Run() error {

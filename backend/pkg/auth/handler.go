@@ -7,7 +7,6 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -34,9 +33,17 @@ func NewHandler(userRepo user.Repository, cipher Cipher, params Params) *Handler
 }
 
 func (h Handler) Authenticate(email, password string) (AuthenticationToken, error) {
-	usr := h.userRepo.GetByEmail(email)
+	usr, err := h.userRepo.GetByEmail(email)
 
-	if usr == nil || !h.cipher.ComparePasswords(usr.Password(), password) {
+	if err == user.NotFoundErr {
+		return AuthenticationToken{}, ErrInvalidCredentials
+	}
+
+	if err != nil {
+		return AuthenticationToken{}, err
+	}
+
+	if !h.cipher.ComparePasswords(usr.Password(), password) {
 		return AuthenticationToken{}, ErrInvalidCredentials
 	}
 
@@ -96,10 +103,16 @@ func (h Handler) Middleware() gin.HandlerFunc {
 			return
 		}
 
-		usr := h.userRepo.GetByEmail(claims.Email)
+		usr, err := h.userRepo.GetByEmail(claims.Email)
 
-		if usr == nil {
+		if err == user.NotFoundErr {
 			log.Printf("[Error] Attempt to authenticate with not existing user and valid token")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if err != nil {
+			log.Printf("[Error] Can not get user from DB: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -128,11 +141,12 @@ func (h Handler) UserFromContext(c *gin.Context) (User, error) {
 	return usr, nil
 }
 
+// "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGVtYWlsLmNvbSIsImV4cCI6MTY3MTEzNjU1OX0.92rJjpLYfmjJIAMcPU4j6gxoxG_ieDpHOP3iBameQXCX8i3h-cLiFrJtJOLNU1Wk_maL1FocJbo5jv2MULuxyw"
 func (h Handler) tokenFromHeader(r *http.Request) string {
 	headerValue := r.Header.Get("Authorization")
 
-	if len(headerValue) > 8 && strings.ToLower(headerValue[0:6]) == strings.ToLower(authType) {
-		return headerValue[8:]
+	if len(headerValue) > 8 && headerValue[0:6] == authType {
+		return headerValue[7:]
 	}
 
 	return ""

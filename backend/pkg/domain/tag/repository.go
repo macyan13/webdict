@@ -1,10 +1,13 @@
 package tag
 
+import "errors"
+
+var NotFoundErr = errors.New("can not find tag in storage")
+
 type Repository interface {
-	Save(tag Tag) error
-	GetById(id string) *Tag
-	GetByIds(ids []string) []*Tag // May be remove it
-	Get() []Tag
-	Delete(tag Tag) error
-	AllExist(ids []string, AuthorId string) bool
+	Create(tag Tag) error
+	Update(tag Tag) error
+	Get(id, authorId string) (Tag, error) // Get provide tag by id and authorId, return NotFoundErr when tag not exist
+	Delete(id, authorId string) error
+	AllExist(ids []string, authorId string) (bool, error)
 }

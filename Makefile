@@ -5,4 +5,7 @@ backend:
 	docker compose -f compose-dev-backend.yml build
 	docker compose -f compose-dev-backend.yml up -d
 
-.PHONY: backend
+stop:
+	docker compose -f compose-dev-backend.yml stop
+
+.PHONY: backend, stop

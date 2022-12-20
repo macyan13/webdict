@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// todo: clean up unused getter after read DB repository implementation
 type Translation struct {
 	id            string
 	authorId      string
@@ -41,34 +40,6 @@ func (t *Translation) AuthorId() string {
 	return t.authorId
 }
 
-func (t *Translation) CreatedAt() time.Time {
-	return t.createdAt
-}
-
-func (t *Translation) UpdatedAt() time.Time {
-	return t.updatedAt
-}
-
-func (t *Translation) Transcription() string {
-	return t.transcription
-}
-
-func (t *Translation) Translation() string {
-	return t.translation
-}
-
-func (t *Translation) Text() string {
-	return t.text
-}
-
-func (t *Translation) Example() string {
-	return t.example
-}
-
-func (t *Translation) TagIds() []string {
-	return t.tagIds
-}
-
 func (t *Translation) ApplyChanges(translation, transcription, text, example string, tagIds []string) {
 	t.tagIds = tagIds
 	t.transcription = transcription
@@ -78,6 +49,40 @@ func (t *Translation) ApplyChanges(translation, transcription, text, example str
 	t.updatedAt = time.Now()
 }
 
-func (t *Translation) IsAuthor(authorId string) bool {
-	return t.authorId == authorId
+func (t *Translation) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":            t.id,
+		"authorId":      t.authorId,
+		"createdAt":     t.createdAt,
+		"updatedAt":     t.updatedAt,
+		"translation":   t.translation,
+		"transcription": t.transcription,
+		"text":          t.text,
+		"example":       t.example,
+		"tagIds":        t.tagIds,
+	}
+}
+
+func UnmarshalFromDB(
+	id string,
+	authorId string,
+	createdAt time.Time,
+	updatedAt time.Time,
+	transcription string,
+	translation string,
+	text string,
+	example string,
+	tagIds []string,
+) Translation {
+	return Translation{
+		id:            id,
+		authorId:      authorId,
+		createdAt:     createdAt,
+		updatedAt:     updatedAt,
+		transcription: transcription,
+		translation:   translation,
+		text:          text,
+		example:       example,
+		tagIds:        tagIds,
+	}
 }
