@@ -81,5 +81,5 @@ func TestUnmarshalFromDB(t *testing.T) {
 		role:     0,
 	}
 
-	assert.Equal(t, user, *UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role)))
+	assert.Equal(t, user, UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role)))
 }

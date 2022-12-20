@@ -41,7 +41,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 
 	tr.ApplyChanges(cmd.Translation, cmd.Transcription, cmd.Text, cmd.Example, cmd.TagIds)
 
-	return h.translationRepo.Update(*tr)
+	return h.translationRepo.Update(tr)
 }
 
 func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {

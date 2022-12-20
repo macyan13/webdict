@@ -39,16 +39,14 @@ func (_m *MockRepository) Delete(id string, authorId string) error {
 }
 
 // Get provides a mock function with given fields: id, authorId
-func (_m *MockRepository) Get(id string, authorId string) (*Translation, error) {
+func (_m *MockRepository) Get(id string, authorId string) (Translation, error) {
 	ret := _m.Called(id, authorId)
 
-	var r0 *Translation
-	if rf, ok := ret.Get(0).(func(string, string) *Translation); ok {
+	var r0 Translation
+	if rf, ok := ret.Get(0).(func(string, string) Translation); ok {
 		r0 = rf(id, authorId)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*Translation)
-		}
+		r0 = ret.Get(0).(Translation)
 	}
 
 	var r1 error

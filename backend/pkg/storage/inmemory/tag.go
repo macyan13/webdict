@@ -16,14 +16,14 @@ func NewTagRepository() *TagRepo {
 	}
 }
 
-func (r *TagRepo) Get(id, authorId string) (*tag.Tag, error) {
+func (r *TagRepo) Get(id, authorId string) (tag.Tag, error) {
 	t, ok := r.storage[id]
 
 	if ok && t.AuthorId() == authorId {
-		return &t, nil
+		return t, nil
 	}
 
-	return nil, fmt.Errorf("not found")
+	return tag.Tag{}, tag.NotFoundErr
 }
 
 func (r *TagRepo) Delete(id, authorId string) error {

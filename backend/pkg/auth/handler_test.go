@@ -83,7 +83,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", email).Return(existingUser)
+				repository.On("GetByEmail", email).Return(existingUser, nil)
 
 				tokener := mockTokener{}
 				tokener.On("generateToken", email, mock.IsType(time.Time{})).Return("", fmt.Errorf("noToken"))
@@ -110,7 +110,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				assert.NoError(t, err)
 
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", email).Return(existingUser)
+				repository.On("GetByEmail", email).Return(existingUser, nil)
 
 				tokener := mockTokener{}
 				tokener.On("generateToken", email, mock.IsType(time.Time{})).Return("validToken", nil)
@@ -366,7 +366,7 @@ func TestHandler_Middleware(t *testing.T) {
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {
 				c, _ := gin.CreateTestContext(r)
-				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer: testToken"}}}
+				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer testToken"}}}
 				return c
 			},
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {
@@ -382,12 +382,12 @@ func TestHandler_Middleware(t *testing.T) {
 				tokener.On("parseToken", "testToken").Return(claims, nil)
 
 				userRepo := user.MockRepository{}
-				userRepo.On("GetByEmail", "testEmail").Return(nil)
+				userRepo.On("GetByEmail", "testEmail").Return(user.User{}, user.NotFoundErr)
 				return fields{tokener: &tokener, userRepo: &userRepo}
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {
 				c, _ := gin.CreateTestContext(r)
-				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer: testToken"}}}
+				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer testToken"}}}
 				return c
 			},
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {
@@ -409,7 +409,7 @@ func TestHandler_Middleware(t *testing.T) {
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {
 				c, _ := gin.CreateTestContext(r)
-				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer: testToken"}}}
+				c.Request = &http.Request{Header: http.Header{"Authorization": {"Bearer testToken"}}}
 				return c
 			},
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {

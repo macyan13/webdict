@@ -43,10 +43,6 @@ func (h Handler) Authenticate(email, password string) (AuthenticationToken, erro
 		return AuthenticationToken{}, err
 	}
 
-	if usr == nil {
-		// todo remove pointers from repositories
-	}
-
 	if !h.cipher.ComparePasswords(usr.Password(), password) {
 		return AuthenticationToken{}, ErrInvalidCredentials
 	}

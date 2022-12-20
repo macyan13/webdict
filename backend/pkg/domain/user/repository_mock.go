@@ -11,11 +11,11 @@ type MockRepository struct {
 }
 
 // Create provides a mock function with given fields: user
-func (_m *MockRepository) Create(user *User) error {
+func (_m *MockRepository) Create(user User) error {
 	ret := _m.Called(user)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*User) error); ok {
+	if rf, ok := ret.Get(0).(func(User) error); ok {
 		r0 = rf(user)
 	} else {
 		r0 = ret.Error(0)
@@ -46,16 +46,14 @@ func (_m *MockRepository) Exist(email string) (bool, error) {
 }
 
 // GetByEmail provides a mock function with given fields: email
-func (_m *MockRepository) GetByEmail(email string) (*User, error) {
+func (_m *MockRepository) GetByEmail(email string) (User, error) {
 	ret := _m.Called(email)
 
-	var r0 *User
-	if rf, ok := ret.Get(0).(func(string) *User); ok {
+	var r0 User
+	if rf, ok := ret.Get(0).(func(string) User); ok {
 		r0 = rf(email)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*User)
-		}
+		r0 = ret.Get(0).(User)
 	}
 
 	var r1 error

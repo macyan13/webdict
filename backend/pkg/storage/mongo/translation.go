@@ -103,15 +103,20 @@ func (t *TranslationRepo) Update(translation translation.Translation) error {
 }
 
 // Get performs search request based on translation id and author id parameters and returns domain translation entity
-func (t *TranslationRepo) Get(id, authorId string) (*translation.Translation, error) {
+func (t *TranslationRepo) Get(id, authorId string) (translation.Translation, error) {
 	var record TranslationModel
 
 	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+
+	if err == mongo.ErrNoDocuments {
+		return translation.Translation{}, translation.NotFoundErr
+	}
+
 	if err != nil {
-		return nil, err
+		return translation.Translation{}, err
 	}
 
 	return translation.UnmarshalFromDB(

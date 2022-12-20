@@ -45,7 +45,7 @@ func TestUnmarshalFromDB(t *testing.T) {
 		tagIds:        []string{"tag1", "tag2"},
 	}
 
-	assert.Equal(t, translation, *UnmarshalFromDB(
+	assert.Equal(t, translation, UnmarshalFromDB(
 		translation.id,
 		translation.authorId,
 		translation.createdAt,

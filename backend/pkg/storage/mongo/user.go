@@ -68,9 +68,8 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return count == 1, nil
 }
 
-// Create saves new user to DB
-func (u *UserRepo) Create(user *user.User) error {
-	model, err := u.fromDomainToModel(*user)
+func (u *UserRepo) Create(user user.User) error {
+	model, err := u.fromDomainToModel(user)
 	if err != nil {
 		return err
 	}
@@ -86,15 +85,19 @@ func (u *UserRepo) Create(user *user.User) error {
 }
 
 // GetByEmail returns User for email
-func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
+func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 	var record UserModel
 
 	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := u.collection.FindOne(ctx, bson.D{{"email", email}}).Decode(&record)
+
+	if err == mongo.ErrNoDocuments {
+		return user.User{}, user.NotFoundErr
+	}
 	if err != nil {
-		return nil, err
+		return user.User{}, err
 	}
 
 	return user.UnmarshalFromDB(

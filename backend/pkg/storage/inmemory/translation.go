@@ -24,14 +24,14 @@ func (r *TranslationRepo) Update(translation translation.Translation) error {
 	return nil
 }
 
-func (r *TranslationRepo) Get(id, authorId string) (*translation.Translation, error) {
+func (r *TranslationRepo) Get(id, authorId string) (translation.Translation, error) {
 	t, ok := r.storage[id]
 
 	if ok && t.AuthorId() == authorId {
-		return &t, nil
+		return t, nil
 	}
 
-	return nil, fmt.Errorf("not found")
+	return translation.Translation{}, translation.NotFoundErr
 }
 
 func (r *TranslationRepo) Delete(id, authorId string) error {

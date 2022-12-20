@@ -80,15 +80,20 @@ func (t *TagRepo) Update(tag tag.Tag) error {
 }
 
 // Get searches for tag with id and authorId
-func (t *TagRepo) Get(id, authorId string) (*tag.Tag, error) {
+func (t *TagRepo) Get(id, authorId string) (tag.Tag, error) {
 	var record TagModel
 
 	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+
+	if err != mongo.ErrNoDocuments {
+		return tag.Tag{}, tag.NotFoundErr
+	}
+
 	if err != nil {
-		return nil, err
+		return tag.Tag{}, err
 	}
 
 	return tag.UnmarshalFromDB(
