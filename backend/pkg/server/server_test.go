@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func initTestServer() *HttpServer {
+func initTestServer() *HTTPServer {
 	authGroup := AuthGroup{}
 	authGroup.TTL.Auth = time.Minute * 10
 	authGroup.TTL.Refresh = time.Minute * 10
@@ -63,7 +63,7 @@ func initTestServer() *HttpServer {
 
 	router := gin.Default()
 
-	s := HttpServer{
+	s := HTTPServer{
 		engine:      router,
 		app:         &application,
 		authHandler: authHandler,

@@ -1,7 +1,7 @@
 package query
 
 type AllTags struct {
-	AuthorId string
+	AuthorID string
 }
 
 type AllTagsHandler struct {
@@ -13,5 +13,5 @@ func NewAllTagsHandler(tagRepository TagViewRepository) AllTagsHandler {
 }
 
 func (h AllTagsHandler) Handle(cmd AllTags) ([]TagView, error) {
-	return h.tagRepo.GetAllViews(cmd.AuthorId)
+	return h.tagRepo.GetAllViews(cmd.AuthorID)
 }

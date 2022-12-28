@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const v1TagApi = "/v1/api/tags"
+const v1TagAPI = "/v1/api/tags"
 
 func TestServer_CreateTag(t *testing.T) {
 	s := initTestServer()
@@ -20,7 +20,7 @@ func TestServer_CreateTag(t *testing.T) {
 	}
 
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
@@ -41,7 +41,7 @@ func TestServer_CreateTagUnauthorised(t *testing.T) {
 	}
 
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -53,12 +53,12 @@ func TestServer_DeleteTagById(t *testing.T) {
 
 	request := tagRequest{}
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
-	id := getExistingTags(t, s)[0].Id
-	req, _ = http.NewRequest("DELETE", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
+	id := getExistingTags(t, s)[0].ID
+	req, _ = http.NewRequest("DELETE", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
@@ -71,12 +71,12 @@ func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 
 	request := tagRequest{}
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
-	id := getExistingTags(t, s)[0].Id
-	req, _ = http.NewRequest("DELETE", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
+	id := getExistingTags(t, s)[0].ID
+	req, _ = http.NewRequest("DELETE", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -87,10 +87,10 @@ func TestServer_UpdateTag(t *testing.T) {
 	s := initTestServer()
 	request := tagRequest{}
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
-	id := getExistingTags(t, s)[0].Id
+	id := getExistingTags(t, s)[0].ID
 	tg := "UpdateTag"
 
 	request = tagRequest{
@@ -98,13 +98,13 @@ func TestServer_UpdateTag(t *testing.T) {
 	}
 
 	jsonValue, _ = json.Marshal(request)
-	req, _ = http.NewRequest("PUT", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
+	req, _ = http.NewRequest("PUT", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	req, _ = http.NewRequest("GET", v1TagApi+"/"+id, nil)
+	req, _ = http.NewRequest("GET", v1TagAPI+"/"+id, http.NoBody)
 	setAuthToken(s, req)
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
@@ -123,10 +123,10 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 		Tag: originalTag,
 	}
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
-	id := getExistingTags(t, s)[0].Id
+	id := getExistingTags(t, s)[0].ID
 	tg := "UpdateTag"
 
 	request = tagRequest{
@@ -134,12 +134,12 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	}
 
 	jsonValue, _ = json.Marshal(request)
-	req, _ = http.NewRequest("PUT", v1TagApi+"/"+id, bytes.NewBuffer(jsonValue))
+	req, _ = http.NewRequest("PUT", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-	req, _ = http.NewRequest("GET", v1TagApi+"/"+id, nil)
+	req, _ = http.NewRequest("GET", v1TagAPI+"/"+id, http.NoBody)
 	setAuthToken(s, req)
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
@@ -159,7 +159,7 @@ func TestServer_GetTags(t *testing.T) {
 	for tag := range tags {
 		request := tagRequest{Tag: tag}
 		jsonValue, _ := json.Marshal(request)
-		req, _ := http.NewRequest("POST", v1TagApi, bytes.NewBuffer(jsonValue))
+		req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 		setAuthToken(s, req)
 		recorder := httptest.NewRecorder()
 		s.engine.ServeHTTP(recorder, req)
@@ -179,14 +179,14 @@ func TestServer_GetTags(t *testing.T) {
 func TestServer_GetTagsUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	req, _ := http.NewRequest("GET", v1TagApi, nil)
+	req, _ := http.NewRequest("GET", v1TagAPI, http.NoBody)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func getExistingTags(t *testing.T, s *HttpServer) []tagResponse {
-	req, _ := http.NewRequest("GET", v1TagApi, nil)
+func getExistingTags(t *testing.T, s *HTTPServer) []tagResponse {
+	req, _ := http.NewRequest("GET", v1TagAPI, http.NoBody)
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)

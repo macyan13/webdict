@@ -36,7 +36,7 @@ func NewUser(name, email, password string, role Role) (User, error) {
 	return u, nil
 }
 
-func (u *User) Id() string {
+func (u *User) ID() string {
 	return u.id
 }
 

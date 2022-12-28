@@ -18,7 +18,7 @@ func TestUserRepo_fromDomainToModel(t *testing.T) {
 
 	model, err := repo.fromDomainToModel(usr)
 	assert.Nil(t, err)
-	assert.Equal(t, usr.Id(), model.Id)
+	assert.Equal(t, usr.ID(), model.ID)
 	assert.Equal(t, name, name)
 	assert.Equal(t, email, model.Email)
 	assert.Equal(t, password, model.Password)

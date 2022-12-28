@@ -4,33 +4,27 @@ import (
 	"fmt"
 )
 
-func (s *HttpServer) BuildRoutes() {
+func (s *HTTPServer) BuildRoutes() {
 	router := s.engine
 
 	v1 := router.Group("/v1/api")
 	{
-		translationApi := v1.Group("/translations", s.authHandler.Middleware())
-		{
-			translationApi.POST("", s.CreateTranslation())
-			translationApi.GET("/last", s.GetLastTranslations())
-			translationApi.PUT(fmt.Sprintf("/:%s", translationIdParam), s.UpdateTranslation())
-			translationApi.GET(fmt.Sprintf("/:%s", translationIdParam), s.GetTranslationById())
-			translationApi.DELETE(fmt.Sprintf("/:%s", translationIdParam), s.DeleteTranslationById())
-		}
+		translationAPI := v1.Group("/translations", s.authHandler.Middleware())
+		translationAPI.POST("", s.CreateTranslation())
+		translationAPI.GET("/last", s.GetLastTranslations())
+		translationAPI.PUT(fmt.Sprintf("/:%s", translationIDParam), s.UpdateTranslation())
+		translationAPI.GET(fmt.Sprintf("/:%s", translationIDParam), s.GetTranslationByID())
+		translationAPI.DELETE(fmt.Sprintf("/:%s", translationIDParam), s.DeleteTranslationByID())
 
-		tagApi := v1.Group("/tags", s.authHandler.Middleware())
-		{
-			tagApi.POST("", s.CreateTag())
-			tagApi.GET("", s.GetTags())
-			tagApi.PUT(fmt.Sprintf("/:%s", tagIdParam), s.UpdateTag())
-			tagApi.GET(fmt.Sprintf("/:%s", tagIdParam), s.GetTagById())
-			tagApi.DELETE(fmt.Sprintf("/:%s", tagIdParam), s.DeleteTagById())
-		}
+		tagAPI := v1.Group("/tags", s.authHandler.Middleware())
+		tagAPI.POST("", s.CreateTag())
+		tagAPI.GET("", s.GetTags())
+		tagAPI.PUT(fmt.Sprintf("/:%s", tagIDParam), s.UpdateTag())
+		tagAPI.GET(fmt.Sprintf("/:%s", tagIDParam), s.GetTagByID())
+		tagAPI.DELETE(fmt.Sprintf("/:%s", tagIDParam), s.DeleteTagByID())
 
-		authApi := v1.Group("/auth")
-		{
-			authApi.POST("/signin", s.SighIn())
-			authApi.POST("/refresh", s.Refresh())
-		}
+		authAPI := v1.Group("/auth")
+		authAPI.POST("/signin", s.SighIn())
+		authAPI.POST("/refresh", s.Refresh())
 	}
 }

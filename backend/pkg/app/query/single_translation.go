@@ -1,8 +1,8 @@
 package query
 
 type SingleTranslation struct {
-	Id       string
-	AuthorId string
+	ID       string
+	AuthorID string
 }
 
 type SingleTranslationHandler struct {
@@ -14,5 +14,5 @@ func NewSingleTranslationHandler(translationRepo TranslationViewRepository) Sing
 }
 
 func (h SingleTranslationHandler) Handle(cmd SingleTranslation) (TranslationView, error) {
-	return h.translationRepo.GetView(cmd.Id, cmd.AuthorId)
+	return h.translationRepo.GetView(cmd.ID, cmd.AuthorID)
 }

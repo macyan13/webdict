@@ -17,7 +17,7 @@ type UserRepo struct {
 
 // UserModel represents mongo user document
 type UserModel struct {
-	Id       string `bson:"_id"`
+	ID       string `bson:"_id"`
 	Name     string `bson:"name"`
 	Email    string `bson:"email"`
 	Password string `bson:"password"`
@@ -39,7 +39,7 @@ func (u *UserRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.D{
-				{"email", 1},
+				{Key: "email", Value: 1},
 			},
 		},
 	}
@@ -68,8 +68,8 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return count == 1, nil
 }
 
-func (u *UserRepo) Create(user user.User) error {
-	model, err := u.fromDomainToModel(user)
+func (u *UserRepo) Create(usr user.User) error {
+	model, err := u.fromDomainToModel(usr)
 	if err != nil {
 		return err
 	}
@@ -94,14 +94,14 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 	err := u.collection.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
-		return user.User{}, user.NotFoundErr
+		return user.User{}, user.ErrNotFound
 	}
 	if err != nil {
 		return user.User{}, err
 	}
 
 	return user.UnmarshalFromDB(
-		record.Id,
+		record.ID,
 		record.Name,
 		record.Email,
 		record.Password,
@@ -110,8 +110,8 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 }
 
 // fromDomainToModel converts domain user to mongo model
-func (u *UserRepo) fromDomainToModel(user user.User) (UserModel, error) {
+func (u *UserRepo) fromDomainToModel(usr user.User) (UserModel, error) {
 	model := UserModel{}
-	err := mapstructure.Decode(user.ToMap(), &model)
+	err := mapstructure.Decode(usr.ToMap(), &model)
 	return model, err
 }

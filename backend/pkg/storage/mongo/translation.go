@@ -21,15 +21,15 @@ type TranslationRepo struct {
 
 // TranslationModel represents mongo translation document
 type TranslationModel struct {
-	Id            string    `bson:"_id"`
-	AuthorId      string    `bson:"author_id"`
+	ID            string    `bson:"_id"`
+	AuthorID      string    `bson:"author_id"`
 	CreatedAt     time.Time `bson:"created_at"`
 	UpdatedAt     time.Time `bson:"updatedAt"`
 	Transcription string    `bson:"transcription,omitempty"`
 	Translation   string    `bson:"translation"`
 	Text          string    `bson:"text"`
 	Example       string    `bson:"example,omitempty"`
-	TagIds        []string  `bson:"tag_ids,omitempty"`
+	TagIDs        []string  `bson:"tag_ids,omitempty"`
 }
 
 // NewTranslationRepo creates new TranslationRepo
@@ -43,36 +43,36 @@ func NewTranslationRepo(ctx context.Context, db *mongo.Database, tagRepo query.T
 }
 
 // initIndexes creates required for current queries indexes in translation collection
-func (t *TranslationRepo) initIndexes() error {
+func (r *TranslationRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.D{
-				{"author_id", 1},
-				{"created_at", -1},
+				{Key: "author_id", Value: 1},
+				{Key: "created_at", Value: -1},
 			},
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	if _, err := t.collection.Indexes().CreateMany(ctx, indexes); err != nil {
+	if _, err := r.collection.Indexes().CreateMany(ctx, indexes); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Create saves new translation to DB
-func (t *TranslationRepo) Create(translation translation.Translation) error {
-	model, err := t.fromDomainToModel(translation)
+func (r *TranslationRepo) Create(t translation.Translation) error {
+	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	if _, err = t.collection.InsertOne(ctx, model); err != nil {
+	if _, err = r.collection.InsertOne(ctx, model); err != nil {
 		return err
 	}
 
@@ -80,39 +80,39 @@ func (t *TranslationRepo) Create(translation translation.Translation) error {
 }
 
 // Update updates already existed translation
-func (t *TranslationRepo) Update(translation translation.Translation) error {
-	model, err := t.fromDomainToModel(translation)
+func (r *TranslationRepo) Update(t translation.Translation) error {
+	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.Id}}, model)
+	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
 
 	if err != nil {
 		return err
 	}
 
 	if result.MatchedCount != 1 {
-		return fmt.Errorf("translation with id %s which must be modified not found", model.Id)
+		return fmt.Errorf("translation with id %s which must be modified not found", model.ID)
 	}
 
 	return nil
 }
 
 // Get performs search request based on translation id and author id parameters and returns domain translation entity
-func (t *TranslationRepo) Get(id, authorId string) (translation.Translation, error) {
+func (r *TranslationRepo) Get(id, authorID string) (translation.Translation, error) {
 	var record TranslationModel
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
-		return translation.Translation{}, translation.NotFoundErr
+		return translation.Translation{}, translation.ErrNotFound
 	}
 
 	if err != nil {
@@ -120,24 +120,24 @@ func (t *TranslationRepo) Get(id, authorId string) (translation.Translation, err
 	}
 
 	return translation.UnmarshalFromDB(
-		record.Id,
-		record.AuthorId,
+		record.ID,
+		record.AuthorID,
 		record.CreatedAt,
 		record.UpdatedAt,
 		record.Transcription,
 		record.Translation,
 		record.Text,
 		record.Example,
-		record.TagIds,
+		record.TagIDs,
 	), nil
 }
 
 // Delete removes translation record by passed id and authorId fields
-func (t *TranslationRepo) Delete(id, authorId string) error {
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+func (r *TranslationRepo) Delete(id, authorID string) error {
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorId}})
+	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}})
 
 	if err != nil {
 		return err
@@ -151,43 +151,50 @@ func (t *TranslationRepo) Delete(id, authorId string) error {
 }
 
 // GetView perform search request based on translation id and author id parameters and returns translation view representation
-func (t *TranslationRepo) GetView(id, authorId string) (query.TranslationView, error) {
+func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	var record TranslationModel
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := t.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorId}}).Decode(&record)
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 	if err != nil {
 		return query.TranslationView{}, err
 	}
 
-	return t.fromModelToView(record)
+	return r.fromModelToView(record)
 }
 
 // GetLastViews provide a limited slice of views ordered in DESC order by created_at field
-func (t *TranslationRepo) GetLastViews(authorId string, limit int) ([]query.TranslationView, error) {
-	filter := bson.D{{"author_id", authorId}}
-	opts := options.Find().SetSort(bson.D{{"created_at", -1}})
+func (r *TranslationRepo) GetLastViews(authorID string, limit int) ([]query.TranslationView, error) {
+	filter := bson.D{{Key: "author_id", Value: authorID}}
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 	opts.SetLimit(int64(limit))
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	cursor, err := t.collection.Find(ctx, filter, opts)
+	cursor, err := r.collection.Find(ctx, filter, opts)
 
 	if err != nil {
 		return nil, err
 	}
 
 	var models []TranslationModel
-	if err = cursor.All(context.TODO(), &models); err != nil {
+
+	if err = cursor.All(ctx, &models); err != nil {
+		return nil, err
+	}
+
+	err = cursor.Close(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	views := make([]query.TranslationView, 0, limit)
-	for _, model := range models {
-		view, err := t.fromModelToView(model)
+
+	for i := range models {
+		view, err := r.fromModelToView(models[i])
 
 		if err != nil {
 			return nil, err
@@ -200,26 +207,26 @@ func (t *TranslationRepo) GetLastViews(authorId string, limit int) ([]query.Tran
 }
 
 // fromDomainToModel converts domain translation to mongo model
-func (t *TranslationRepo) fromDomainToModel(translation translation.Translation) (TranslationModel, error) {
+func (r *TranslationRepo) fromDomainToModel(t translation.Translation) (TranslationModel, error) {
 	model := TranslationModel{}
-	err := mapstructure.Decode(translation.ToMap(), &model)
+	err := mapstructure.Decode(t.ToMap(), &model)
 	return model, err
 }
 
 // fromModelToView converts mongo model to translation View performing request for receiving related tag views
-func (t *TranslationRepo) fromModelToView(model TranslationModel) (query.TranslationView, error) {
-	tagViews, err := t.tagRepo.GetViews(model.TagIds, model.AuthorId)
+func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.TranslationView, error) {
+	tagViews, err := r.tagRepo.GetViews(model.TagIDs, model.AuthorID)
 
 	if err != nil {
 		return query.TranslationView{}, err
 	}
 
-	if len(model.TagIds) != len(tagViews) {
+	if len(model.TagIDs) != len(tagViews) {
 		return query.TranslationView{}, fmt.Errorf("can not find all translation tags")
 	}
 
 	return query.TranslationView{
-		Id:            model.Id,
+		ID:            model.ID,
 		CreatedAd:     model.CreatedAt,
 		Transcription: model.Transcription,
 		Translation:   model.Translation,

@@ -24,8 +24,8 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return true, nil
 }
 
-func (u *UserRepo) Create(user user.User) error {
-	u.storage[user.Id()] = &user
+func (u *UserRepo) Create(usr user.User) error {
+	u.storage[usr.ID()] = &usr
 	return nil
 }
 
@@ -36,5 +36,5 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 		}
 	}
 
-	return user.User{}, user.NotFoundErr
+	return user.User{}, user.ErrNotFound
 }

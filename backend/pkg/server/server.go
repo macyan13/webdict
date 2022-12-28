@@ -18,7 +18,7 @@ import (
 	"syscall"
 )
 
-type HttpServer struct {
+type HTTPServer struct {
 	engine      *gin.Engine
 	app         *app.Application
 	authHandler *auth.Handler
@@ -26,7 +26,7 @@ type HttpServer struct {
 	userRepo    user.Repository // todo: need only for tests, remove after query for user
 }
 
-func InitServer(opts Opts) (*HttpServer, error) {
+func InitServer(opts Opts) (*HTTPServer, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { // catch signal and invoke graceful termination
 		stop := make(chan os.Signal, 1)
@@ -96,7 +96,7 @@ func InitServer(opts Opts) (*HttpServer, error) {
 	// 	"github.com/gin-contrib/cors"
 	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
 
-	s := HttpServer{
+	s := HTTPServer{
 		engine:      router,
 		app:         &application,
 		authHandler: authHandler,
@@ -108,18 +108,18 @@ func InitServer(opts Opts) (*HttpServer, error) {
 	return &s, nil
 }
 
-func (s *HttpServer) Run() error {
+func (s *HTTPServer) Run() error {
 	err := s.engine.Run(fmt.Sprintf(":%d", s.opts.Port))
 
 	if err != nil {
-		log.Printf("HttpServer - there was an error calling Run on engine: %v", err)
+		log.Printf("HTTPServer - there was an error calling Run on engine: %v", err)
 		return err
 	}
 
 	return nil
 }
 
-func (s *HttpServer) PopulateInitData() {
+func (s *HTTPServer) PopulateInitData() {
 	if err := s.app.Commands.AddUser.Handle(command.AddUser{
 		Name:     "admin",
 		Email:    s.opts.Admin.AdminEmail,
@@ -129,17 +129,17 @@ func (s *HttpServer) PopulateInitData() {
 	}
 }
 
-func (s *HttpServer) unauthorised(c *gin.Context, err error) {
+func (s *HTTPServer) unauthorized(c *gin.Context, err error) {
 	pc := make([]uintptr, 15)
 	n := runtime.Callers(2, pc)
 	frames := runtime.CallersFrames(pc[:n])
 	frame, _ := frames.Next()
 
-	log.Printf("[Error] Can not authorise action: %s:%s: %v", frame.File, frame.Function, err)
+	log.Printf("[Error] Can not authorize` action: %s:%s: %v", frame.File, frame.Function, err)
 	c.JSON(http.StatusUnauthorized, nil)
 }
 
-func (s *HttpServer) badRequest(c *gin.Context, err error) {
+func (s *HTTPServer) badRequest(c *gin.Context, err error) {
 	log.Printf("[Error] Can not handle request - %v", err)
 	c.JSON(http.StatusBadRequest, nil)
 }

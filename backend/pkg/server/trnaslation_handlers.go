@@ -9,9 +9,9 @@ import (
 	"strconv"
 )
 
-const translationIdParam = "translationId"
+const translationIDParam = "translationId"
 
-func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
+func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
@@ -23,7 +23,7 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.AddTranslation.Handle(&command.AddTranslation{
@@ -32,7 +32,7 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorID:      user.Id,
+			AuthorID:      user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new translation: %v", err))
 			return
@@ -42,13 +42,13 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
+func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		var limit int
@@ -64,7 +64,7 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 		}
 
 		views, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
-			AuthorId: user.Id,
+			AuthorID: user.ID,
 			Limit:    limit,
 		})
 
@@ -77,7 +77,7 @@ func (s *HttpServer) GetLastTranslations() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
+func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
@@ -90,17 +90,17 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.UpdateTranslation.Handle(&command.UpdateTranslation{
-			ID:            c.Param(translationIdParam),
+			ID:            c.Param(translationIDParam),
 			Transcription: request.Transcription,
 			Translation:   request.Translation,
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorID:      user.Id,
+			AuthorID:      user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
@@ -114,18 +114,18 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
+func (s *HTTPServer) GetTranslationByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		view, err := s.app.Queries.SingleTranslation.Handle(query.SingleTranslation{
-			Id:       c.Param(translationIdParam),
-			AuthorId: user.Id,
+			ID:       c.Param(translationIDParam),
+			AuthorID: user.ID,
 		})
 
 		if err != nil {
@@ -137,18 +137,18 @@ func (s *HttpServer) GetTranslationById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
+func (s *HTTPServer) DeleteTranslationByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
-			ID:       c.Param(translationIdParam),
-			AuthorID: user.Id,
+			ID:       c.Param(translationIDParam),
+			AuthorID: user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not delete translation: %v", err))
 			return
@@ -162,28 +162,28 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) translationViewsToResponse(translations []query.TranslationView) []translationResponse {
+func (s *HTTPServer) translationViewsToResponse(translations []query.TranslationView) []translationResponse {
 	responses := make([]translationResponse, len(translations))
 
-	for i, translation := range translations {
-		responses[i] = s.translationViewToResponse(translation)
+	for i := range translations {
+		responses[i] = s.translationViewToResponse(translations[i])
 	}
 
 	return responses
 }
 
-func (s *HttpServer) translationViewToResponse(translation query.TranslationView) translationResponse {
+func (s *HTTPServer) translationViewToResponse(translation query.TranslationView) translationResponse {
 	tags := make([]tagResponse, len(translation.Tags))
 
 	for i, tag := range translation.Tags {
 		tags[i] = tagResponse{
-			Id:  tag.Id,
+			ID:  tag.ID,
 			Tag: tag.Tag,
 		}
 	}
 
 	return translationResponse{
-		Id:            translation.Id,
+		ID:            translation.ID,
 		CreatedAt:     translation.CreatedAd,
 		Transcription: translation.Transcription,
 		Translation:   translation.Translation,

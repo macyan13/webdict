@@ -1,7 +1,7 @@
 package query
 
 type LastTranslations struct {
-	AuthorId string
+	AuthorID string
 	Limit    int
 }
 
@@ -20,5 +20,5 @@ func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView
 		limit = 10
 	}
 
-	return h.translationRepo.GetLastViews(cmd.AuthorId, limit)
+	return h.translationRepo.GetLastViews(cmd.AuthorID, limit)
 }

@@ -15,7 +15,7 @@ type tagRequest struct {
 }
 
 type translationResponse struct {
-	Id            string        `json:"id"`
+	ID            string        `json:"id"`
 	CreatedAt     time.Time     `json:"created_at"`
 	Transcription string        `json:"transcription"`
 	Translation   string        `json:"translation"`
@@ -25,7 +25,7 @@ type translationResponse struct {
 }
 
 type tagResponse struct {
-	Id  string `json:"id"`
+	ID  string `json:"id"`
 	Tag string `json:"tag"`
 }
 

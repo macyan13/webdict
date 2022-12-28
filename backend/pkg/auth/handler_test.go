@@ -35,7 +35,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"User does not exist",
 			func() fields {
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", "notExist").Return(user.User{}, user.NotFoundErr)
+				repository.On("GetByEmail", "notExist").Return(user.User{}, user.ErrNotFound)
 				return fields{
 					userRepo: &repository,
 					tokener:  &mockTokener{},
@@ -382,7 +382,7 @@ func TestHandler_Middleware(t *testing.T) {
 				tokener.On("parseToken", "testToken").Return(claims, nil)
 
 				userRepo := user.MockRepository{}
-				userRepo.On("GetByEmail", "testEmail").Return(user.User{}, user.NotFoundErr)
+				userRepo.On("GetByEmail", "testEmail").Return(user.User{}, user.ErrNotFound)
 				return fields{tokener: &tokener, userRepo: &userRepo}
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {
@@ -537,7 +537,7 @@ func TestHandler_UserFromContext(t *testing.T) {
 			},
 			User{},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not get authorised user", err.Error(), i)
+				assert.Equal(t, "can not get authorized user", err.Error(), i)
 				return true
 			},
 		},
@@ -551,7 +551,7 @@ func TestHandler_UserFromContext(t *testing.T) {
 			},
 			User{},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not cast authorised user", err.Error(), i)
+				assert.Equal(t, "can not cast authorized user", err.Error(), i)
 				return true
 			},
 		},
@@ -560,10 +560,10 @@ func TestHandler_UserFromContext(t *testing.T) {
 			fields{},
 			func() args {
 				context := &gin.Context{}
-				context.Set(userContextKey, User{Id: "testId", Email: "testEmail", Role: user.Admin})
+				context.Set(userContextKey, User{ID: "testId", Email: "testEmail", Role: user.Admin})
 				return args{c: context}
 			},
-			User{Id: "testId", Email: "testEmail", Role: user.Admin},
+			User{ID: "testId", Email: "testEmail", Role: user.Admin},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i)
 				return false

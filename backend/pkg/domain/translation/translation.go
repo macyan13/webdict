@@ -17,18 +17,18 @@ type Translation struct {
 	tagIDs        []string
 }
 
-func NewTranslation(translation, transcription, text, example, authorId string, tagIds []string) *Translation {
+func NewTranslation(translation, transcription, text, example, authorID string, tagIDs []string) *Translation {
 	now := time.Now()
 	return &Translation{
 		id:            uuid.New().String(),
-		authorID:      authorId,
+		authorID:      authorID,
 		createdAt:     now,
 		updatedAt:     now,
 		translation:   translation,
 		transcription: transcription,
 		text:          text,
 		example:       example,
-		tagIDs:        tagIds,
+		tagIDs:        tagIDs,
 	}
 }
 
@@ -65,24 +65,24 @@ func (t *Translation) ToMap() map[string]interface{} {
 
 func UnmarshalFromDB(
 	id string,
-	authorId string,
+	authorID string,
 	createdAt time.Time,
 	updatedAt time.Time,
 	transcription string,
 	translation string,
 	text string,
 	example string,
-	tagIds []string,
+	tagIDs []string,
 ) Translation {
 	return Translation{
 		id:            id,
-		authorID:      authorId,
+		authorID:      authorID,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 		transcription: transcription,
 		translation:   translation,
 		text:          text,
 		example:       example,
-		tagIDs:        tagIds,
+		tagIDs:        tagIDs,
 	}
 }

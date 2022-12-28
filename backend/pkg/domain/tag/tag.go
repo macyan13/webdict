@@ -41,11 +41,11 @@ func (t *Tag) ToMap() map[string]interface{} {
 func UnmarshalFromDB(
 	id string,
 	tag string,
-	authorId string,
+	authorID string,
 ) Tag {
 	return Tag{
 		id:       id,
 		tag:      tag,
-		authorID: authorId,
+		authorID: authorID,
 	}
 }
