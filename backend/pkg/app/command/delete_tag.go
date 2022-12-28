@@ -5,8 +5,8 @@ import (
 )
 
 type DeleteTag struct {
-	Id       string
-	AuthorId string
+	ID       string
+	AuthorID string
 }
 
 type DeleteTagHandler struct {
@@ -18,5 +18,5 @@ func NewDeleteTagHandler(tagRepo tag.Repository) DeleteTagHandler {
 }
 
 func (h DeleteTagHandler) Handle(cmd DeleteTag) error {
-	return h.tagRepo.Delete(cmd.Id, cmd.AuthorId)
+	return h.tagRepo.Delete(cmd.ID, cmd.AuthorID)
 }

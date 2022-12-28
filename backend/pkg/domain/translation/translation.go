@@ -7,41 +7,41 @@ import (
 
 type Translation struct {
 	id            string
-	authorId      string
+	authorID      string
 	createdAt     time.Time
 	updatedAt     time.Time
 	transcription string
 	translation   string
 	text          string
 	example       string
-	tagIds        []string
+	tagIDs        []string
 }
 
-func NewTranslation(translation, transcription, text, example, authorId string, tagIds []string) *Translation {
+func NewTranslation(translation, transcription, text, example, authorID string, tagIDs []string) *Translation {
 	now := time.Now()
 	return &Translation{
 		id:            uuid.New().String(),
-		authorId:      authorId,
+		authorID:      authorID,
 		createdAt:     now,
 		updatedAt:     now,
 		translation:   translation,
 		transcription: transcription,
 		text:          text,
 		example:       example,
-		tagIds:        tagIds,
+		tagIDs:        tagIDs,
 	}
 }
 
-func (t *Translation) Id() string {
+func (t *Translation) ID() string {
 	return t.id
 }
 
-func (t *Translation) AuthorId() string {
-	return t.authorId
+func (t *Translation) AuthorID() string {
+	return t.authorID
 }
 
 func (t *Translation) ApplyChanges(translation, transcription, text, example string, tagIds []string) {
-	t.tagIds = tagIds
+	t.tagIDs = tagIds
 	t.transcription = transcription
 	t.text = text
 	t.translation = translation
@@ -52,37 +52,37 @@ func (t *Translation) ApplyChanges(translation, transcription, text, example str
 func (t *Translation) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":            t.id,
-		"authorId":      t.authorId,
+		"authorID":      t.authorID,
 		"createdAt":     t.createdAt,
 		"updatedAt":     t.updatedAt,
 		"translation":   t.translation,
 		"transcription": t.transcription,
 		"text":          t.text,
 		"example":       t.example,
-		"tagIds":        t.tagIds,
+		"tagIDs":        t.tagIDs,
 	}
 }
 
 func UnmarshalFromDB(
 	id string,
-	authorId string,
+	authorID string,
 	createdAt time.Time,
 	updatedAt time.Time,
 	transcription string,
 	translation string,
 	text string,
 	example string,
-	tagIds []string,
+	tagIDs []string,
 ) Translation {
 	return Translation{
 		id:            id,
-		authorId:      authorId,
+		authorID:      authorID,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 		transcription: transcription,
 		translation:   translation,
 		text:          text,
 		example:       example,
-		tagIds:        tagIds,
+		tagIDs:        tagIDs,
 	}
 }

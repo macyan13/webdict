@@ -31,7 +31,7 @@ func (h AddUserHandler) Handle(cmd AddUser) error {
 		return err
 	}
 
-	if err := h.validate(cmd); err != nil {
+	if err = h.validate(cmd); err != nil {
 		return err
 	}
 

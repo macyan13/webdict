@@ -35,7 +35,7 @@ func NewHandler(userRepo user.Repository, cipher Cipher, params Params) *Handler
 func (h Handler) Authenticate(email, password string) (AuthenticationToken, error) {
 	usr, err := h.userRepo.GetByEmail(email)
 
-	if err == user.NotFoundErr {
+	if err == user.ErrNotFound {
 		return AuthenticationToken{}, ErrInvalidCredentials
 	}
 
@@ -105,7 +105,7 @@ func (h Handler) Middleware() gin.HandlerFunc {
 
 		usr, err := h.userRepo.GetByEmail(claims.Email)
 
-		if err == user.NotFoundErr {
+		if err == user.ErrNotFound {
 			log.Printf("[Error] Attempt to authenticate with not existing user and valid token")
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -118,7 +118,7 @@ func (h Handler) Middleware() gin.HandlerFunc {
 		}
 
 		c.Set(userContextKey, User{
-			Id:    usr.Id(),
+			ID:    usr.ID(),
 			Email: usr.Email(),
 			Role:  usr.Role(),
 		})
@@ -129,13 +129,13 @@ func (h Handler) UserFromContext(c *gin.Context) (User, error) {
 	value, exists := c.Get(userContextKey)
 
 	if !exists {
-		return User{}, fmt.Errorf("can not get authorised user")
+		return User{}, fmt.Errorf("can not get authorized user")
 	}
 
 	usr, ok := value.(User)
 
 	if !ok {
-		return User{}, fmt.Errorf("can not cast authorised user")
+		return User{}, fmt.Errorf("can not cast authorized user")
 	}
 
 	return usr, nil

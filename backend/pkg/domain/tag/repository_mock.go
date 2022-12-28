@@ -10,7 +10,7 @@ type MockRepository struct {
 	mock.Mock
 }
 
-// AllExist provides a mock function with given fields: ids, authorId
+// AllExist provides a mock function with given fields: ids, authorID
 func (_m *MockRepository) AllExist(ids []string, authorId string) (bool, error) {
 	ret := _m.Called(ids, authorId)
 
@@ -45,7 +45,7 @@ func (_m *MockRepository) Create(tag Tag) error {
 	return r0
 }
 
-// Delete provides a mock function with given fields: id, authorId
+// Delete provides a mock function with given fields: id, authorID
 func (_m *MockRepository) Delete(id string, authorId string) error {
 	ret := _m.Called(id, authorId)
 
@@ -59,7 +59,7 @@ func (_m *MockRepository) Delete(id string, authorId string) error {
 	return r0
 }
 
-// Get provides a mock function with given fields: id, authorId
+// Get provides a mock function with given fields: id, authorID
 func (_m *MockRepository) Get(id string, authorId string) (Tag, error) {
 	ret := _m.Called(id, authorId)
 

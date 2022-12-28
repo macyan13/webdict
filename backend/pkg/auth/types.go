@@ -21,7 +21,7 @@ type RefreshToken struct {
 }
 
 type User struct {
-	Id    string
+	ID    string
 	Email string
 	Role  user.Role
 }

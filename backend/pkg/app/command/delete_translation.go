@@ -6,8 +6,8 @@ import (
 )
 
 type DeleteTranslation struct {
-	Id       string
-	AuthorId string
+	ID       string
+	AuthorID string
 }
 
 type DeleteTranslationHandler struct {
@@ -23,5 +23,5 @@ func NewDeleteTranslationHandler(translationRepo translation.Repository, tagRepo
 }
 
 func (h DeleteTranslationHandler) Handle(cmd DeleteTranslation) error {
-	return h.translationRepo.Delete(cmd.Id, cmd.AuthorId)
+	return h.translationRepo.Delete(cmd.ID, cmd.AuthorID)
 }

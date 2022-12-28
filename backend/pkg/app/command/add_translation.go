@@ -12,7 +12,7 @@ type AddTranslation struct {
 	Text          string   `json:"text"`
 	Example       string   `json:"example"`
 	TagIds        []string `json:"tag_ids"`
-	AuthorId      string
+	AuthorID      string
 }
 
 type AddTranslationHandler struct {
@@ -27,7 +27,7 @@ func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag
 	}
 }
 
-func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
+func (h AddTranslationHandler) Handle(cmd *AddTranslation) error {
 	if err := h.validateTags(cmd); err != nil {
 		return err
 	}
@@ -37,19 +37,19 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 		cmd.Transcription,
 		cmd.Text,
 		cmd.Example,
-		cmd.AuthorId,
+		cmd.AuthorID,
 		cmd.TagIds,
 	)
 
 	return h.translationRepo.Create(*tr)
 }
 
-func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
+func (h AddTranslationHandler) validateTags(cmd *AddTranslation) error {
 	if len(cmd.TagIds) == 0 {
 		return nil
 	}
 
-	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId)
+	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorID)
 
 	if err != nil {
 		return err

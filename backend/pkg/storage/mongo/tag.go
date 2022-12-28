@@ -19,9 +19,9 @@ type TagRepo struct {
 
 // TagModel represents mongo tag document
 type TagModel struct {
-	Id       string `bson:"_id"`
+	ID       string `bson:"_id"`
 	Tag      string `bson:"tag"`
-	AuthorId string `bson:"author_id"`
+	AuthorID string `bson:"author_id"`
 }
 
 // NewTagRepo creates TagRepo
@@ -35,21 +35,21 @@ func NewTagRepo(ctx context.Context, db *mongo.Database) (*TagRepo, error) {
 }
 
 // initIndexes creates required for current queries indexes in tags collection
-func (t *TagRepo) initIndexes() error {
+func (r *TagRepo) initIndexes() error {
 	return nil
 }
 
 // Create saves new tag to DB
-func (t *TagRepo) Create(tag tag.Tag) error {
-	model, err := t.fromDomainToModel(tag)
+func (r *TagRepo) Create(t tag.Tag) error {
+	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	if _, err = t.collection.InsertOne(ctx, model); err != nil {
+	if _, err = r.collection.InsertOne(ctx, model); err != nil {
 		return err
 	}
 
@@ -57,39 +57,39 @@ func (t *TagRepo) Create(tag tag.Tag) error {
 }
 
 // Update updates already existed tag
-func (t *TagRepo) Update(tag tag.Tag) error {
-	model, err := t.fromDomainToModel(tag)
+func (r *TagRepo) Update(t tag.Tag) error {
+	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.UpdateOne(ctx, bson.D{{"_id", model.Id}}, model)
+	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
 
 	if err != nil {
 		return err
 	}
 
 	if result.MatchedCount != 1 {
-		return fmt.Errorf("tag with id %s which must be modified not found", model.Id)
+		return fmt.Errorf("tag with id %s which must be modified not found", model.ID)
 	}
 
 	return nil
 }
 
 // Get searches for tag with id and authorId
-func (t *TagRepo) Get(id, authorId string) (tag.Tag, error) {
+func (r *TagRepo) Get(id, authorID string) (tag.Tag, error) {
 	var record TagModel
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
 	if err != mongo.ErrNoDocuments {
-		return tag.Tag{}, tag.NotFoundErr
+		return tag.Tag{}, tag.ErrNotFound
 	}
 
 	if err != nil {
@@ -97,18 +97,18 @@ func (t *TagRepo) Get(id, authorId string) (tag.Tag, error) {
 	}
 
 	return tag.UnmarshalFromDB(
-		record.Id,
+		record.ID,
 		record.Tag,
-		record.AuthorId,
+		record.AuthorID,
 	), nil
 }
 
 // Delete removes tag with id and authorId
-func (t *TagRepo) Delete(id, authorId string) error {
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+func (r *TagRepo) Delete(id, authorID string) error {
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.DeleteOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}})
+	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}})
 
 	if err != nil {
 		return err
@@ -122,13 +122,13 @@ func (t *TagRepo) Delete(id, authorId string) error {
 }
 
 // AllExist checks that all tags exist in DB with passed ids and authorId
-func (t *TagRepo) AllExist(ids []string, authorId string) (bool, error) {
-	filter := bson.D{{"_id", bson.D{{"$in", ids}}}, {"author_id", authorId}}
+func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
+	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := t.collection.CountDocuments(ctx, filter)
+	count, err := r.collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return false, err
 	}
@@ -137,13 +137,13 @@ func (t *TagRepo) AllExist(ids []string, authorId string) (bool, error) {
 }
 
 // GetAllViews returns all existing tag views for passed authorId
-func (t *TagRepo) GetAllViews(authorId string) ([]query.TagView, error) {
-	filter := bson.D{{"author_id", authorId}}
+func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
+	filter := bson.D{{Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(t.ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
 	defer cancel()
 
-	cursor, err := t.collection.Find(ctx, filter)
+	cursor, err := r.collection.Find(ctx, filter)
 
 	if err != nil {
 		return nil, err
@@ -156,35 +156,35 @@ func (t *TagRepo) GetAllViews(authorId string) ([]query.TagView, error) {
 
 	views := make([]query.TagView, 0, len(models))
 	for _, model := range models {
-		views = append(views, t.fromModelToView(model))
+		views = append(views, r.fromModelToView(model))
 	}
 
 	return views, nil
 }
 
 // GetView searches for tag with id and authorId
-func (t *TagRepo) GetView(id, authorId string) (query.TagView, error) {
+func (r *TagRepo) GetView(id, authorID string) (query.TagView, error) {
 	var record TagModel
 
-	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 	if err != nil {
 		return query.TagView{}, err
 	}
 
-	return t.fromModelToView(record), nil
+	return r.fromModelToView(record), nil
 }
 
 // GetViews returns tag views for passed ids and authorId
-func (t *TagRepo) GetViews(ids []string, authorId string) ([]query.TagView, error) {
-	filter := bson.D{{"_id", bson.D{{"$in", ids}}}, {"author_id", authorId}}
+func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error) {
+	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(t.ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
 	defer cancel()
 
-	cursor, err := t.collection.Find(ctx, filter)
+	cursor, err := r.collection.Find(ctx, filter)
 
 	if err != nil {
 		return nil, err
@@ -197,23 +197,23 @@ func (t *TagRepo) GetViews(ids []string, authorId string) ([]query.TagView, erro
 
 	views := make([]query.TagView, 0, len(models))
 	for _, model := range models {
-		views = append(views, t.fromModelToView(model))
+		views = append(views, r.fromModelToView(model))
 	}
 
 	return views, nil
 }
 
 // fromDomainToModel converts domain tag to mongo model
-func (t *TagRepo) fromDomainToModel(tag tag.Tag) (TagModel, error) {
+func (r *TagRepo) fromDomainToModel(t tag.Tag) (TagModel, error) {
 	model := TagModel{}
-	err := mapstructure.Decode(tag.ToMap(), &model)
+	err := mapstructure.Decode(t.ToMap(), &model)
 	return model, err
 }
 
 // fromModelToView converts mongo model to tag View
-func (t *TagRepo) fromModelToView(model TagModel) query.TagView {
+func (r *TagRepo) fromModelToView(model TagModel) query.TagView {
 	return query.TagView{
-		Id:  model.Id,
+		ID:  model.ID,
 		Tag: model.Tag,
 	}
 }

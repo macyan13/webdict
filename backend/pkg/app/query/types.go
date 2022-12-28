@@ -3,18 +3,18 @@ package query
 import "time"
 
 type TranslationViewRepository interface {
-	GetView(id, authorId string) (TranslationView, error)
-	GetLastViews(authorId string, limit int) ([]TranslationView, error)
+	GetView(id, authorID string) (TranslationView, error)
+	GetLastViews(authorID string, limit int) ([]TranslationView, error)
 }
 
 type TagViewRepository interface {
-	GetAllViews(authorId string) ([]TagView, error)
-	GetView(id, authorId string) (TagView, error)
-	GetViews(ids []string, authorId string) ([]TagView, error)
+	GetAllViews(authorID string) ([]TagView, error)
+	GetView(id, authorID string) (TagView, error)
+	GetViews(ids []string, authorID string) ([]TagView, error)
 }
 
 type TranslationView struct {
-	Id            string
+	ID            string
 	CreatedAd     time.Time
 	Transcription string
 	Translation   string
@@ -24,6 +24,6 @@ type TranslationView struct {
 }
 
 type TagView struct {
-	Id  string
+	ID  string
 	Tag string
 }

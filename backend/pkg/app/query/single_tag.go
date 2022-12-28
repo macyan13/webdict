@@ -1,8 +1,8 @@
 package query
 
 type SingleTag struct {
-	Id       string
-	AuthorId string
+	ID       string
+	AuthorID string
 }
 
 type SingleTagHandler struct {
@@ -14,5 +14,5 @@ func NewSingleTagHandler(tagRepo TagViewRepository) SingleTagHandler {
 }
 
 func (h SingleTagHandler) Handle(cmd SingleTag) (TagView, error) {
-	return h.tagRepo.GetView(cmd.Id, cmd.AuthorId)
+	return h.tagRepo.GetView(cmd.ID, cmd.AuthorID)
 }

@@ -10,7 +10,7 @@ import (
 
 const refreshTokenCookieName = "refreshToken"
 
-func (s *HttpServer) SighIn() gin.HandlerFunc {
+func (s *HTTPServer) SighIn() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request SignInRequest
@@ -46,7 +46,7 @@ func (s *HttpServer) SighIn() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) Refresh() gin.HandlerFunc {
+func (s *HTTPServer) Refresh() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 

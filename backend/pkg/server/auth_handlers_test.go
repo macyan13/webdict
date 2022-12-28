@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const authApi = "/v1/api/auth"
+const authAPI = "/v1/api/auth"
 
 func TestServer_SighIn(t *testing.T) {
 	s := initTestServer()
@@ -22,14 +22,15 @@ func TestServer_SighIn(t *testing.T) {
 	}
 
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", authApi+"/signin", bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", authAPI+"/signin", bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response AuthTokenResponse
 
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "Bearer", response.Type, "Route:SignIn - Auth type must be Bearer")
 	assert.NotEmpty(t, response.AccessToken, "Route:SignIn -AccessToken must present")
@@ -41,7 +42,7 @@ func TestServer_SighIn(t *testing.T) {
 func TestServer_Refresh(t *testing.T) {
 	s := initTestServer()
 
-	req, _ := http.NewRequest("POST", authApi+"/refresh", &bytes.Buffer{})
+	req, _ := http.NewRequest("POST", authAPI+"/refresh", &bytes.Buffer{})
 	req.AddCookie(&http.Cookie{
 		Name:  "refreshToken",
 		Value: getRefreshToken(s),
@@ -52,20 +53,21 @@ func TestServer_Refresh(t *testing.T) {
 
 	var response AuthTokenResponse
 
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "Bearer", response.Type, "Route:SignIn - Auth type must be Bearer")
 	assert.NotEmpty(t, response.AccessToken, "Route:SignIn -AccessToken must present")
 }
 
-func getRefreshToken(s *HttpServer) string {
+func getRefreshToken(s *HTTPServer) string {
 	request := SignInRequest{
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,
 	}
 
 	jsonValue, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", authApi+"/signin", bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", authAPI+"/signin", bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
@@ -75,7 +77,7 @@ func getRefreshToken(s *HttpServer) string {
 
 var authenticationToken *auth.AuthenticationToken
 
-func setAuthToken(s *HttpServer, r *http.Request) {
+func setAuthToken(s *HTTPServer, r *http.Request) {
 	if authenticationToken == nil {
 		token, _ := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
 		authenticationToken = &token

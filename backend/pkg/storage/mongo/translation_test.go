@@ -11,12 +11,12 @@ import (
 
 func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	tr := "testTranslation"
-	authorId := "testAuthor"
+	authorID := "testAuthor"
 	transcription := "testTranscription"
 	text := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	domain := translation.NewTranslation(tr, transcription, text, example, authorId, tags)
+	domain := translation.NewTranslation(tr, transcription, text, example, authorID, tags)
 	domainMap := domain.ToMap()
 
 	repo := TranslationRepo{}
@@ -24,26 +24,26 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, tr, model.Translation)
-	assert.Equal(t, authorId, model.AuthorId)
+	assert.Equal(t, authorID, model.AuthorID)
 	assert.Equal(t, transcription, model.Transcription)
 	assert.Equal(t, text, model.Text)
 	assert.Equal(t, example, model.Example)
-	assert.Equal(t, tags, model.TagIds)
+	assert.Equal(t, tags, model.TagIDs)
 	assert.Equal(t, domainMap["createdAt"], model.CreatedAt)
 	assert.Equal(t, domainMap["updatedAt"], model.UpdatedAt)
 }
 
 func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 	model := TranslationModel{
-		Id:            "id",
-		AuthorId:      "testAuthor",
+		ID:            "id",
+		AuthorID:      "testAuthor",
 		CreatedAt:     time.Now().Add(5 * time.Second),
 		UpdatedAt:     time.Now().Add(10 * time.Second),
 		Transcription: "transcription",
 		Translation:   "translation",
 		Text:          "text",
 		Example:       "example",
-		TagIds:        []string{"tag1", "tag2"},
+		TagIDs:        []string{"tag1", "tag2"},
 	}
 
 	tagViews := []query.TagView{{Tag: "tag1"}, {Tag: "tag2"}}
@@ -57,7 +57,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 	view, err := translationRepo.fromModelToView(model)
 	assert.Nil(t, err)
 
-	assert.Equal(t, model.Id, view.Id)
+	assert.Equal(t, model.ID, view.ID)
 	assert.Equal(t, model.CreatedAt, view.CreatedAd)
 	assert.Equal(t, model.Translation, view.Translation)
 	assert.Equal(t, model.Transcription, view.Transcription)
@@ -68,8 +68,8 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 
 func TestTranslationRepo_fromModelToView_errorOnGetViews(t *testing.T) {
 	model := TranslationModel{
-		AuthorId: "testAuthor",
-		TagIds:   []string{"tag1", "tag2"},
+		AuthorID: "testAuthor",
+		TagIDs:   []string{"tag1", "tag2"},
 	}
 
 	tagRepo := query.MockTagViewRepository{}
@@ -85,8 +85,8 @@ func TestTranslationRepo_fromModelToView_errorOnGetViews(t *testing.T) {
 
 func TestTranslationRepo_fromModelToView_errorOnTagViewsMiscount(t *testing.T) {
 	model := TranslationModel{
-		AuthorId: "testAuthor",
-		TagIds:   []string{"tag1", "tag2"},
+		AuthorID: "testAuthor",
+		TagIDs:   []string{"tag1", "tag2"},
 	}
 
 	tagRepo := query.MockTagViewRepository{}

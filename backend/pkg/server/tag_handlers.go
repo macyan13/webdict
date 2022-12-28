@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-const tagIdParam = "tagId"
+const tagIDParam = "tagId"
 
-func (s *HttpServer) CreateTag() gin.HandlerFunc {
+func (s *HTTPServer) CreateTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request tagRequest
@@ -22,12 +22,12 @@ func (s *HttpServer) CreateTag() gin.HandlerFunc {
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.AddTag.Handle(command.AddTag{
 			Tag:      request.Tag,
-			AuthorId: user.Id,
+			AuthorID: user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new tag: %v", err))
 			return
@@ -37,16 +37,16 @@ func (s *HttpServer) CreateTag() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) GetTags() gin.HandlerFunc {
+func (s *HTTPServer) GetTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
-		tag, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorId: user.Id})
+		tag, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorID: user.ID})
 
 		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not get tags from DB - %v", err))
@@ -57,7 +57,7 @@ func (s *HttpServer) GetTags() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) UpdateTag() gin.HandlerFunc {
+func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request tagRequest
@@ -69,13 +69,13 @@ func (s *HttpServer) UpdateTag() gin.HandlerFunc {
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
-			TagId:    c.Param(tagIdParam),
+			TagID:    c.Param(tagIDParam),
 			Tag:      request.Tag,
-			AuthorId: user.Id,
+			AuthorID: user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
 			return
@@ -89,18 +89,18 @@ func (s *HttpServer) UpdateTag() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) GetTagById() gin.HandlerFunc {
+func (s *HTTPServer) GetTagByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		view, err := s.app.Queries.SingleTag.Handle(query.SingleTag{
-			Id:       c.Param(tagIdParam),
-			AuthorId: user.Id,
+			ID:       c.Param(tagIDParam),
+			AuthorID: user.ID,
 		})
 
 		if err != nil {
@@ -111,18 +111,18 @@ func (s *HttpServer) GetTagById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
+func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
-			s.unauthorised(c, err)
+			s.unauthorized(c, err)
 		}
 
 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
-			Id:       c.Param(tagIdParam),
-			AuthorId: user.Id,
+			ID:       c.Param(tagIDParam),
+			AuthorID: user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not delete tag: %v", err))
 			return
@@ -136,19 +136,19 @@ func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
 	}
 }
 
-func (s *HttpServer) tagModelToResponse(tag query.TagView) tagResponse {
+func (s *HTTPServer) tagModelToResponse(tag query.TagView) tagResponse {
 	return tagResponse{
-		Id:  tag.Id,
+		ID:  tag.ID,
 		Tag: tag.Tag,
 	}
 }
 
-func (s *HttpServer) tagViewsToResponse(tags []query.TagView) []tagResponse {
+func (s *HTTPServer) tagViewsToResponse(tags []query.TagView) []tagResponse {
 	responses := make([]tagResponse, len(tags))
 
 	for i, t := range tags {
 		responses[i] = tagResponse{
-			Id:  t.Id,
+			ID:  t.ID,
 			Tag: t.Tag,
 		}
 	}

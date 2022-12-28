@@ -7,13 +7,13 @@ import (
 )
 
 type UpdateTranslation struct {
-	Id            string
+	ID            string
 	Transcription string
 	Translation   string
 	Text          string
 	Example       string
 	TagIds        []string
-	AuthorId      string
+	AuthorID      string
 }
 
 type UpdateTranslationHandler struct {
@@ -28,8 +28,8 @@ func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo 
 	}
 }
 
-func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
-	tr, err := h.translationRepo.Get(cmd.Id, cmd.AuthorId)
+func (h UpdateTranslationHandler) Handle(cmd *UpdateTranslation) error {
+	tr, err := h.translationRepo.Get(cmd.ID, cmd.AuthorID)
 
 	if err != nil {
 		return err
@@ -44,12 +44,12 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 	return h.translationRepo.Update(tr)
 }
 
-func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {
+func (h UpdateTranslationHandler) validateTags(cmd *UpdateTranslation) error {
 	if len(cmd.TagIds) == 0 {
 		return nil
 	}
 
-	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorId)
+	exists, err := h.tagRepo.AllExist(cmd.TagIds, cmd.AuthorID)
 
 	if err != nil {
 		return err

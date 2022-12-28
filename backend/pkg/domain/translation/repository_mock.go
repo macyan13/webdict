@@ -24,7 +24,7 @@ func (_m *MockRepository) Create(translation Translation) error {
 	return r0
 }
 
-// Delete provides a mock function with given fields: id, authorId
+// Delete provides a mock function with given fields: id, authorID
 func (_m *MockRepository) Delete(id string, authorId string) error {
 	ret := _m.Called(id, authorId)
 
@@ -38,7 +38,7 @@ func (_m *MockRepository) Delete(id string, authorId string) error {
 	return r0
 }
 
-// Get provides a mock function with given fields: id, authorId
+// Get provides a mock function with given fields: id, authorID
 func (_m *MockRepository) Get(id string, authorId string) (Translation, error) {
 	ret := _m.Called(id, authorId)
 

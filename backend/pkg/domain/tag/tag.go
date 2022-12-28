@@ -7,23 +7,23 @@ import (
 type Tag struct {
 	id       string
 	tag      string
-	authorId string
+	authorID string
 }
 
-func NewTag(tag, AuthorId string) *Tag {
+func NewTag(tag, authorID string) *Tag {
 	return &Tag{
 		id:       uuid.New().String(),
 		tag:      tag,
-		authorId: AuthorId,
+		authorID: authorID,
 	}
 }
 
-func (t *Tag) Id() string {
+func (t *Tag) ID() string {
 	return t.id
 }
 
-func (t *Tag) AuthorId() string {
-	return t.authorId
+func (t *Tag) AuthorID() string {
+	return t.authorID
 }
 
 func (t *Tag) ApplyChanges(tag string) {
@@ -34,18 +34,18 @@ func (t *Tag) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":       t.id,
 		"tag":      t.tag,
-		"authorId": t.authorId,
+		"authorID": t.authorID,
 	}
 }
 
 func UnmarshalFromDB(
 	id string,
 	tag string,
-	authorId string,
+	authorID string,
 ) Tag {
 	return Tag{
 		id:       id,
 		tag:      tag,
-		authorId: authorId,
+		authorID: authorID,
 	}
 }
