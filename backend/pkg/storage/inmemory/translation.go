@@ -9,26 +9,26 @@ import (
 
 type TranslationRepo struct {
 	tagRepo TagRepo
-	storage map[string]translation.Translation
+	storage map[string]*translation.Translation
 }
 
 func NewTranslationRepository(tagRepo TagRepo) *TranslationRepo {
 	return &TranslationRepo{
-		storage: map[string]translation.Translation{},
+		storage: map[string]*translation.Translation{},
 		tagRepo: tagRepo,
 	}
 }
 
 func (r *TranslationRepo) Update(translation translation.Translation) error {
-	r.storage[translation.Id()] = translation
+	r.storage[translation.ID()] = &translation
 	return nil
 }
 
 func (r *TranslationRepo) Get(id, authorId string) (translation.Translation, error) {
 	t, ok := r.storage[id]
 
-	if ok && t.AuthorId() == authorId {
-		return t, nil
+	if ok && t.AuthorID() == authorId {
+		return *t, nil
 	}
 
 	return translation.Translation{}, translation.NotFoundErr
@@ -37,7 +37,7 @@ func (r *TranslationRepo) Get(id, authorId string) (translation.Translation, err
 func (r *TranslationRepo) Delete(id, authorId string) error {
 	t, ok := r.storage[id]
 
-	if ok && t.AuthorId() == authorId {
+	if ok && t.AuthorID() == authorId {
 		delete(r.storage, id)
 		return nil
 	}
@@ -46,14 +46,14 @@ func (r *TranslationRepo) Delete(id, authorId string) error {
 }
 
 func (r *TranslationRepo) Create(translation translation.Translation) error {
-	r.storage[translation.Id()] = translation
+	r.storage[translation.ID()] = &translation
 	return nil
 }
 
 func (r *TranslationRepo) GetView(id, authorId string) (query.TranslationView, error) {
 	for _, t := range r.storage {
 
-		if t.AuthorId() == authorId && t.Id() == id {
+		if t.AuthorID() == authorId && t.ID() == id {
 			translationData := t.ToMap()
 			tagViews, err := r.tagRepo.GetViews(translationData["tagIds"].([]string), authorId)
 
@@ -61,7 +61,7 @@ func (r *TranslationRepo) GetView(id, authorId string) (query.TranslationView, e
 				return query.TranslationView{}, err
 			}
 			return query.TranslationView{
-				Id:            t.Id(),
+				Id:            t.ID(),
 				CreatedAd:     translationData["createdAt"].(time.Time),
 				Transcription: translationData["transcription"].(string),
 				Translation:   translationData["translation"].(string),
@@ -80,7 +80,7 @@ func (r *TranslationRepo) GetLastViews(authorId string, limit int) ([]query.Tran
 	counter := 0
 
 	for _, t := range r.storage {
-		if t.AuthorId() == authorId && counter < limit {
+		if t.AuthorID() == authorId && counter < limit {
 			translationData := t.ToMap()
 			tagViews, err := r.tagRepo.GetViews(translationData["tagIds"].([]string), authorId)
 
@@ -89,7 +89,7 @@ func (r *TranslationRepo) GetLastViews(authorId string, limit int) ([]query.Tran
 			}
 
 			results = append(results, query.TranslationView{
-				Id:            t.Id(),
+				Id:            t.ID(),
 				CreatedAd:     translationData["createdAt"].(time.Time),
 				Transcription: translationData["transcription"].(string),
 				Translation:   translationData["translation"].(string),

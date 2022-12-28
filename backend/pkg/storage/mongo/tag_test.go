@@ -13,8 +13,8 @@ func TestTagRepo_fromDomainToModel(t *testing.T) {
 
 	model, err := repo.fromDomainToModel(*entity)
 	assert.Nil(t, err)
-	assert.Equal(t, entity.Id(), model.Id)
-	assert.Equal(t, entity.AuthorId(), model.AuthorId)
+	assert.Equal(t, entity.ID(), model.Id)
+	assert.Equal(t, entity.AuthorID(), model.AuthorId)
 	assert.Equal(t, tagValue, model.Tag)
 }
 

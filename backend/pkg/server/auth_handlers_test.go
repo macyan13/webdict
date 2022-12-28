@@ -29,7 +29,8 @@ func TestServer_SighIn(t *testing.T) {
 
 	var response AuthTokenResponse
 
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "Bearer", response.Type, "Route:SignIn - Auth type must be Bearer")
 	assert.NotEmpty(t, response.AccessToken, "Route:SignIn -AccessToken must present")
@@ -52,7 +53,8 @@ func TestServer_Refresh(t *testing.T) {
 
 	var response AuthTokenResponse
 
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "Bearer", response.Type, "Route:SignIn - Auth type must be Bearer")
 	assert.NotEmpty(t, response.AccessToken, "Route:SignIn -AccessToken must present")

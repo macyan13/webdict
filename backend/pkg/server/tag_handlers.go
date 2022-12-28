@@ -27,7 +27,7 @@ func (s *HttpServer) CreateTag() gin.HandlerFunc {
 
 		if err := s.app.Commands.AddTag.Handle(command.AddTag{
 			Tag:      request.Tag,
-			AuthorId: user.Id,
+			AuthorID: user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new tag: %v", err))
 			return
@@ -73,9 +73,9 @@ func (s *HttpServer) UpdateTag() gin.HandlerFunc {
 		}
 
 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
-			TagId:    c.Param(tagIdParam),
+			TagID:    c.Param(tagIdParam),
 			Tag:      request.Tag,
-			AuthorId: user.Id,
+			AuthorID: user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
 			return
@@ -121,8 +121,8 @@ func (s *HttpServer) DeleteTagById() gin.HandlerFunc {
 		}
 
 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
-			Id:       c.Param(tagIdParam),
-			AuthorId: user.Id,
+			ID:       c.Param(tagIdParam),
+			AuthorID: user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not delete tag: %v", err))
 			return

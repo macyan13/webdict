@@ -14,10 +14,5 @@ func (c Cipher) GenerateHash(pwd string) (string, error) {
 
 func (c Cipher) ComparePasswords(hashedPwd, plainPwd string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(plainPwd))
-
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }

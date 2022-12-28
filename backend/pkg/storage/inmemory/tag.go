@@ -7,20 +7,20 @@ import (
 )
 
 type TagRepo struct {
-	storage map[string]tag.Tag
+	storage map[string]*tag.Tag
 }
 
 func NewTagRepository() *TagRepo {
 	return &TagRepo{
-		storage: map[string]tag.Tag{},
+		storage: map[string]*tag.Tag{},
 	}
 }
 
 func (r *TagRepo) Get(id, authorId string) (tag.Tag, error) {
 	t, ok := r.storage[id]
 
-	if ok && t.AuthorId() == authorId {
-		return t, nil
+	if ok && t.AuthorID() == authorId {
+		return *t, nil
 	}
 
 	return tag.Tag{}, tag.NotFoundErr
@@ -29,7 +29,7 @@ func (r *TagRepo) Get(id, authorId string) (tag.Tag, error) {
 func (r *TagRepo) Delete(id, authorId string) error {
 	t, ok := r.storage[id]
 
-	if ok && t.AuthorId() == authorId {
+	if ok && t.AuthorID() == authorId {
 		delete(r.storage, id)
 		return nil
 	}
@@ -39,7 +39,7 @@ func (r *TagRepo) Delete(id, authorId string) error {
 
 func (r *TagRepo) AllExist(ids []string, authorId string) (bool, error) {
 	for _, id := range ids {
-		if t, ok := r.storage[id]; !ok || t.AuthorId() != authorId {
+		if t, ok := r.storage[id]; !ok || t.AuthorID() != authorId {
 			return false, nil
 		}
 	}
@@ -47,18 +47,18 @@ func (r *TagRepo) AllExist(ids []string, authorId string) (bool, error) {
 	return true, nil
 }
 
-func (r *TagRepo) Create(tag tag.Tag) error {
-	r.storage[tag.Id()] = tag
+func (r *TagRepo) Create(t tag.Tag) error {
+	r.storage[t.ID()] = &t
 	return nil
 }
 
 func (r *TagRepo) GetAllViews(authorId string) ([]query.TagView, error) {
 	tags := make([]query.TagView, 0)
 	for _, t := range r.storage {
-		if t.AuthorId() == authorId {
+		if t.AuthorID() == authorId {
 			tagData := t.ToMap()
 			tags = append(tags, query.TagView{
-				Id:  t.Id(),
+				Id:  t.ID(),
 				Tag: tagData["tag"].(string),
 			})
 		}
@@ -70,10 +70,10 @@ func (r *TagRepo) GetAllViews(authorId string) ([]query.TagView, error) {
 func (r *TagRepo) GetView(id, authorId string) (query.TagView, error) {
 	t, ok := r.storage[id]
 
-	if ok && t.AuthorId() == authorId {
+	if ok && t.AuthorID() == authorId {
 		tagData := t.ToMap()
 		return query.TagView{
-			Id:  t.Id(),
+			Id:  t.ID(),
 			Tag: tagData["tag"].(string),
 		}, nil
 	}
@@ -86,10 +86,10 @@ func (r *TagRepo) GetViews(ids []string, authorId string) ([]query.TagView, erro
 
 	for _, id := range ids {
 		for _, t := range r.storage {
-			if t.AuthorId() == authorId && t.Id() == id {
+			if t.AuthorID() == authorId && t.ID() == id {
 				tagData := t.ToMap()
 				views = append(views, query.TagView{
-					Id:  t.Id(),
+					Id:  t.ID(),
 					Tag: tagData["tag"].(string),
 				})
 			}
@@ -99,7 +99,7 @@ func (r *TagRepo) GetViews(ids []string, authorId string) ([]query.TagView, erro
 	return views, nil
 }
 
-func (r *TagRepo) Update(tag tag.Tag) error {
-	r.storage[tag.Id()] = tag
+func (r *TagRepo) Update(t tag.Tag) error {
+	r.storage[t.ID()] = &t
 	return nil
 }

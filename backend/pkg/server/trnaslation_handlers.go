@@ -26,13 +26,13 @@ func (s *HttpServer) CreateTranslation() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
+		if err := s.app.Commands.AddTranslation.Handle(&command.AddTranslation{
 			Transcription: request.Transcription,
 			Translation:   request.Translation,
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorId:      user.Id,
+			AuthorID:      user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new translation: %v", err))
 			return
@@ -93,14 +93,14 @@ func (s *HttpServer) UpdateTranslation() gin.HandlerFunc {
 			s.unauthorised(c, err)
 		}
 
-		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
-			Id:            c.Param(translationIdParam),
+		if err := s.app.Commands.UpdateTranslation.Handle(&command.UpdateTranslation{
+			ID:            c.Param(translationIdParam),
 			Transcription: request.Transcription,
 			Translation:   request.Translation,
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
-			AuthorId:      user.Id,
+			AuthorID:      user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
@@ -147,8 +147,8 @@ func (s *HttpServer) DeleteTranslationById() gin.HandlerFunc {
 		}
 
 		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
-			Id:       c.Param(translationIdParam),
-			AuthorId: user.Id,
+			ID:       c.Param(translationIdParam),
+			AuthorID: user.Id,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not delete translation: %v", err))
 			return

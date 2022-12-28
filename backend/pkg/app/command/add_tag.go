@@ -6,7 +6,7 @@ import (
 
 type AddTag struct {
 	Tag      string
-	AuthorId string
+	AuthorID string
 }
 
 type AddTagHandler struct {
@@ -20,5 +20,5 @@ func NewAddTagHandler(tagRepo tag.Repository) AddTagHandler {
 }
 
 func (h AddTagHandler) Handle(cmd AddTag) error {
-	return h.tagRepo.Create(*tag.NewTag(cmd.Tag, cmd.AuthorId))
+	return h.tagRepo.Create(*tag.NewTag(cmd.Tag, cmd.AuthorID))
 }

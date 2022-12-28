@@ -5,9 +5,9 @@ import (
 )
 
 type UpdateTag struct {
-	TagId    string
+	TagID    string
 	Tag      string
-	AuthorId string
+	AuthorID string
 }
 
 type UpdateTagHandler struct {
@@ -19,7 +19,7 @@ func NewUpdateTagHandler(tagRepo tag.Repository) UpdateTagHandler {
 }
 
 func (h UpdateTagHandler) Handle(cmd UpdateTag) error {
-	tg, err := h.tagRepo.Get(cmd.TagId, cmd.AuthorId)
+	tg, err := h.tagRepo.Get(cmd.TagID, cmd.AuthorID)
 
 	if err != nil {
 		return err

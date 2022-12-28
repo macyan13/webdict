@@ -89,7 +89,7 @@ func (t *TranslationRepo) Update(translation translation.Translation) error {
 	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.UpdateOne(ctx, bson.D{{"_id", model.Id}}, model)
+	result, err := t.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.Id}}, model)
 
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (t *TranslationRepo) Delete(id, authorId string) error {
 	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := t.collection.DeleteOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}})
+	result, err := t.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorId}})
 
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func (t *TranslationRepo) GetView(id, authorId string) (query.TranslationView, e
 	ctx, cancel := context.WithTimeout(t.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := t.collection.FindOne(ctx, bson.D{{"_id", id}, {"author_id", authorId}}).Decode(&record)
+	err := t.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorId}}).Decode(&record)
 	if err != nil {
 		return query.TranslationView{}, err
 	}

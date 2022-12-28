@@ -5,12 +5,12 @@ import (
 )
 
 type UserRepo struct {
-	storage map[string]user.User
+	storage map[string]*user.User
 }
 
 func NewUserRepository() *UserRepo {
 	return &UserRepo{
-		storage: map[string]user.User{},
+		storage: map[string]*user.User{},
 	}
 }
 
@@ -25,14 +25,14 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 }
 
 func (u *UserRepo) Create(user user.User) error {
-	u.storage[user.Id()] = user
+	u.storage[user.Id()] = &user
 	return nil
 }
 
 func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 	for _, el := range u.storage {
 		if el.Email() == email {
-			return el, nil
+			return *el, nil
 		}
 	}
 

@@ -55,7 +55,7 @@ func (u *UserRepo) initIndexes() error {
 
 // Exist checks if user with the email exists
 func (u *UserRepo) Exist(email string) (bool, error) {
-	filter := bson.D{{"email", email}}
+	filter := bson.D{{Key: "email", Value: email}}
 
 	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
@@ -91,7 +91,7 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := u.collection.FindOne(ctx, bson.D{{"email", email}}).Decode(&record)
+	err := u.collection.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
 		return user.User{}, user.NotFoundErr
