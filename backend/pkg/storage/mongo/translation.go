@@ -51,6 +51,12 @@ func (r *TranslationRepo) initIndexes() error {
 				{Key: "created_at", Value: -1},
 			},
 		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "text", Value: 1},
+			},
+		},
 	}
 
 	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
@@ -148,6 +154,15 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 	}
 
 	return nil
+}
+
+func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "text", Value: text}, {Key: "author_id", Value: authorID}})
+
+	return count > 0, err
 }
 
 // GetView perform search request based on translation id and author id parameters and returns translation view representation

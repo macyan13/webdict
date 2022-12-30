@@ -50,6 +50,20 @@ func (r *TranslationRepo) Create(t translation.Translation) error {
 	return nil
 }
 
+func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
+	for _, t := range r.storage {
+		if t.AuthorID() != authorID {
+			continue
+		}
+
+		if t.ToMap()["text"] == text {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	for _, t := range r.storage {
 

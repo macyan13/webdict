@@ -26,7 +26,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.AddTranslation.Handle(&command.AddTranslation{
+		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
 			Translation:   request.Translation,
 			Text:          request.Text,
