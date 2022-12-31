@@ -11,11 +11,11 @@ type MockRepository struct {
 
 // mockery --name=Repository --filename=repository_mock.go --output=./ --structname=MockRepository --inpackage
 // Create provides a mock function with given fields: translation
-func (_m *MockRepository) Create(translation Translation) error {
+func (_m *MockRepository) Create(translation *Translation) error {
 	ret := _m.Called(translation)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(Translation) error); ok {
+	if rf, ok := ret.Get(0).(func(*Translation) error); ok {
 		r0 = rf(translation)
 	} else {
 		r0 = ret.Error(0)
@@ -60,14 +60,16 @@ func (_m *MockRepository) ExistByText(text string, authorID string) (bool, error
 }
 
 // Get provides a mock function with given fields: id, authorID
-func (_m *MockRepository) Get(id string, authorID string) (Translation, error) {
+func (_m *MockRepository) Get(id string, authorID string) (*Translation, error) {
 	ret := _m.Called(id, authorID)
 
-	var r0 Translation
-	if rf, ok := ret.Get(0).(func(string, string) Translation); ok {
+	var r0 *Translation
+	if rf, ok := ret.Get(0).(func(string, string) *Translation); ok {
 		r0 = rf(id, authorID)
 	} else {
-		r0 = ret.Get(0).(Translation)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Translation)
+		}
 	}
 
 	var r1 error
@@ -81,11 +83,11 @@ func (_m *MockRepository) Get(id string, authorID string) (Translation, error) {
 }
 
 // Update provides a mock function with given fields: translation
-func (_m *MockRepository) Update(translation Translation) error {
+func (_m *MockRepository) Update(translation *Translation) error {
 	ret := _m.Called(translation)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(Translation) error); ok {
+	if rf, ok := ret.Get(0).(func(*Translation) error); ok {
 		r0 = rf(translation)
 	} else {
 		r0 = ret.Error(0)

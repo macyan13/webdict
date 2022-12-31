@@ -11,19 +11,19 @@ type MockRepository struct {
 }
 
 // AllExist provides a mock function with given fields: ids, authorID
-func (_m *MockRepository) AllExist(ids []string, authorId string) (bool, error) {
-	ret := _m.Called(ids, authorId)
+func (_m *MockRepository) AllExist(ids []string, authorID string) (bool, error) {
+	ret := _m.Called(ids, authorID)
 
 	var r0 bool
 	if rf, ok := ret.Get(0).(func([]string, string) bool); ok {
-		r0 = rf(ids, authorId)
+		r0 = rf(ids, authorID)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func([]string, string) error); ok {
-		r1 = rf(ids, authorId)
+		r1 = rf(ids, authorID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -32,11 +32,11 @@ func (_m *MockRepository) AllExist(ids []string, authorId string) (bool, error) 
 }
 
 // Create provides a mock function with given fields: tag
-func (_m *MockRepository) Create(tag Tag) error {
+func (_m *MockRepository) Create(tag *Tag) error {
 	ret := _m.Called(tag)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(Tag) error); ok {
+	if rf, ok := ret.Get(0).(func(*Tag) error); ok {
 		r0 = rf(tag)
 	} else {
 		r0 = ret.Error(0)
@@ -46,12 +46,12 @@ func (_m *MockRepository) Create(tag Tag) error {
 }
 
 // Delete provides a mock function with given fields: id, authorID
-func (_m *MockRepository) Delete(id string, authorId string) error {
-	ret := _m.Called(id, authorId)
+func (_m *MockRepository) Delete(id string, authorID string) error {
+	ret := _m.Called(id, authorID)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(id, authorId)
+		r0 = rf(id, authorID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -60,19 +60,21 @@ func (_m *MockRepository) Delete(id string, authorId string) error {
 }
 
 // Get provides a mock function with given fields: id, authorID
-func (_m *MockRepository) Get(id string, authorId string) (Tag, error) {
-	ret := _m.Called(id, authorId)
+func (_m *MockRepository) Get(id string, authorID string) (*Tag, error) {
+	ret := _m.Called(id, authorID)
 
-	var r0 Tag
-	if rf, ok := ret.Get(0).(func(string, string) Tag); ok {
-		r0 = rf(id, authorId)
+	var r0 *Tag
+	if rf, ok := ret.Get(0).(func(string, string) *Tag); ok {
+		r0 = rf(id, authorID)
 	} else {
-		r0 = ret.Get(0).(Tag)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Tag)
+		}
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(id, authorId)
+		r1 = rf(id, authorID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -81,11 +83,11 @@ func (_m *MockRepository) Get(id string, authorId string) (Tag, error) {
 }
 
 // Update provides a mock function with given fields: tag
-func (_m *MockRepository) Update(tag Tag) error {
+func (_m *MockRepository) Update(tag *Tag) error {
 	ret := _m.Called(tag)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(Tag) error); ok {
+	if rf, ok := ret.Get(0).(func(*Tag) error); ok {
 		r0 = rf(tag)
 	} else {
 		r0 = ret.Error(0)

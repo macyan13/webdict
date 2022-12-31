@@ -69,7 +69,7 @@ func (r *TranslationRepo) initIndexes() error {
 }
 
 // Create saves new translation to DB
-func (r *TranslationRepo) Create(t translation.Translation) error {
+func (r *TranslationRepo) Create(t *translation.Translation) error {
 	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (r *TranslationRepo) Create(t translation.Translation) error {
 }
 
 // Update updates already existed translation
-func (r *TranslationRepo) Update(t translation.Translation) error {
+func (r *TranslationRepo) Update(t *translation.Translation) error {
 	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (r *TranslationRepo) Update(t translation.Translation) error {
 }
 
 // Get performs search request based on translation id and author id parameters and returns domain translation entity
-func (r *TranslationRepo) Get(id, authorID string) (translation.Translation, error) {
+func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, error) {
 	var record TranslationModel
 
 	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
@@ -118,11 +118,11 @@ func (r *TranslationRepo) Get(id, authorID string) (translation.Translation, err
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
-		return translation.Translation{}, translation.ErrNotFound
+		return nil, translation.ErrNotFound
 	}
 
 	if err != nil {
-		return translation.Translation{}, err
+		return nil, err
 	}
 
 	return translation.UnmarshalFromDB(
@@ -222,7 +222,7 @@ func (r *TranslationRepo) GetLastViews(authorID string, limit int) ([]query.Tran
 }
 
 // fromDomainToModel converts domain translation to mongo model
-func (r *TranslationRepo) fromDomainToModel(t translation.Translation) (TranslationModel, error) {
+func (r *TranslationRepo) fromDomainToModel(t *translation.Translation) (TranslationModel, error) {
 	model := TranslationModel{}
 	err := mapstructure.Decode(t.ToMap(), &model)
 	return model, err

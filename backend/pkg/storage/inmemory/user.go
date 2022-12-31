@@ -24,17 +24,17 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return true, nil
 }
 
-func (u *UserRepo) Create(usr user.User) error {
-	u.storage[usr.ID()] = &usr
+func (u *UserRepo) Create(usr *user.User) error {
+	u.storage[usr.ID()] = usr
 	return nil
 }
 
-func (u *UserRepo) GetByEmail(email string) (user.User, error) {
+func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
 	for _, el := range u.storage {
 		if el.Email() == email {
-			return *el, nil
+			return el, nil
 		}
 	}
 
-	return user.User{}, user.ErrNotFound
+	return nil, user.ErrNotFound
 }

@@ -68,7 +68,7 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return count == 1, nil
 }
 
-func (u *UserRepo) Create(usr user.User) error {
+func (u *UserRepo) Create(usr *user.User) error {
 	model, err := u.fromDomainToModel(usr)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (u *UserRepo) Create(usr user.User) error {
 }
 
 // GetByEmail returns User for email
-func (u *UserRepo) GetByEmail(email string) (user.User, error) {
+func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
 	var record UserModel
 
 	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
@@ -94,10 +94,10 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 	err := u.collection.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
-		return user.User{}, user.ErrNotFound
+		return nil, user.ErrNotFound
 	}
 	if err != nil {
-		return user.User{}, err
+		return nil, err
 	}
 
 	return user.UnmarshalFromDB(
@@ -110,7 +110,7 @@ func (u *UserRepo) GetByEmail(email string) (user.User, error) {
 }
 
 // fromDomainToModel converts domain user to mongo model
-func (u *UserRepo) fromDomainToModel(usr user.User) (UserModel, error) {
+func (u *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
 	model := UserModel{}
 	err := mapstructure.Decode(usr.ToMap(), &model)
 	return model, err

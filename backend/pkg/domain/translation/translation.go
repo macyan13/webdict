@@ -73,8 +73,8 @@ func UnmarshalFromDB(
 	text string,
 	example string,
 	tagIDs []string,
-) Translation {
-	return Translation{
+) *Translation {
+	return &Translation{
 		id:            id,
 		authorID:      authorID,
 		createdAt:     createdAt,

@@ -19,5 +19,5 @@ func TestUnmarshalFromDB(t *testing.T) {
 		authorID: "testAuthor",
 	}
 
-	assert.Equal(t, tag, UnmarshalFromDB(tag.id, tag.tag, tag.authorID))
+	assert.Equal(t, &tag, UnmarshalFromDB(tag.id, tag.tag, tag.authorID))
 }

@@ -40,7 +40,7 @@ func (r *TagRepo) initIndexes() error {
 }
 
 // Create saves new tag to DB
-func (r *TagRepo) Create(t tag.Tag) error {
+func (r *TagRepo) Create(t *tag.Tag) error {
 	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (r *TagRepo) Create(t tag.Tag) error {
 }
 
 // Update updates already existed tag
-func (r *TagRepo) Update(t tag.Tag) error {
+func (r *TagRepo) Update(t *tag.Tag) error {
 	model, err := r.fromDomainToModel(t)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (r *TagRepo) Update(t tag.Tag) error {
 }
 
 // Get searches for tag with id and authorId
-func (r *TagRepo) Get(id, authorID string) (tag.Tag, error) {
+func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 	var record TagModel
 
 	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
@@ -89,11 +89,11 @@ func (r *TagRepo) Get(id, authorID string) (tag.Tag, error) {
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
 	if err != mongo.ErrNoDocuments {
-		return tag.Tag{}, tag.ErrNotFound
+		return nil, tag.ErrNotFound
 	}
 
 	if err != nil {
-		return tag.Tag{}, err
+		return nil, err
 	}
 
 	return tag.UnmarshalFromDB(
@@ -204,7 +204,7 @@ func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, erro
 }
 
 // fromDomainToModel converts domain tag to mongo model
-func (r *TagRepo) fromDomainToModel(t tag.Tag) (TagModel, error) {
+func (r *TagRepo) fromDomainToModel(t *tag.Tag) (TagModel, error) {
 	model := TagModel{}
 	err := mapstructure.Decode(t.ToMap(), &model)
 	return model, err

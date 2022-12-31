@@ -20,7 +20,7 @@ const (
 	Author Role = 2
 )
 
-func NewUser(name, email, password string, role Role) (User, error) {
+func NewUser(name, email, password string, role Role) (*User, error) {
 	u := User{
 		id:       uuid.New().String(),
 		name:     name,
@@ -30,10 +30,10 @@ func NewUser(name, email, password string, role Role) (User, error) {
 	}
 
 	if err := u.validate(); err != nil {
-		return User{}, err
+		return nil, err
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (u *User) ID() string {
@@ -68,8 +68,8 @@ func UnmarshalFromDB(
 	email string,
 	password string,
 	role int,
-) User {
-	return User{
+) *User {
+	return &User{
 		id:       id,
 		name:     name,
 		email:    email,
