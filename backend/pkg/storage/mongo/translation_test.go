@@ -20,7 +20,7 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	domainMap := domain.ToMap()
 
 	repo := TranslationRepo{}
-	model, err := repo.fromDomainToModel(*domain)
+	model, err := repo.fromDomainToModel(domain)
 
 	assert.Nil(t, err)
 	assert.Equal(t, tr, model.Translation)

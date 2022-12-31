@@ -35,7 +35,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			"User does not exist",
 			func() fields {
 				repository := user.MockRepository{}
-				repository.On("GetByEmail", "notExist").Return(user.User{}, user.ErrNotFound)
+				repository.On("GetByEmail", "notExist").Return(nil, user.ErrNotFound)
 				return fields{
 					userRepo: &repository,
 					tokener:  &mockTokener{},
@@ -382,7 +382,7 @@ func TestHandler_Middleware(t *testing.T) {
 				tokener.On("parseToken", "testToken").Return(claims, nil)
 
 				userRepo := user.MockRepository{}
-				userRepo.On("GetByEmail", "testEmail").Return(user.User{}, user.ErrNotFound)
+				userRepo.On("GetByEmail", "testEmail").Return(nil, user.ErrNotFound)
 				return fields{tokener: &tokener, userRepo: &userRepo}
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {

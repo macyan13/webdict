@@ -16,14 +16,14 @@ func NewTagRepository() *TagRepo {
 	}
 }
 
-func (r *TagRepo) Get(id, authorID string) (tag.Tag, error) {
+func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 	t, ok := r.storage[id]
 
 	if ok && t.AuthorID() == authorID {
-		return *t, nil
+		return t, nil
 	}
 
-	return tag.Tag{}, tag.ErrNotFound
+	return nil, tag.ErrNotFound
 }
 
 func (r *TagRepo) Delete(id, authorID string) error {
@@ -47,8 +47,8 @@ func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	return true, nil
 }
 
-func (r *TagRepo) Create(t tag.Tag) error {
-	r.storage[t.ID()] = &t
+func (r *TagRepo) Create(t *tag.Tag) error {
+	r.storage[t.ID()] = t
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, erro
 	return views, nil
 }
 
-func (r *TagRepo) Update(t tag.Tag) error {
-	r.storage[t.ID()] = &t
+func (r *TagRepo) Update(t *tag.Tag) error {
+	r.storage[t.ID()] = t
 	return nil
 }

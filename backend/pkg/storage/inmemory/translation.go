@@ -19,19 +19,19 @@ func NewTranslationRepository(tagRepo TagRepo) *TranslationRepo {
 	}
 }
 
-func (r *TranslationRepo) Update(t translation.Translation) error {
-	r.storage[t.ID()] = &t
+func (r *TranslationRepo) Update(t *translation.Translation) error {
+	r.storage[t.ID()] = t
 	return nil
 }
 
-func (r *TranslationRepo) Get(id, authorID string) (translation.Translation, error) {
+func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, error) {
 	t, ok := r.storage[id]
 
 	if ok && t.AuthorID() == authorID {
-		return *t, nil
+		return t, nil
 	}
 
-	return translation.Translation{}, translation.ErrNotFound
+	return nil, translation.ErrNotFound
 }
 
 func (r *TranslationRepo) Delete(id, authorID string) error {
@@ -45,8 +45,8 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 	return fmt.Errorf("not found")
 }
 
-func (r *TranslationRepo) Create(t translation.Translation) error {
-	r.storage[t.ID()] = &t
+func (r *TranslationRepo) Create(t *translation.Translation) error {
+	r.storage[t.ID()] = t
 	return nil
 }
 

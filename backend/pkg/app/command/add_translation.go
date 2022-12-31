@@ -46,7 +46,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 		cmd.TagIds,
 	)
 
-	return h.translationRepo.Create(*tr)
+	return h.translationRepo.Create(tr)
 }
 
 func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {

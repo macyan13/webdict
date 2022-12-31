@@ -92,7 +92,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, nil)
-				translationRepo.On("Create", mock.AnythingOfType("Translation")).Return(errors.New("testErr"))
+				translationRepo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
@@ -127,7 +127,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 
 	translationRepo := translation.MockRepository{}
 	translationRepo.On("ExistByText", text, authorID).Return(false, nil)
-	translationRepo.On("Create", mock.AnythingOfType("Translation")).Return(nil)
+	translationRepo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(nil)
 
 	handler := NewAddTranslationHandler(
 		&translationRepo,
@@ -144,7 +144,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	}
 	assert.Nil(t, handler.Handle(cmd))
 
-	createdTranslation := translationRepo.Calls[1].Arguments[0].(translation.Translation)
+	createdTranslation := translationRepo.Calls[1].Arguments[0].(*translation.Translation)
 	data := createdTranslation.ToMap()
 
 	assert.Equal(t, cmd.Translation, data["translation"])

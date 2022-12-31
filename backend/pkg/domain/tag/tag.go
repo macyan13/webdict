@@ -42,8 +42,8 @@ func UnmarshalFromDB(
 	id string,
 	tag string,
 	authorID string,
-) Tag {
-	return Tag{
+) *Tag {
+	return &Tag{
 		id:       id,
 		tag:      tag,
 		authorID: authorID,
