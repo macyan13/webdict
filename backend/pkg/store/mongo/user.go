@@ -11,7 +11,6 @@ import (
 
 // UserRepo Mongo DB implementation for domain user entity
 type UserRepo struct {
-	ctx        context.Context
 	collection *mongo.Collection
 }
 
@@ -25,8 +24,8 @@ type UserModel struct {
 }
 
 // NewUserRepo creates new UserRepo
-func NewUserRepo(ctx context.Context, db *mongo.Database) (*UserRepo, error) {
-	u := UserRepo{ctx: ctx, collection: db.Collection("users")}
+func NewUserRepo(db *mongo.Database) (*UserRepo, error) {
+	u := UserRepo{collection: db.Collection("users")}
 
 	if err := u.initIndexes(); err != nil {
 		return nil, err
@@ -35,7 +34,7 @@ func NewUserRepo(ctx context.Context, db *mongo.Database) (*UserRepo, error) {
 }
 
 // initIndexes creates required for current queries indexes in user collection
-func (u *UserRepo) initIndexes() error {
+func (r *UserRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.D{
@@ -44,23 +43,23 @@ func (u *UserRepo) initIndexes() error {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	if _, err := u.collection.Indexes().CreateMany(ctx, indexes); err != nil {
+	if _, err := r.collection.Indexes().CreateMany(ctx, indexes); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Exist checks if user with the email exists
-func (u *UserRepo) Exist(email string) (bool, error) {
+func (r *UserRepo) Exist(email string) (bool, error) {
 	filter := bson.D{{Key: "email", Value: email}}
 
-	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := u.collection.CountDocuments(ctx, filter)
+	count, err := r.collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return false, err
 	}
@@ -68,16 +67,16 @@ func (u *UserRepo) Exist(email string) (bool, error) {
 	return count == 1, nil
 }
 
-func (u *UserRepo) Create(usr *user.User) error {
-	model, err := u.fromDomainToModel(usr)
+func (r *UserRepo) Create(usr *user.User) error {
+	model, err := r.fromDomainToModel(usr)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	if _, err = u.collection.InsertOne(ctx, model); err != nil {
+	if _, err = r.collection.InsertOne(ctx, model); err != nil {
 		return err
 	}
 
@@ -85,13 +84,13 @@ func (u *UserRepo) Create(usr *user.User) error {
 }
 
 // GetByEmail returns User for email
-func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
+func (r *UserRepo) GetByEmail(email string) (*user.User, error) {
 	var record UserModel
 
-	ctx, cancel := context.WithTimeout(u.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	err := u.collection.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&record)
+	err := r.collection.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&record)
 
 	if err == mongo.ErrNoDocuments {
 		return nil, user.ErrNotFound
@@ -110,7 +109,7 @@ func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
 }
 
 // fromDomainToModel converts domain user to mongo model
-func (u *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
+func (r *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
 	model := UserModel{}
 	err := mapstructure.Decode(usr.ToMap(), &model)
 	return model, err

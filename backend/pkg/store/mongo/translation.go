@@ -14,7 +14,6 @@ import (
 
 // TranslationRepo Mongo DB implementation for domain translation entity
 type TranslationRepo struct {
-	ctx        context.Context
 	collection *mongo.Collection
 	tagRepo    query.TagViewRepository
 }
@@ -33,8 +32,8 @@ type TranslationModel struct {
 }
 
 // NewTranslationRepo creates new TranslationRepo
-func NewTranslationRepo(ctx context.Context, db *mongo.Database, tagRepo query.TagViewRepository) (*TranslationRepo, error) {
-	t := TranslationRepo{ctx: ctx, collection: db.Collection("translations"), tagRepo: tagRepo}
+func NewTranslationRepo(db *mongo.Database, tagRepo query.TagViewRepository) (*TranslationRepo, error) {
+	t := TranslationRepo{collection: db.Collection("translations"), tagRepo: tagRepo}
 
 	if err := t.initIndexes(); err != nil {
 		return nil, err
@@ -59,7 +58,7 @@ func (r *TranslationRepo) initIndexes() error {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	if _, err := r.collection.Indexes().CreateMany(ctx, indexes); err != nil {
@@ -75,7 +74,7 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
@@ -92,7 +91,7 @@ func (r *TranslationRepo) Update(t *translation.Translation) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
@@ -112,7 +111,7 @@ func (r *TranslationRepo) Update(t *translation.Translation) error {
 func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, error) {
 	var record TranslationModel
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
@@ -140,7 +139,7 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 
 // Delete removes translation record by passed id and authorId fields
 func (r *TranslationRepo) Delete(id, authorID string) error {
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}})
@@ -157,7 +156,7 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 }
 
 func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "text", Value: text}, {Key: "author_id", Value: authorID}})
@@ -169,7 +168,7 @@ func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	var record TranslationModel
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
@@ -186,7 +185,7 @@ func (r *TranslationRepo) GetLastViews(authorID string, limit int) ([]query.Tran
 	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 	opts.SetLimit(int64(limit))
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, filter, opts)

@@ -2,7 +2,7 @@ package translation
 
 import "errors"
 
-var ErrNotFound = errors.New("can not find translation in storage")
+var ErrNotFound = errors.New("can not find translation in store")
 
 // Repository defines domain translation repository methods
 type Repository interface {
