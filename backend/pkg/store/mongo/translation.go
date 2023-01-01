@@ -56,6 +56,12 @@ func (r *TranslationRepo) initIndexes() error {
 				{Key: "text", Value: 1},
 			},
 		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "tag_ids", Value: 1},
+			},
+		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
@@ -160,6 +166,15 @@ func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
 	defer cancel()
 
 	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "text", Value: text}, {Key: "author_id", Value: authorID}})
+
+	return count > 0, err
+}
+
+func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: bson.D{{Key: "$in", Value: tagID}}}, {Key: "author_id", Value: authorID}})
 
 	return count > 0, err
 }

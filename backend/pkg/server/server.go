@@ -70,7 +70,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo, tagRepo),
 		AddTag:            command.NewAddTagHandler(tagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
-		DeleteTag:         command.NewDeleteTagHandler(tagRepo),
+		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 	}
 

@@ -135,6 +135,19 @@ func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	return int(count) == len(ids), nil
 }
 
+func (r *TagRepo) ExistByTag(tag, authorID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag", Value: tag}, {Key: "author_id", Value: authorID}})
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 // GetAllViews returns all existing tag views for passed authorId
 func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 	filter := bson.D{{Key: "author_id", Value: authorID}}
