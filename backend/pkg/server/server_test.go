@@ -6,7 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
-	"github.com/macyan13/webdict/backend/pkg/storage/inmemory"
+	"github.com/macyan13/webdict/backend/pkg/store/inmemory"
 	"time"
 )
 

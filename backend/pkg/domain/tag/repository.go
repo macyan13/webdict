@@ -2,7 +2,7 @@ package tag
 
 import "errors"
 
-var ErrNotFound = errors.New("can not find tag in storage")
+var ErrNotFound = errors.New("can not find tag in store")
 
 type Repository interface {
 	Create(tag *Tag) error

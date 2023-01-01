@@ -9,7 +9,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
-	"github.com/macyan13/webdict/backend/pkg/storage/mongo"
+	"github.com/macyan13/webdict/backend/pkg/store/mongo"
 	"log"
 	"net/http"
 	"os"
@@ -47,17 +47,17 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	tagRepo, err := mongo.NewTagRepo(ctx, dbConnect)
+	tagRepo, err := mongo.NewTagRepo(dbConnect)
 	if err != nil {
 		return nil, err
 	}
 
-	translationRepo, err := mongo.NewTranslationRepo(ctx, dbConnect, tagRepo)
+	translationRepo, err := mongo.NewTranslationRepo(dbConnect, tagRepo)
 	if err != nil {
 		return nil, err
 	}
 
-	userRepo, err := mongo.NewUserRepo(ctx, dbConnect)
+	userRepo, err := mongo.NewUserRepo(dbConnect)
 	if err != nil {
 		return nil, err
 	}

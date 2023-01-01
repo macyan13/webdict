@@ -13,7 +13,6 @@ import (
 
 // TagRepo Mongo DB implementation for domain tag entity
 type TagRepo struct {
-	ctx        context.Context
 	collection *mongo.Collection
 }
 
@@ -25,8 +24,8 @@ type TagModel struct {
 }
 
 // NewTagRepo creates TagRepo
-func NewTagRepo(ctx context.Context, db *mongo.Database) (*TagRepo, error) {
-	t := TagRepo{ctx: ctx, collection: db.Collection("tags")}
+func NewTagRepo(db *mongo.Database) (*TagRepo, error) {
+	t := TagRepo{collection: db.Collection("tags")}
 
 	if err := t.initIndexes(); err != nil {
 		return nil, err
@@ -46,7 +45,7 @@ func (r *TagRepo) Create(t *tag.Tag) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
@@ -63,7 +62,7 @@ func (r *TagRepo) Update(t *tag.Tag) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
@@ -83,7 +82,7 @@ func (r *TagRepo) Update(t *tag.Tag) error {
 func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 	var record TagModel
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
@@ -105,7 +104,7 @@ func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 
 // Delete removes tag with id and authorId
 func (r *TagRepo) Delete(id, authorID string) error {
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}})
@@ -125,7 +124,7 @@ func (r *TagRepo) Delete(id, authorID string) error {
 func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	count, err := r.collection.CountDocuments(ctx, filter)
@@ -140,7 +139,7 @@ func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 	filter := bson.D{{Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, filter)
@@ -166,7 +165,7 @@ func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 func (r *TagRepo) GetView(id, authorID string) (query.TagView, error) {
 	var record TagModel
 
-	ctx, cancel := context.WithTimeout(r.ctx, queryDefaultTimeoutInSec*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
@@ -181,7 +180,7 @@ func (r *TagRepo) GetView(id, authorID string) (query.TagView, error) {
 func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error) {
 	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}
 
-	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, filter)

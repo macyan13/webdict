@@ -22,7 +22,7 @@ func InitDatabase(ctx context.Context, opts Opts) (*mongo.Database, error) {
 	clientOpts := options.Client()
 	clientOpts.ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d", opts.Username, opts.Passwd, opts.Host, opts.Port))
 
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, clientOpts)
