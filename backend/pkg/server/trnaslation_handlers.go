@@ -93,7 +93,7 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.UpdateTranslation.Handle(&command.UpdateTranslation{
+		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
 			ID:            c.Param(translationIDParam),
 			Transcription: request.Transcription,
 			Translation:   request.Translation,

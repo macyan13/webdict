@@ -67,7 +67,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	cmd := app.Commands{
 		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo),
 		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo),
-		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo, tagRepo),
+		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo),
 		AddTag:            command.NewAddTagHandler(tagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
@@ -124,6 +124,7 @@ func (s *HTTPServer) PopulateInitData() {
 		Name:     "admin",
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,
+		Role:     user.Admin,
 	}); err != nil {
 		log.Printf("[WARN] can not create admin user - %s", err)
 	}

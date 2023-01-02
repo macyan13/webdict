@@ -6,7 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 )
 
-// DeleteTag delete tag cmd argument
+// DeleteTag delete tag cmd
 type DeleteTag struct {
 	ID       string
 	AuthorID string

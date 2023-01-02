@@ -1,11 +1,12 @@
 package command
 
 import (
-	"errors"
+	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 )
 
+// UpdateTranslation update existing translation cmd
 type UpdateTranslation struct {
 	ID            string
 	Transcription string
@@ -16,6 +17,7 @@ type UpdateTranslation struct {
 	AuthorID      string
 }
 
+// UpdateTranslationHandler update existing translation cmd handler
 type UpdateTranslationHandler struct {
 	translationRepo translation.Repository
 	tagRepo         tag.Repository
@@ -28,7 +30,8 @@ func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo 
 	}
 }
 
-func (h UpdateTranslationHandler) Handle(cmd *UpdateTranslation) error {
+// Handle apply changes from cmd to existing translation
+func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 	tr, err := h.translationRepo.Get(cmd.ID, cmd.AuthorID)
 
 	if err != nil {
@@ -44,7 +47,8 @@ func (h UpdateTranslationHandler) Handle(cmd *UpdateTranslation) error {
 	return h.translationRepo.Update(tr)
 }
 
-func (h UpdateTranslationHandler) validateTags(cmd *UpdateTranslation) error {
+// validateTags checks that all tags from cmd exist in DB
+func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {
 	if len(cmd.TagIds) == 0 {
 		return nil
 	}
@@ -56,7 +60,7 @@ func (h UpdateTranslationHandler) validateTags(cmd *UpdateTranslation) error {
 	}
 
 	if !exists {
-		return errors.New("can not apply changes for translation tags, some passed tag are not found")
+		return fmt.Errorf("can not apply changes for translation %s, some passed tag are not found", cmd.ID)
 	}
 
 	return nil

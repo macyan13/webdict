@@ -5,7 +5,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 )
 
-// AddTag create new tag cmd argument
+// AddTag create new tag cmd
 type AddTag struct {
 	Tag      string
 	AuthorID string
