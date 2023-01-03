@@ -13,6 +13,7 @@ func NewLastTranslationsHandler(translationRepo TranslationViewRepository) LastT
 	return LastTranslationsHandler{translationRepo: translationRepo}
 }
 
+// Handle todo: add test after finalizing solution
 func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView, error) {
 	limit := cmd.Limit
 

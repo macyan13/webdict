@@ -52,12 +52,12 @@ func (r *TagRepo) Create(t *tag.Tag) error {
 	return nil
 }
 
-func (r *TagRepo) ExistByTag(tag, authorID string) (bool, error) {
+func (r *TagRepo) ExistByTag(tg, authorID string) (bool, error) {
 	for _, t := range r.storage {
 		if t.AuthorID() != authorID {
 			continue
 		}
-		if t.ToMap()["tag"] == tag {
+		if t.ToMap()["tag"] == tg {
 			return true, nil
 		}
 	}

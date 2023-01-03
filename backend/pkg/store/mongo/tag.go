@@ -135,11 +135,11 @@ func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	return int(count) == len(ids), nil
 }
 
-func (r *TagRepo) ExistByTag(tag, authorID string) (bool, error) {
+func (r *TagRepo) ExistByTag(tg, authorID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag", Value: tag}, {Key: "author_id", Value: authorID}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag", Value: tg}, {Key: "author_id", Value: authorID}})
 
 	if err != nil {
 		return false, err
