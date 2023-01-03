@@ -64,6 +64,22 @@ func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
 	return false, nil
 }
 
+func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
+	for _, t := range r.storage {
+		if t.AuthorID() != authorID {
+			continue
+		}
+
+		for _, tag := range t.ToMap()["tagIDs"].([]string) {
+			if tag == tagID {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	for _, t := range r.storage {
 

@@ -7,6 +7,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 )
 
+// AddTranslation create new translation cmd
 type AddTranslation struct {
 	Transcription string
 	Translation   string
@@ -16,6 +17,7 @@ type AddTranslation struct {
 	AuthorID      string
 }
 
+// AddTranslationHandler create new translation cmd handler
 type AddTranslationHandler struct {
 	translationRepo translation.Repository
 	tagRepo         tag.Repository
@@ -28,6 +30,7 @@ func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag
 	}
 }
 
+// Handle performs translation creation cmd
 func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 	if err := h.validateTags(cmd); err != nil {
 		return err
@@ -49,6 +52,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 	return h.translationRepo.Create(tr)
 }
 
+// validateTags check that all cmd tags exist
 func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
 	if len(cmd.TagIds) == 0 {
 		return nil
@@ -66,6 +70,7 @@ func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
 	return nil
 }
 
+// validateTranslation checks that there is not already creation translation with the cmd text
 func (h AddTranslationHandler) validateTranslation(cmd AddTranslation) error {
 	exist, err := h.translationRepo.ExistByText(cmd.Text, cmd.AuthorID)
 

@@ -10,5 +10,6 @@ type Repository interface {
 	Update(translation *Translation) error
 	Get(id, authorID string) (*Translation, error)   // Get provides translation by id and authorID, return ErrNotFound if record not exists
 	ExistByText(text, authorID string) (bool, error) // ExistByText checks if translation with such text was already created
+	ExistByTag(tagID, authorID string) (bool, error) // ExistByTag checks if at least one translation tagged with tagID exist
 	Delete(id, authorID string) error
 }
