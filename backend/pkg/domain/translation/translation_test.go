@@ -43,6 +43,7 @@ func TestUnmarshalFromDB(t *testing.T) {
 		text:          "testText",
 		example:       "testExample",
 		tagIDs:        []string{"tag1", "tag2"},
+		lang:          EN,
 	}
 
 	assert.Equal(t, &translation, UnmarshalFromDB(
@@ -55,5 +56,6 @@ func TestUnmarshalFromDB(t *testing.T) {
 		translation.text,
 		translation.example,
 		translation.tagIDs,
+		EN,
 	))
 }

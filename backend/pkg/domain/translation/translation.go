@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type Lang string
+
+const EN Lang = "en"
+
 type Translation struct {
 	id            string
 	authorID      string
@@ -15,6 +19,7 @@ type Translation struct {
 	text          string
 	example       string
 	tagIDs        []string
+	lang          Lang
 }
 
 func NewTranslation(translation, transcription, text, example, authorID string, tagIDs []string) *Translation {
@@ -29,6 +34,7 @@ func NewTranslation(translation, transcription, text, example, authorID string, 
 		text:          text,
 		example:       example,
 		tagIDs:        tagIDs,
+		lang:          EN,
 	}
 }
 
@@ -73,6 +79,7 @@ func UnmarshalFromDB(
 	text string,
 	example string,
 	tagIDs []string,
+	lang Lang,
 ) *Translation {
 	return &Translation{
 		id:            id,
@@ -84,5 +91,6 @@ func UnmarshalFromDB(
 		text:          text,
 		example:       example,
 		tagIDs:        tagIDs,
+		lang:          lang,
 	}
 }

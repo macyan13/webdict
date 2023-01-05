@@ -29,6 +29,7 @@ type TranslationModel struct {
 	Text          string    `bson:"text"`
 	Example       string    `bson:"example,omitempty"`
 	TagIDs        []string  `bson:"tag_ids,omitempty"`
+	Lang          string    `bson:"lang"`
 }
 
 // NewTranslationRepo creates new TranslationRepo
@@ -140,6 +141,7 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 		record.Text,
 		record.Example,
 		record.TagIDs,
+		translation.Lang(record.Lang),
 	), nil
 }
 
