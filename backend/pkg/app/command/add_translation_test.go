@@ -112,7 +112,9 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 				fields.translationRepo,
 				fields.tagRepo,
 			)
-			assert.True(t, tt.wantErr(t, h.Handle(tt.args.cmd)))
+			id, err := h.Handle(tt.args.cmd)
+			assert.Equal(t, "", id)
+			assert.True(t, tt.wantErr(t, err))
 		})
 	}
 }
@@ -142,11 +144,14 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 		TagIds:        tags,
 		AuthorID:      "testAuthor",
 	}
-	assert.Nil(t, handler.Handle(cmd))
+
+	id, err := handler.Handle(cmd)
+	assert.Nil(t, err)
 
 	createdTranslation := translationRepo.Calls[1].Arguments[0].(*translation.Translation)
 	data := createdTranslation.ToMap()
 
+	assert.Equal(t, id, createdTranslation.ID())
 	assert.Equal(t, cmd.Translation, data["translation"])
 	assert.Equal(t, cmd.Transcription, data["transcription"])
 	assert.Equal(t, cmd.Text, data["text"])

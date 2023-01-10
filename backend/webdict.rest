@@ -7,10 +7,15 @@ Content-Type: application/json
   "password": "{{password}}"
 }
 
+> {%
+client.global.set("auth_token", response.body.accessToken)
+client.global.set("auth_type", response.body.type)
+ %}
+
 ### Create Translation
 POST {{host}}/v1/api/translations
 Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+Authorization: {{auth_type}} {{auth_token}}
 
 {
   "translation": "Give it a shot",
@@ -21,5 +26,5 @@ Authorization: Bearer {{auth_token}}
 
 ### Get the list of last created translations
 GET {{host}}/v1/api/translations/last?limit=10
-Authorization: Bearer {{auth_token}}
+Authorization: {{auth_type}} {{auth_token}}
 

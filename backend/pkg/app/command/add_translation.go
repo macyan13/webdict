@@ -31,13 +31,13 @@ func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag
 }
 
 // Handle performs translation creation cmd
-func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
+func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 	if err := h.validateTags(cmd); err != nil {
-		return err
+		return "", err
 	}
 
 	if err := h.validateTranslation(cmd); err != nil {
-		return err
+		return "", err
 	}
 
 	tr := translation.NewTranslation(
@@ -49,7 +49,13 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) error {
 		cmd.TagIds,
 	)
 
-	return h.translationRepo.Create(tr)
+	err := h.translationRepo.Create(tr)
+
+	if err != nil {
+		return "", err
+	}
+
+	return tr.ID(), nil
 }
 
 // validateTags check that all cmd tags exist

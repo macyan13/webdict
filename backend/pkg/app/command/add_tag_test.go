@@ -59,7 +59,9 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fields := tt.fieldsFn()
 			h := NewAddTagHandler(fields.tagRepo)
-			tt.wantErr(t, h.Handle(tt.args.cmd), fmt.Sprintf("Handle(%v)", tt.args.cmd))
+			id, err := h.Handle(tt.args.cmd)
+			assert.Equal(t, "", id)
+			tt.wantErr(t, err, fmt.Sprintf("Handle(%v)", tt.args.cmd))
 		})
 	}
 }
@@ -76,11 +78,14 @@ func TestAddTagHandler_Handle_PositiveCase(t *testing.T) {
 		Tag:      tg,
 		AuthorID: authorID,
 	}
-	assert.Nil(t, handler.Handle(cmd))
+
+	id, err := handler.Handle(cmd)
+	assert.Nil(t, err)
 
 	createdTag := tagRepo.Calls[1].Arguments[0].(*tag.Tag)
 	data := createdTag.ToMap()
 
+	assert.Equal(t, createdTag.ID(), id)
 	assert.Equal(t, cmd.Tag, data["tag"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
 }

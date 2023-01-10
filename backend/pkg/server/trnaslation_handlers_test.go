@@ -24,7 +24,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	user, err := s.userRepo.GetByEmail(s.opts.Admin.AdminEmail)
 	assert.Nil(t, err)
 
-	err = s.app.Commands.AddTag.Handle(command.AddTag{
+	_, err = s.app.Commands.AddTag.Handle(command.AddTag{
 		Tag:      tg,
 		AuthorID: user.ID(),
 	})

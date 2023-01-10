@@ -25,15 +25,17 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.AddTag.Handle(command.AddTag{
+		id, err := s.app.Commands.AddTag.Handle(command.AddTag{
 			Tag:      request.Tag,
 			AuthorID: user.ID,
-		}); err != nil {
+		})
+
+		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new tag: %v", err))
 			return
 		}
 
-		c.JSON(http.StatusCreated, nil)
+		c.JSON(http.StatusCreated, map[string]any{"id": id})
 	}
 }
 

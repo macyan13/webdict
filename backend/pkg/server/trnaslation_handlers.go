@@ -26,19 +26,21 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
+		id, err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
 			Translation:   request.Translation,
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
 			AuthorID:      user.ID,
-		}); err != nil {
+		})
+
+		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new translation: %v", err))
 			return
 		}
 
-		c.JSON(http.StatusCreated, nil)
+		c.JSON(http.StatusCreated, map[string]any{"id": id})
 	}
 }
 

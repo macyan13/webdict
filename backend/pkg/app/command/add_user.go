@@ -29,24 +29,28 @@ func NewAddUserHandler(userRepo user.Repository, cipher Cipher) AddUserHandler {
 }
 
 // Handle performs user creation cmd
-func (h AddUserHandler) Handle(cmd AddUser) error {
+func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
 	hashedPwd, err := h.cipher.GenerateHash(cmd.Password)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err = h.validate(cmd); err != nil {
-		return err
+		return "", err
 	}
 
 	u, err := user.NewUser(cmd.Name, cmd.Email, hashedPwd, cmd.Role)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return h.userRepo.Create(u)
+	if err := h.userRepo.Create(u); err != nil {
+		return "", err
+	}
+
+	return u.ID(), nil
 }
 
 // validate checks that there is not already created user with cmd email
