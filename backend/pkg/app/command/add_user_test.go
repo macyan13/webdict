@@ -119,7 +119,9 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fields := tt.fieldsFn()
 			h := NewAddUserHandler(fields.userRepo, fields.cipher)
-			tt.wantErr(t, h.Handle(tt.args.cmd), fmt.Sprintf("Handle(%v)", tt.args.cmd))
+			id, err := h.Handle(tt.args.cmd)
+			assert.Equal(t, "", id)
+			tt.wantErr(t, err, fmt.Sprintf("Handle(%v)", tt.args.cmd))
 		})
 	}
 }
@@ -145,11 +147,13 @@ func TestAddUserHandler_Handle_PositiveCase(t *testing.T) {
 
 	handler := NewAddUserHandler(&userRepo, &cipher)
 
-	assert.Nil(t, handler.Handle(cmd))
+	id, err := handler.Handle(cmd)
+	assert.Nil(t, err)
 
 	createdUser := userRepo.Calls[1].Arguments[0].(*user.User)
 	data := createdUser.ToMap()
 
+	assert.Equal(t, createdUser.ID(), id)
 	assert.Equal(t, cmd.Email, data["email"])
 	assert.Equal(t, cmd.Name, data["name"])
 	assert.Equal(t, hashedPwd, data["password"])

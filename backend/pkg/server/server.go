@@ -120,7 +120,7 @@ func (s *HTTPServer) Run() error {
 }
 
 func (s *HTTPServer) PopulateInitData() {
-	if err := s.app.Commands.AddUser.Handle(command.AddUser{
+	if _, err := s.app.Commands.AddUser.Handle(command.AddUser{
 		Name:     "admin",
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,

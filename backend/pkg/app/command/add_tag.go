@@ -23,12 +23,18 @@ func NewAddTagHandler(tagRepo tag.Repository) AddTagHandler {
 }
 
 // Handle performs tag creation cmd
-func (h AddTagHandler) Handle(cmd AddTag) error {
+func (h AddTagHandler) Handle(cmd AddTag) (string, error) {
 	if err := h.validate(cmd); err != nil {
-		return err
+		return "", err
 	}
 
-	return h.tagRepo.Create(tag.NewTag(cmd.Tag, cmd.AuthorID))
+	tg := tag.NewTag(cmd.Tag, cmd.AuthorID)
+
+	if err := h.tagRepo.Create(tg); err != nil {
+		return "", err
+	}
+
+	return tg.ID(), nil
 }
 
 // Validate checks that there is no such already created tag for the author
