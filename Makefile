@@ -8,4 +8,4 @@ backend:
 stop:
 	docker compose -f compose-dev-backend.yml stop
 
-.PHONY: backend, stop
+.PHONY: backend stop
