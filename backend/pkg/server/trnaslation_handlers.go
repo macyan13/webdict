@@ -40,7 +40,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, map[string]any{"id": id})
+		c.JSON(http.StatusCreated, idResponse{ID: id})
 	}
 }
 

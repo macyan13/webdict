@@ -29,6 +29,10 @@ type tagResponse struct {
 	Tag string `json:"tag"`
 }
 
+type idResponse struct {
+	ID string `json:"id"`
+}
+
 type SignInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

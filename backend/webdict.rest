@@ -12,6 +12,81 @@ client.global.set("auth_token", response.body.accessToken)
 client.global.set("auth_type", response.body.type)
  %}
 
+### Crete tag
+POST {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+{
+  "tag": "Business"
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 201, "Response status is not 201")
+    client.assert(response.body.hasOwnProperty("id"), "ID is present")
+})
+client.global.set("tag_id", response.body.id)
+ %}
+
+### Update tag
+PUT {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+{
+  "tag": "Programming"
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+### Get all tags
+GET {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.length === 1, "Tag ID is not correct")
+    client.assert(response.body[0].tag === "Programming", "Tag from get tag by id is not correct")
+})
+ %}
+
+### Get tag by ID
+GET {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not correct")
+    client.assert(response.body.tag === "Programming", "Tag from get tag by id is not correct")
+})
+ %}
+
+### Delete tag
+DELETE {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+
 ### Create Translation
 POST {{host}}/v1/api/translations
 Content-Type: application/json

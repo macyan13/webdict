@@ -123,11 +123,10 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
-	if err == mongo.ErrNoDocuments {
-		return nil, translation.ErrNotFound
-	}
-
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, translation.ErrNotFound
+		}
 		return nil, err
 	}
 
@@ -176,7 +175,7 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: bson.D{{Key: "$in", Value: tagID}}}, {Key: "author_id", Value: authorID}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: tagID}, {Key: "author_id", Value: authorID}})
 
 	return count > 0, err
 }

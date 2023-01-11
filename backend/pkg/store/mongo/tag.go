@@ -65,7 +65,7 @@ func (r *TagRepo) Update(t *tag.Tag) error {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
+	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
 		return err
@@ -87,11 +87,11 @@ func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
-	if err != mongo.ErrNoDocuments {
-		return nil, tag.ErrNotFound
-	}
-
 	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return nil, tag.ErrNotFound
+		}
+
 		return nil, err
 	}
 

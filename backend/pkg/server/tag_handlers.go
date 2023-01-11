@@ -35,7 +35,7 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, map[string]any{"id": id})
+		c.JSON(http.StatusCreated, idResponse{ID: id})
 	}
 }
 
@@ -83,11 +83,7 @@ func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
 			return
 		}
 
-		response := map[string]any{
-			"status": "success",
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, http.NoBody)
 	}
 }
 
@@ -107,6 +103,7 @@ func (s *HTTPServer) GetTagByID() gin.HandlerFunc {
 
 		if err != nil {
 			s.badRequest(c, fmt.Errorf("can get find requested tag - %v", err))
+			return
 		}
 
 		c.JSON(http.StatusOK, s.tagModelToResponse(view))
@@ -120,6 +117,7 @@ func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
@@ -130,11 +128,7 @@ func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 			return
 		}
 
-		response := map[string]any{
-			"status": "success",
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, http.NoBody)
 	}
 }
 
