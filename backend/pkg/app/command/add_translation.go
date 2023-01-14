@@ -41,11 +41,11 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 	}
 
 	tr := translation.NewTranslation(
-		cmd.Translation,
-		cmd.Transcription,
 		cmd.Text,
-		cmd.Example,
+		cmd.Transcription,
+		cmd.Translation,
 		cmd.AuthorID,
+		cmd.Example,
 		cmd.TagIds,
 	)
 

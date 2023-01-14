@@ -11,18 +11,18 @@ const EN Lang = "en"
 
 type Translation struct {
 	id            string
-	authorID      string
-	createdAt     time.Time
-	updatedAt     time.Time
+	text          string
 	transcription string
 	translation   string
-	text          string
+	authorID      string
 	example       string
 	tagIDs        []string
+	createdAt     time.Time
+	updatedAt     time.Time
 	lang          Lang
 }
 
-func NewTranslation(translation, transcription, text, example, authorID string, tagIDs []string) *Translation {
+func NewTranslation(text, transcription, translation, authorID, example string, tagIDs []string) *Translation {
 	now := time.Now()
 	return &Translation{
 		id:            uuid.New().String(),
@@ -46,7 +46,7 @@ func (t *Translation) AuthorID() string {
 	return t.authorID
 }
 
-func (t *Translation) ApplyChanges(translation, transcription, text, example string, tagIds []string) {
+func (t *Translation) ApplyChanges(text, transcription, translation, example string, tagIds []string) {
 	t.tagIDs = tagIds
 	t.transcription = transcription
 	t.text = text
@@ -58,27 +58,28 @@ func (t *Translation) ApplyChanges(translation, transcription, text, example str
 func (t *Translation) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":            t.id,
-		"authorID":      t.authorID,
-		"createdAt":     t.createdAt,
-		"updatedAt":     t.updatedAt,
-		"translation":   t.translation,
-		"transcription": t.transcription,
 		"text":          t.text,
+		"transcription": t.transcription,
+		"translation":   t.translation,
+		"authorID":      t.authorID,
 		"example":       t.example,
 		"tagIDs":        t.tagIDs,
+		"createdAt":     t.createdAt,
+		"updatedAt":     t.updatedAt,
+		"lang":          t.lang,
 	}
 }
 
 func UnmarshalFromDB(
 	id string,
-	authorID string,
-	createdAt time.Time,
-	updatedAt time.Time,
+	text string,
 	transcription string,
 	translation string,
-	text string,
+	authorID string,
 	example string,
 	tagIDs []string,
+	createdAt time.Time,
+	updatedAt time.Time,
 	lang Lang,
 ) *Translation {
 	return &Translation{
