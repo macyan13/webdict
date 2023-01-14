@@ -9,12 +9,12 @@ import (
 // UpdateTranslation update existing translation cmd
 type UpdateTranslation struct {
 	ID            string
+	Text          string
 	Transcription string
 	Translation   string
-	Text          string
+	AuthorID      string
 	Example       string
 	TagIds        []string
-	AuthorID      string
 }
 
 // UpdateTranslationHandler update existing translation cmd handler
@@ -42,7 +42,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 		return err
 	}
 
-	tr.ApplyChanges(cmd.Translation, cmd.Transcription, cmd.Text, cmd.Example, cmd.TagIds)
+	tr.ApplyChanges(cmd.Text, cmd.Transcription, cmd.Translation, cmd.Example, cmd.TagIds)
 
 	return h.translationRepo.Update(tr)
 }

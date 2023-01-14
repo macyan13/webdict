@@ -22,7 +22,7 @@ func TestTranslation_ApplyChanges(t *testing.T) {
 	updatedAt := tr.updatedAt
 
 	time.Sleep(time.Second)
-	tr.ApplyChanges(translation, transcription, text, example, []string{tg})
+	tr.ApplyChanges(text, transcription, translation, example, []string{tg})
 
 	assert.Equal(t, tr.translation, translation)
 	assert.Equal(t, tr.text, text)
@@ -48,14 +48,14 @@ func TestUnmarshalFromDB(t *testing.T) {
 
 	assert.Equal(t, &translation, UnmarshalFromDB(
 		translation.id,
-		translation.authorID,
-		translation.createdAt,
-		translation.updatedAt,
+		translation.text,
 		translation.transcription,
 		translation.translation,
-		translation.text,
+		translation.authorID,
 		translation.example,
 		translation.tagIDs,
+		translation.createdAt,
+		translation.updatedAt,
 		EN,
 	))
 }

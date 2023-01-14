@@ -101,7 +101,7 @@ func (r *TranslationRepo) Update(t *translation.Translation) error {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, model)
+	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
 		return err
@@ -123,24 +123,23 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 
 	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}}).Decode(&record)
 
-	if err == mongo.ErrNoDocuments {
-		return nil, translation.ErrNotFound
-	}
-
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, translation.ErrNotFound
+		}
 		return nil, err
 	}
 
 	return translation.UnmarshalFromDB(
 		record.ID,
-		record.AuthorID,
-		record.CreatedAt,
-		record.UpdatedAt,
+		record.Text,
 		record.Transcription,
 		record.Translation,
-		record.Text,
+		record.AuthorID,
 		record.Example,
 		record.TagIDs,
+		record.CreatedAt,
+		record.UpdatedAt,
 		translation.Lang(record.Lang),
 	), nil
 }
@@ -176,7 +175,7 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: bson.D{{Key: "$in", Value: tagID}}}, {Key: "author_id", Value: authorID}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: tagID}, {Key: "author_id", Value: authorID}})
 
 	return count > 0, err
 }

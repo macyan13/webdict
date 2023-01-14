@@ -12,19 +12,146 @@ client.global.set("auth_token", response.body.accessToken)
 client.global.set("auth_type", response.body.type)
  %}
 
+### Crete tag
+POST {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+{
+  "tag": "Business"
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 201, "Response status is not 201")
+    client.assert(response.body.hasOwnProperty("id"), "ID is present")
+})
+client.global.set("tag_id", response.body.id)
+ %}
+
+### Update tag
+PUT {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+{
+  "tag": "Programming"
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+### Get all tags
+GET {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.length === 1, "Tag ID is not correct")
+    client.assert(response.body[0].tag === "Programming", "Tag from get tag by id is not correct")
+})
+ %}
+
+### Get tag by ID
+GET {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not correct")
+    client.assert(response.body.tag === "Programming", "Tag from get tag by id is not correct")
+})
+ %}
+
 ### Create Translation
 POST {{host}}/v1/api/translations
 Content-Type: application/json
 Authorization: {{auth_type}} {{auth_token}}
 
 {
-  "translation": "Give it a shot",
-  "text": "Попробовать",
-  "example": "Just give it a shot",
-  "transcription": "[n/a]"
+  "text": "test",
+  "transcription": "test",
+  "translation": "test",
+  "example": "test"
 }
 
-### Get the list of last created translations
-GET {{host}}/v1/api/translations/last?limit=10
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 201, "Response status is not 201")
+    client.assert(response.body.hasOwnProperty("id"), "ID is present")
+})
+client.global.set("translation_id", response.body.id)
+ %}
+
+### Update translation
+PUT {{host}}/v1/api/translations/{{translation_id}}
+Content-Type: application/json
 Authorization: {{auth_type}} {{auth_token}}
 
+{
+  "text": "Give it a shot",
+  "transcription": "[n/a]",
+  "translation": "Попробовать",
+  "example": "Just give it a shot",
+  "tag_ids": ["{{tag_id}}"]
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+### Get translation by ID
+GET {{host}}/v1/api/translations/{{translation_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.hasOwnProperty("id"), "Translation ID is not present")
+    client.assert(response.body.hasOwnProperty("created_at"), "Translation created_at is not present")
+    client.assert(response.body.text === "Give it a shot", "text from get translation by id is not correct")
+    client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
+    client.assert(response.body.translation === "Попробовать", "translation from get translation by id is not correct")
+    client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
+    client.assert(response.body.tags[0].hasOwnProperty("id"), "Tag from get translation by id does not have ID")
+    client.assert(response.body.tags[0].tag === "Programming", "Tag from get translation by id is not correct")
+})
+ %}
+
+### Delete translation
+DELETE {{host}}/v1/api/translations/{{translation_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+### Delete tag
+DELETE {{host}}/v1/api/tags/{{tag_id}}
+Content-Type: application/json
+Authorization: {{auth_type}} {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}

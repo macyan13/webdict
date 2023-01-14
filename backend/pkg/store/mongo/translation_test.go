@@ -16,7 +16,7 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	text := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	domain := translation.NewTranslation(tr, transcription, text, example, authorID, tags)
+	domain := translation.NewTranslation(text, transcription, tr, authorID, example, tags)
 	domainMap := domain.ToMap()
 
 	repo := TranslationRepo{}

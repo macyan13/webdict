@@ -3,9 +3,9 @@ package server
 import "time"
 
 type translationRequest struct {
+	Text          string   `json:"text"`
 	Transcription string   `json:"transcription"`
 	Translation   string   `json:"translation"`
-	Text          string   `json:"text"`
 	Example       string   `json:"example"`
 	TagIds        []string `json:"tag_ids"`
 }
@@ -16,17 +16,21 @@ type tagRequest struct {
 
 type translationResponse struct {
 	ID            string        `json:"id"`
-	CreatedAt     time.Time     `json:"created_at"`
+	Text          string        `json:"text"`
 	Transcription string        `json:"transcription"`
 	Translation   string        `json:"translation"`
-	Text          string        `json:"text"`
 	Example       string        `json:"example"`
 	Tags          []tagResponse `json:"tags"`
+	CreatedAt     time.Time     `json:"created_at"`
 }
 
 type tagResponse struct {
 	ID  string `json:"id"`
 	Tag string `json:"tag"`
+}
+
+type idResponse struct {
+	ID string `json:"id"`
 }
 
 type SignInRequest struct {

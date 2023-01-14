@@ -157,4 +157,5 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	assert.Equal(t, cmd.Text, data["text"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
+	assert.Equal(t, translation.EN, data["lang"])
 }
