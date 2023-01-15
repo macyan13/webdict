@@ -23,7 +23,21 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 		wantErr  assert.ErrorAssertionFunc
 	}{
 		{
-			"Case 1: error on checking existing tag",
+			"Error on tag creation",
+			func() fields {
+				return fields{tagRepo: &tag.MockRepository{}}
+			},
+			args{cmd: AddTag{
+				Tag:      "t",
+				AuthorID: "testAuthor",
+			}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed", err.Error(), i)
+				return true
+			},
+		},
+		{
+			"Error on checking existing tag",
 			func() fields {
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("ExistByTag", "testTag", "testAuthor").Return(false, errors.New("testError"))
@@ -39,7 +53,7 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 2: tag already exists",
+			"Tag already exists",
 			func() fields {
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("ExistByTag", "testTag", "testAuthor").Return(true, nil)

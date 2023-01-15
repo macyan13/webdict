@@ -79,7 +79,7 @@ func UnmarshalFromDB(
 }
 
 func (u *User) validate() error {
-	// todo: add validation for email
+	// todo: add validation for email https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
 	if len(u.name) < 3 {
 		return errors.New("can not create new user, the name must contain at least 3 character")
 	}

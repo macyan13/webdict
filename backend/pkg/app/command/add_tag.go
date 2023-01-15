@@ -24,11 +24,14 @@ func NewAddTagHandler(tagRepo tag.Repository) AddTagHandler {
 
 // Handle performs tag creation cmd
 func (h AddTagHandler) Handle(cmd AddTag) (string, error) {
-	if err := h.validate(cmd); err != nil {
+	tg, err := tag.NewTag(cmd.Tag, cmd.AuthorID)
+	if err != nil {
 		return "", err
 	}
 
-	tg := tag.NewTag(cmd.Tag, cmd.AuthorID)
+	if err := h.validate(cmd); err != nil {
+		return "", err
+	}
 
 	if err := h.tagRepo.Create(tg); err != nil {
 		return "", err
