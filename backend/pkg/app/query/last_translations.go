@@ -21,5 +21,15 @@ func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView
 		limit = 10
 	}
 
-	return h.translationRepo.GetLastViews(cmd.AuthorID, limit)
+	views, err := h.translationRepo.GetLastViews(cmd.AuthorID, limit)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range views {
+		views[i].sanitise()
+	}
+
+	return views, nil
 }

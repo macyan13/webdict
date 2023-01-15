@@ -17,5 +17,12 @@ func NewSingleTranslationHandler(translationRepo TranslationViewRepository) Sing
 
 // Handle performs query to get translation by ID and authorID
 func (h SingleTranslationHandler) Handle(cmd SingleTranslation) (TranslationView, error) {
-	return h.translationRepo.GetView(cmd.ID, cmd.AuthorID)
+	view, err := h.translationRepo.GetView(cmd.ID, cmd.AuthorID)
+
+	if err != nil {
+		return TranslationView{}, err
+	}
+
+	view.sanitise()
+	return view, nil
 }

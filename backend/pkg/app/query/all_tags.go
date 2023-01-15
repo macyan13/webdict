@@ -16,5 +16,15 @@ func NewAllTagsHandler(tagRepository TagViewRepository) AllTagsHandler {
 
 // Handle performs query to receive all tags for author
 func (h AllTagsHandler) Handle(query AllTags) ([]TagView, error) {
-	return h.tagRepo.GetAllViews(query.AuthorID)
+	tags, err := h.tagRepo.GetAllViews(query.AuthorID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range tags {
+		tags[i].sanitise()
+	}
+
+	return tags, nil
 }

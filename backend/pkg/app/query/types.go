@@ -15,15 +15,30 @@ type TagViewRepository interface {
 
 type TranslationView struct {
 	ID            string
-	CreatedAd     time.Time
+	Text          string
 	Transcription string
 	Translation   string
-	Text          string
 	Example       string
 	Tags          []TagView
+	CreatedAd     time.Time
+}
+
+func (v *TranslationView) sanitise() {
+	v.Text = viewSanitizer.SanitizeAndEscape(v.Text)
+	v.Transcription = viewSanitizer.SanitizeAndEscape(v.Transcription)
+	v.Translation = viewSanitizer.Sanitize(v.Translation)
+	v.Example = viewSanitizer.Sanitize(v.Example)
+
+	for i := range v.Tags {
+		v.Tags[i].sanitise()
+	}
 }
 
 type TagView struct {
 	ID  string
 	Tag string
+}
+
+func (v *TagView) sanitise() {
+	v.Tag = viewSanitizer.SanitizeAndEscape(v.Tag)
 }
