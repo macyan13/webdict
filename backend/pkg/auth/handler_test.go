@@ -54,7 +54,7 @@ func TestHandler_Authenticate(t *testing.T) {
 		{
 			"Password is not valid",
 			func() fields {
-				email := "testEmail"
+				email := "test@email.com"
 				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
@@ -66,7 +66,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				}
 			},
 			args{
-				email:    "testEmail",
+				email:    "test@email.com",
 				password: "test",
 			},
 			AuthenticationToken{},
@@ -78,7 +78,7 @@ func TestHandler_Authenticate(t *testing.T) {
 		{
 			"Error on token generation",
 			func() fields {
-				email := "testEmail"
+				email := "test@email.com"
 				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
@@ -93,7 +93,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				}
 			},
 			args{
-				email:    "testEmail",
+				email:    "test@email.com",
 				password: "password",
 			},
 			AuthenticationToken{},
@@ -105,7 +105,7 @@ func TestHandler_Authenticate(t *testing.T) {
 		{
 			"Positive Case",
 			func() fields {
-				email := "testEmail"
+				email := "test@email.com"
 				existingUser, err := user.NewUser("test", email, hashedPwd, user.Admin)
 				assert.NoError(t, err)
 
@@ -120,7 +120,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				}
 			},
 			args{
-				email:    "testEmail",
+				email:    "test@email.com",
 				password: "password",
 			},
 			AuthenticationToken{
@@ -400,11 +400,11 @@ func TestHandler_Middleware(t *testing.T) {
 			"Positive case",
 			func() fields {
 				tokener := mockTokener{}
-				claims := &JWTClaim{Email: "testEmail"}
+				claims := &JWTClaim{Email: "test@email.com"}
 				tokener.On("parseToken", "testToken").Return(claims, nil)
 
 				userRepo := user.MockRepository{}
-				userRepo.On("GetByEmail", "testEmail").Return(user.NewUser("test", "testEmail", "12345678", user.Admin))
+				userRepo.On("GetByEmail", "test@email.com").Return(user.NewUser("test", "test@email.com", "12345678", user.Admin))
 				return fields{tokener: &tokener, userRepo: &userRepo}
 			},
 			func(r *httptest.ResponseRecorder) *gin.Context {
@@ -414,14 +414,14 @@ func TestHandler_Middleware(t *testing.T) {
 			},
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {
 				tokener.AssertCalled(t, "parseToken", "testToken")
-				repo.AssertCalled(t, "GetByEmail", "testEmail")
+				repo.AssertCalled(t, "GetByEmail", "test@email.com")
 
 				usr, exist := c.Get(userContextKey)
 				assert.True(t, exist)
 
 				authUsr, _ := usr.(User)
 
-				assert.Equal(t, "testEmail", authUsr.Email)
+				assert.Equal(t, "test@email.com", authUsr.Email)
 				assert.Equal(t, user.Admin, authUsr.Role)
 			},
 		},

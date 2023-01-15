@@ -73,7 +73,7 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed", err.Error(), i)
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},

@@ -3,6 +3,7 @@ package tag
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -28,7 +29,7 @@ func TestTag_ApplyChanges(t1 *testing.T) {
 			},
 			args{tag: "t"},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed", err.Error(), i)
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
@@ -85,7 +86,7 @@ func TestNewTag(t *testing.T) {
 			},
 			nil,
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed", err.Error(), i)
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return false
 			},
 		},
@@ -136,7 +137,7 @@ func TestTag_validate(t *testing.T) {
 				authorID: "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed", err.Error(), i)
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
@@ -147,7 +148,7 @@ func TestTag_validate(t *testing.T) {
 				authorID: "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag max length is 30 symbols, 31 passed", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "tag max length is 30 symbols, 31 passed"), i)
 				return true
 			},
 		},

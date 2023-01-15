@@ -51,7 +51,7 @@ func TestServer_CreateTagUnauthorised(t *testing.T) {
 func TestServer_DeleteTagById(t *testing.T) {
 	s := initTestServer()
 
-	request := tagRequest{}
+	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
@@ -69,7 +69,7 @@ func TestServer_DeleteTagById(t *testing.T) {
 func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	request := tagRequest{}
+	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
@@ -85,7 +85,7 @@ func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 
 func TestServer_UpdateTag(t *testing.T) {
 	s := initTestServer()
-	request := tagRequest{}
+	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)

@@ -3,6 +3,7 @@ package tag
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"unicode/utf8"
 )
 
 type Tag struct {
@@ -39,12 +40,14 @@ func (t *Tag) ApplyChanges(tag string) error {
 }
 
 func (t *Tag) validate() error {
-	if len(t.tag) < 2 {
-		return fmt.Errorf("tag length should be at least 2 symbols, %d passed", len(t.tag))
+	tagCount := utf8.RuneCountInString(t.tag)
+
+	if tagCount < 2 {
+		return fmt.Errorf("tag length should be at least 2 symbols, %d passed (%s)", tagCount, t.tag)
 	}
 
-	if len(t.tag) > 30 {
-		return fmt.Errorf("tag max length is 30 symbols, %d passed", len(t.tag))
+	if tagCount > 30 {
+		return fmt.Errorf("tag max length is 30 symbols, %d passed (%s)", tagCount, t.tag)
 	}
 
 	if t.authorID == "" {
