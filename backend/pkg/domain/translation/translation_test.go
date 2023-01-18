@@ -1,19 +1,28 @@
 package translation
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
 
 import "github.com/stretchr/testify/assert"
 
-func TestNewTranslation(t *testing.T) {
-	translation := NewTranslation("", "", "", "", "", []string{})
+func TestNewTranslation_PositiveCase(t *testing.T) {
+	translation, err := NewTranslation("new", "", "new", "new", "", []string{})
+	assert.Nil(t, err)
 	assert.Equal(t, translation.updatedAt, translation.createdAt, "NewTranslation - createdAt and updatedAt are the same")
 }
 
-func TestTranslation_ApplyChanges(t *testing.T) {
-	tr := NewTranslation("", "", "", "", "", []string{})
+func TestNewTranslation_ValidationError(t *testing.T) {
+	tr, err := NewTranslation("", "", "new", "new", "", []string{})
+	assert.Nil(t, tr)
+	assert.True(t, strings.Contains(err.Error(), "text can not be empty"))
+}
+
+func TestTranslation_ApplyChanges_PositiveCase(t *testing.T) {
+	tr, err := NewTranslation("new", "new", "new", "new", "new", []string{})
+	assert.Nil(t, err)
 	translation := "test"
 	transcription := "[test]"
 	text := "text"
@@ -22,7 +31,8 @@ func TestTranslation_ApplyChanges(t *testing.T) {
 	updatedAt := tr.updatedAt
 
 	time.Sleep(time.Second)
-	tr.ApplyChanges(text, transcription, translation, example, []string{tg})
+	err = tr.ApplyChanges(text, transcription, translation, example, []string{tg})
+	assert.Nil(t, err)
 
 	assert.Equal(t, tr.translation, translation)
 	assert.Equal(t, tr.text, text)
@@ -30,6 +40,15 @@ func TestTranslation_ApplyChanges(t *testing.T) {
 	assert.Equal(t, tr.translation, translation)
 	assert.Greaterf(t, tr.updatedAt, updatedAt, "Tag.ApplyChanges - updatedAt should be greater createdAt")
 	assert.Equal(t, tr.tagIDs[0], tg)
+}
+
+func TestTranslation_ApplyChanges_ValidationError(t *testing.T) {
+	tr, err := NewTranslation("new", "new", "new", "new", "new", []string{})
+	assert.Nil(t, err)
+
+	err = tr.ApplyChanges("", "", "test", "", []string{})
+	assert.True(t, strings.Contains(err.Error(), "text can not be empty"))
+	assert.Equal(t, "new", tr.translation)
 }
 
 func TestUnmarshalFromDB(t *testing.T) {
@@ -58,4 +77,153 @@ func TestUnmarshalFromDB(t *testing.T) {
 		translation.updatedAt,
 		EN,
 	))
+}
+
+func TestTranslation_validate(t *testing.T) {
+	type fields struct {
+		text          string
+		transcription string
+		translation   string
+		authorID      string
+		example       string
+		tagIDs        []string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			"Text is empty",
+			fields{
+				translation: "test",
+				authorID:    "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "text can not be empty"), i)
+				return true
+			},
+		},
+		{
+			"Text is too long",
+			fields{
+				text:        string(make([]rune, 256)),
+				translation: "test",
+				authorID:    "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "text max size is 255 characters, 256 passed ("), i)
+				return true
+			},
+		},
+		{
+			"Transcription is too long",
+			fields{
+				text:          "test",
+				transcription: string(make([]rune, 256)),
+				translation:   "test",
+				authorID:      "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "transcription max size is 255 characters, 256 passed"), i)
+				return true
+			},
+		},
+		{
+			"Translation is empty",
+			fields{
+				text:     "test",
+				authorID: "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				return true
+			},
+		},
+		{
+			"Transcription is too long",
+			fields{
+				text:        "test",
+				translation: string(make([]rune, 256)),
+				authorID:    "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "translation max size is 255 characters, 256 passed"), i)
+				return true
+			},
+		},
+		{
+			"Example is too long",
+			fields{
+				text:        "test",
+				translation: "test",
+				example:     string(make([]rune, 256)),
+				authorID:    "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "example max size is 255 characters, 256 passed"), i)
+				return true
+			},
+		},
+		{
+			"authorID is too long",
+			fields{
+				text:        "test",
+				translation: "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "authorID can not be empty"), i)
+				return true
+			},
+		},
+		{
+			"Too many tags",
+			fields{
+				text:        "test",
+				translation: "test",
+				authorID:    "test",
+				tagIDs:      []string{"test", "test", "test", "test", "test", "test"},
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "tag max amount is 5, 6 passed"), i)
+				return true
+			},
+		},
+		{
+			"Multiple errors",
+			fields{
+				authorID: "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "text can not be empty"), i)
+				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				return true
+			},
+		},
+		{
+			"Positive case",
+			fields{
+				text:        "test",
+				translation: "test",
+				authorID:    "test",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Nil(t, err, i)
+				return true
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := &Translation{
+				text:          tt.fields.text,
+				transcription: tt.fields.transcription,
+				translation:   tt.fields.translation,
+				authorID:      tt.fields.authorID,
+				example:       tt.fields.example,
+				tagIDs:        tt.fields.tagIDs,
+			}
+			tt.wantErr(t, tr.validate(), "validate()")
+		})
+	}
 }

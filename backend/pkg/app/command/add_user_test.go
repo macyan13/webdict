@@ -6,6 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 )
 
@@ -24,7 +25,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 		wantErr  assert.ErrorAssertionFunc
 	}{
 		{
-			"Case 1: error during psw generation",
+			"Error during passwd hash generation",
 			func() fields {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("", errors.New("testErr"))
@@ -35,7 +36,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddUser{
 				Name:     "testName",
-				Email:    "testEmail",
+				Email:    "test@email.com",
 				Password: "testPwd",
 				Role:     user.Admin,
 			}},
@@ -45,12 +46,12 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 2: user repo returns error on validation",
+			"User repo returns error on validation",
 			func() fields {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
 				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "testEmail").Return(false, errors.New("testErr"))
+				userRepo.On("Exist", "test@email.com").Return(false, errors.New("testErr"))
 				return fields{
 					userRepo: &userRepo,
 					cipher:   &cipher,
@@ -58,7 +59,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddUser{
 				Name:     "testName",
-				Email:    "testEmail",
+				Email:    "test@email.com",
 				Password: "testPwd",
 				Role:     user.Admin,
 			}},
@@ -68,12 +69,12 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 3: user with such email already exist",
+			"User with such email already exist",
 			func() fields {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
 				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "testEmail").Return(true, nil)
+				userRepo.On("Exist", "test@email.com").Return(true, nil)
 				return fields{
 					userRepo: &userRepo,
 					cipher:   &cipher,
@@ -81,22 +82,45 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddUser{
 				Name:     "testName",
-				Email:    "testEmail",
+				Email:    "test@email.com",
 				Password: "testPwd",
 				Role:     user.Admin,
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not create new user, a user with passed email: testEmail already exists", err.Error(), i)
+				assert.Equal(t, "can not create new user, a user with passed email: test@email.com already exists", err.Error(), i)
 				return true
 			},
 		},
 		{
-			"Case 4: user repo returns error during user creation",
+			"Error on user creation",
+			func() fields {
+				cipher := MockCipher{}
+				cipher.On("GenerateHash", "testPwd").Return("hashedPasswd", nil)
+				userRepo := user.MockRepository{}
+				userRepo.On("Exist", "test@email.com").Return(false, nil)
+				return fields{
+					userRepo: &userRepo,
+					cipher:   &cipher,
+				}
+			},
+			args{cmd: AddUser{
+				Name:     "n",
+				Email:    "test@email.com",
+				Password: "testPwd",
+				Role:     user.Admin,
+			}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "name must contain at least 2 characters, 1 passed (n)"), i)
+				return true
+			},
+		},
+		{
+			"User repo returns error during user creation",
 			func() fields {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
 				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "testEmail").Return(false, nil)
+				userRepo.On("Exist", "test@email.com").Return(false, nil)
 				userRepo.On("Create", mock.AnythingOfType("*user.User")).Return(errors.New("testErr"))
 				return fields{
 					userRepo: &userRepo,
@@ -105,7 +129,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddUser{
 				Name:     "testName",
-				Email:    "testEmail",
+				Email:    "test@email.com",
 				Password: "testPwd",
 				Role:     user.Admin,
 			}},
@@ -128,7 +152,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 
 func TestAddUserHandler_Handle_PositiveCase(t *testing.T) {
 	name := "testName"
-	email := "testEmail"
+	email := "test@email.com"
 	pwd := "testPwd"
 	hashedPwd := "hashedPwd"
 

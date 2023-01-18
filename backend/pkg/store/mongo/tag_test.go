@@ -8,7 +8,8 @@ import (
 
 func TestTagRepo_fromDomainToModel(t *testing.T) {
 	tagValue := "testTag"
-	entity := tag.NewTag(tagValue, "testAuthor")
+	entity, err := tag.NewTag(tagValue, "testAuthor")
+	assert.Nil(t, err)
 	repo := TagRepo{}
 
 	model, err := repo.fromDomainToModel(entity)

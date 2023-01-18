@@ -40,7 +40,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 		return "", err
 	}
 
-	tr := translation.NewTranslation(
+	tr, err := translation.NewTranslation(
 		cmd.Text,
 		cmd.Transcription,
 		cmd.Translation,
@@ -48,8 +48,11 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 		cmd.Example,
 		cmd.TagIds,
 	)
+	if err != nil {
+		return "", err
+	}
 
-	err := h.translationRepo.Create(tr)
+	err = h.translationRepo.Create(tr)
 
 	if err != nil {
 		return "", err

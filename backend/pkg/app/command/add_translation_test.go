@@ -6,6 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 )
 
@@ -24,7 +25,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 		wantErr  assert.ErrorAssertionFunc
 	}{
 		{
-			"Case 1: Tags repo can not perform query",
+			"Tags repo can not perform query",
 			func() fields {
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(false, errors.New("testErr"))
@@ -40,7 +41,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 2: Tags not exist",
+			"Tags not exist",
 			func() fields {
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(false, nil)
@@ -56,7 +57,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 3: translation repo can not perfrom query",
+			"Translation repo can not perform query",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, errors.New("testErr"))
@@ -72,7 +73,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 4: translation already exists",
+			"Translation already exists",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(true, nil)
@@ -88,7 +89,23 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 5: error on save",
+			"Error on Apply changes",
+			func() fields {
+				translationRepo := translation.MockRepository{}
+				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, nil)
+				return fields{
+					translationRepo: &translationRepo,
+					tagRepo:         &tag.MockRepository{},
+				}
+			},
+			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor"}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				return true
+			},
+		},
+		{
+			"Error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, nil)
@@ -98,7 +115,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					tagRepo:         &tag.MockRepository{},
 				}
 			},
-			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{Text: "text", Translation: "test", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true

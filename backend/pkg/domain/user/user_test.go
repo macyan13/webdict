@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -27,7 +28,20 @@ func TestNewUser(t *testing.T) {
 				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not create new user, the name must contain at least 3 character", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "name must contain at least 2 characters, 1 passed (t)"), i)
+				return true
+			},
+		},
+		{
+			"Name is too long",
+			args{
+				string(make([]rune, 31)),
+				"test@test.com",
+				"12345678",
+				Admin,
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "name max size is 30 characters, 31 passed"), i)
 				return true
 			},
 		},
@@ -40,7 +54,34 @@ func TestNewUser(t *testing.T) {
 				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not create new user, the password must contain at least 3 character", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "password must contain at least 8 character"), i)
+				return true
+			},
+		},
+		{
+			"Invalid Email",
+			args{
+				"tes",
+				"test.test.com",
+				"1234567",
+				Admin,
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), i)
+				return true
+			},
+		},
+		{
+			"Multiple errors",
+			args{
+				"tes",
+				"test.test.com",
+				"12367",
+				Admin,
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), i)
+				assert.True(t, strings.Contains(err.Error(), "password must contain at least 8 character"), i)
 				return true
 			},
 		},

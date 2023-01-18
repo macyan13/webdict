@@ -60,7 +60,25 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 			},
 		},
 		{
-			"Case 3: positive case",
+			"Case 3: error on applying changes",
+			func() fields {
+				tg := tag.UnmarshalFromDB("testID", "testTag", "testAuthor")
+				tagRepo := tag.MockRepository{}
+				tagRepo.On("Get", "testID", "testAuthor").Return(tg, nil)
+				return fields{tagRepo: &tagRepo}
+			},
+			args{cmd: UpdateTag{
+				TagID:    "testID",
+				Tag:      "t",
+				AuthorID: "testAuthor",
+			}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				return true
+			},
+		},
+		{
+			"Case 4: positive case",
 			func() fields {
 				tg := tag.UnmarshalFromDB("testID", "testTag", "testAuthor")
 				tagRepo := tag.MockRepository{}

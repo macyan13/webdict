@@ -28,6 +28,9 @@ func (h UpdateTagHandler) Handle(cmd UpdateTag) error {
 		return err
 	}
 
-	tg.ApplyChanges(cmd.Tag)
+	if err := tg.ApplyChanges(cmd.Tag); err != nil {
+		return err
+	}
+
 	return h.tagRepo.Update(tg)
 }

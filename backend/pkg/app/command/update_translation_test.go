@@ -80,14 +80,17 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			"Case 4: tags no set, error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("Get", "testID", "testAuthor").Return(&translation.Translation{}, nil)
+				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{})
+				assert.Nil(t, err)
+
+				translationRepo.On("Get", "testID", "testAuthor").Return(tr, nil)
 				translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Text: "test", Translation: "test", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -97,7 +100,9 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			"Case 5: error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("Get", "testID", "testAuthor").Return(&translation.Translation{}, nil)
+				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{})
+				assert.Nil(t, err)
+				translationRepo.On("Get", "testID", "testAuthor").Return(tr, nil)
 				translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(true, nil)
@@ -106,7 +111,7 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					tagRepo:         &tagRepo,
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Text: "test", Translation: "test", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -131,7 +136,9 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	tagRepo.On("AllExist", tags, authorID).Return(true, nil)
 
 	translationRepo := translation.MockRepository{}
-	translationRepo.On("Get", id, authorID).Return(&translation.Translation{}, nil)
+	tr, err := translation.NewTranslation("test", "", "test", authorID, "", []string{})
+	assert.Nil(t, err)
+	translationRepo.On("Get", id, authorID).Return(tr, nil)
 	translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(nil)
 
 	handler := NewUpdateTranslationHandler(

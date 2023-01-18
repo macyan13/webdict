@@ -17,5 +17,12 @@ func NewSingleTagHandler(tagRepo TagViewRepository) SingleTagHandler {
 
 // Handle performs query to get tag by ID and authorID
 func (h SingleTagHandler) Handle(cmd SingleTag) (TagView, error) {
-	return h.tagRepo.GetView(cmd.ID, cmd.AuthorID)
+	view, err := h.tagRepo.GetView(cmd.ID, cmd.AuthorID)
+
+	if err != nil {
+		return TagView{}, err
+	}
+
+	view.sanitize()
+	return view, nil
 }

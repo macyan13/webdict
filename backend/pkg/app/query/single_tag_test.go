@@ -48,6 +48,23 @@ func TestSingleTagHandler_Handle(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Case 3: check sanitization",
+			func() fields {
+				repo := MockTagViewRepository{}
+				repo.On("GetView", "tagID", "testAuthor").Return(TagView{
+					ID:  "tagID",
+					Tag: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Tag<a>`,
+				}, nil)
+				return fields{tagRepo: &repo}
+			},
+			args{cmd: SingleTag{ID: "tagID", AuthorID: "testAuthor"}},
+			TagView{
+				ID:  "tagID",
+				Tag: "Test Tag",
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -46,6 +46,21 @@ func TestSingleTranslationHandler_Handle(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Case 3: check sanitization",
+			func() fields {
+				repo := MockTranslationViewRepository{}
+				repo.On("GetView", "trID", "testAuthor").Return(TranslationView{
+					Translation: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Translation<a>`,
+				}, nil)
+				return fields{translationRepo: &repo}
+			},
+			args{cmd: SingleTranslation{ID: "trID", AuthorID: "testAuthor"}},
+			TranslationView{
+				Translation: "Test Translation",
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -2,7 +2,11 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-multierror"
+	"net/mail"
+	"unicode/utf8"
 )
 
 type User struct {
@@ -79,14 +83,25 @@ func UnmarshalFromDB(
 }
 
 func (u *User) validate() error {
-	// todo: add validation for email
-	if len(u.name) < 3 {
-		return errors.New("can not create new user, the name must contain at least 3 character")
+	var result error
+	nameCount := utf8.RuneCountInString(u.name)
+
+	if nameCount < 2 {
+		result = multierror.Append(result, fmt.Errorf("name must contain at least 2 characters, %d passed (%s)", nameCount, u.name))
 	}
 
+	if nameCount > 30 {
+		result = multierror.Append(result, fmt.Errorf("name max size is 30 characters, %d passed (%s)", nameCount, u.name))
+	}
+
+	if _, err := mail.ParseAddress(u.email); err != nil {
+		result = multierror.Append(result, fmt.Errorf("email is not valid: %s", err.Error()))
+	}
+
+	// it should never happen as domain receives passwd as hash from cipher
 	if len(u.password) < 8 {
-		return errors.New("can not create new user, the password must contain at least 3 character")
+		result = multierror.Append(result, errors.New("password must contain at least 8 character"))
 	}
 
-	return nil
+	return result
 }
