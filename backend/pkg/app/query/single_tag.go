@@ -23,6 +23,6 @@ func (h SingleTagHandler) Handle(cmd SingleTag) (TagView, error) {
 		return TagView{}, err
 	}
 
-	view.sanitise()
+	view.sanitize()
 	return view, nil
 }

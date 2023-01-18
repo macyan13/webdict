@@ -23,6 +23,6 @@ func (h SingleTranslationHandler) Handle(cmd SingleTranslation) (TranslationView
 		return TranslationView{}, err
 	}
 
-	view.sanitise()
+	view.sanitize()
 	return view, nil
 }

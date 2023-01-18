@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestTagView_sanitise(t *testing.T) {
+func TestTagView_sanitize(t *testing.T) {
 	tests := []struct {
 		name         string
 		rawTag       string
@@ -29,14 +29,14 @@ func TestTagView_sanitise(t *testing.T) {
 				ID:  id,
 				Tag: tt.rawTag,
 			}
-			v.sanitise()
+			v.sanitize()
 			assert.Equal(t, tt.sanitizedTag, v.Tag)
 			assert.Equal(t, id, v.ID)
 		})
 	}
 }
 
-func TestTranslationView_sanitise(t *testing.T) {
+func TestTranslationView_sanitize(t *testing.T) {
 	type fields struct {
 		Text          string
 		Transcription string
@@ -95,7 +95,7 @@ func TestTranslationView_sanitise(t *testing.T) {
 				Example:       tt.rawFields.Example,
 				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
 			}
-			v.sanitise()
+			v.sanitize()
 			assert.Equal(t, id, v.ID)
 			assert.Equal(t, tt.sanitizedFields.Text, v.Text)
 			assert.Equal(t, tt.sanitizedFields.Transcription, v.Transcription)

@@ -42,7 +42,7 @@ func TestTag_ApplyChanges(t1 *testing.T) {
 			args{tag: "tag"},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i)
-				return true
+				return false
 			},
 		},
 	}
@@ -52,7 +52,9 @@ func TestTag_ApplyChanges(t1 *testing.T) {
 				tag:      tt.fields.tag,
 				authorID: tt.fields.authorID,
 			}
-			tt.wantErr(t1, t.ApplyChanges(tt.args.tag), fmt.Sprintf("ApplyChanges(%v)", tt.args.tag))
+			if tt.wantErr(t1, t.ApplyChanges(tt.args.tag), fmt.Sprintf("ApplyChanges(%v)", tt.args.tag)) {
+				assert.Equal(t1, tt.fields.tag, t.tag)
+			}
 		})
 	}
 }
@@ -121,7 +123,6 @@ func TestNewTag(t *testing.T) {
 
 func TestTag_validate(t *testing.T) {
 	type fields struct {
-		id       string
 		tag      string
 		authorID string
 	}
@@ -181,7 +182,7 @@ func TestTag_validate(t *testing.T) {
 				tag:      tt.fields.tag,
 				authorID: tt.fields.authorID,
 			}
-			tt.wantErr(t1, t.validate(), fmt.Sprintf("validate()"))
+			tt.wantErr(t1, t.validate(), "validate()")
 		})
 	}
 }

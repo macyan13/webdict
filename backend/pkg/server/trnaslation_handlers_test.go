@@ -86,8 +86,7 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
 
-	request := translationRequest{}
-	jsonValue, _ := json.Marshal(request)
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -104,8 +103,7 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	request := translationRequest{}
-	jsonValue, _ := json.Marshal(request)
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -120,9 +118,8 @@ func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
-	request := translationRequest{}
 
-	jsonValue, _ := json.Marshal(request)
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -133,7 +130,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	text := "UpdateText"
 	example := "UpdateExample"
 
-	request = translationRequest{
+	request := translationRequest{
 		Transcription: transcription,
 		Translation:   tr,
 		Text:          text,
@@ -164,7 +161,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	s := initTestServer()
 	originalTranslation := "originalTranslation"
-	request := translationRequest{Translation: originalTranslation}
+	request := translationRequest{Translation: originalTranslation, Text: "test"}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))

@@ -23,7 +23,7 @@ func (h AllTagsHandler) Handle(query AllTags) ([]TagView, error) {
 	}
 
 	for i := range tags {
-		tags[i].sanitise()
+		tags[i].sanitize()
 	}
 
 	return tags, nil

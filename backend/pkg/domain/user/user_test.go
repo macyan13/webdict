@@ -28,7 +28,7 @@ func TestNewUser(t *testing.T) {
 				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "name must contain at least 2 characters, 1 passed (t)", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "name must contain at least 2 characters, 1 passed (t)"), i)
 				return true
 			},
 		},
@@ -54,7 +54,7 @@ func TestNewUser(t *testing.T) {
 				Admin,
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "password must contain at least 8 character", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "password must contain at least 8 character"), i)
 				return true
 			},
 		},
@@ -68,6 +68,20 @@ func TestNewUser(t *testing.T) {
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.True(t, strings.Contains(err.Error(), "email is not valid"), i)
+				return true
+			},
+		},
+		{
+			"Multiple errors",
+			args{
+				"tes",
+				"test.test.com",
+				"12367",
+				Admin,
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), i)
+				assert.True(t, strings.Contains(err.Error(), "password must contain at least 8 character"), i)
 				return true
 			},
 		},

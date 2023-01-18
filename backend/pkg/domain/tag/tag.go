@@ -35,8 +35,15 @@ func (t *Tag) AuthorID() string {
 }
 
 func (t *Tag) ApplyChanges(tag string) error {
+	updated := *t
+	updated.tag = tag
+
+	if err := updated.validate(); err != nil {
+		return err
+	}
+
 	t.tag = tag
-	return t.validate()
+	return nil
 }
 
 func (t *Tag) validate() error {

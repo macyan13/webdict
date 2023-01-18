@@ -28,7 +28,7 @@ func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView
 	}
 
 	for i := range views {
-		views[i].sanitise()
+		views[i].sanitize()
 	}
 
 	return views, nil

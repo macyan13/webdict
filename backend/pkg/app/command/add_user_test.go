@@ -6,6 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 )
 
@@ -109,7 +110,7 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 				Role:     user.Admin,
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "name must contain at least 2 characters, 1 passed (n)", err.Error(), i)
+				assert.True(t, strings.Contains(err.Error(), "name must contain at least 2 characters, 1 passed (n)"), i)
 				return true
 			},
 		},

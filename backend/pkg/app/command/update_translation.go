@@ -42,7 +42,9 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 		return err
 	}
 
-	tr.ApplyChanges(cmd.Text, cmd.Transcription, cmd.Translation, cmd.Example, cmd.TagIds)
+	if err := tr.ApplyChanges(cmd.Text, cmd.Transcription, cmd.Translation, cmd.Example, cmd.TagIds); err != nil {
+		return err
+	}
 
 	return h.translationRepo.Update(tr)
 }
