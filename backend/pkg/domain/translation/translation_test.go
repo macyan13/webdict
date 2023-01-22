@@ -34,10 +34,10 @@ func TestTranslation_ApplyChanges_PositiveCase(t *testing.T) {
 	err = tr.ApplyChanges(text, transcription, translation, example, []string{tg})
 	assert.Nil(t, err)
 
-	assert.Equal(t, tr.translation, translation)
+	assert.Equal(t, tr.meaning, translation)
 	assert.Equal(t, tr.text, text)
 	assert.Equal(t, tr.example, example)
-	assert.Equal(t, tr.translation, translation)
+	assert.Equal(t, tr.meaning, translation)
 	assert.Greaterf(t, tr.updatedAt, updatedAt, "Tag.ApplyChanges - updatedAt should be greater createdAt")
 	assert.Equal(t, tr.tagIDs[0], tg)
 }
@@ -48,7 +48,7 @@ func TestTranslation_ApplyChanges_ValidationError(t *testing.T) {
 
 	err = tr.ApplyChanges("", "", "test", "", []string{})
 	assert.True(t, strings.Contains(err.Error(), "text can not be empty"))
-	assert.Equal(t, "new", tr.translation)
+	assert.Equal(t, "new", tr.meaning)
 }
 
 func TestUnmarshalFromDB(t *testing.T) {
@@ -58,7 +58,7 @@ func TestUnmarshalFromDB(t *testing.T) {
 		createdAt:     time.Now().Add(5 * time.Second),
 		updatedAt:     time.Now().Add(10 * time.Second),
 		transcription: "testTranscription",
-		translation:   "testTranslation",
+		meaning:       "testTranslation",
 		text:          "testText",
 		example:       "testExample",
 		tagIDs:        []string{"tag1", "tag2"},
@@ -69,7 +69,7 @@ func TestUnmarshalFromDB(t *testing.T) {
 		translation.id,
 		translation.text,
 		translation.transcription,
-		translation.translation,
+		translation.meaning,
 		translation.authorID,
 		translation.example,
 		translation.tagIDs,
@@ -117,7 +117,7 @@ func TestTranslation_validate(t *testing.T) {
 			},
 		},
 		{
-			"Transcription is too long",
+			"Meaning is too long",
 			fields{
 				text:          "test",
 				transcription: string(make([]rune, 256)),
@@ -130,25 +130,25 @@ func TestTranslation_validate(t *testing.T) {
 			},
 		},
 		{
-			"Translation is empty",
+			"Meaning is empty",
 			fields{
 				text:     "test",
 				authorID: "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				assert.True(t, strings.Contains(err.Error(), "meaning can not be empty"), i)
 				return true
 			},
 		},
 		{
-			"Transcription is too long",
+			"Meaning is too long",
 			fields{
 				text:        "test",
 				translation: string(make([]rune, 256)),
 				authorID:    "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "translation max size is 255 characters, 256 passed"), i)
+				assert.True(t, strings.Contains(err.Error(), "meaning max size is 255 characters, 256 passed"), i)
 				return true
 			},
 		},
@@ -196,7 +196,7 @@ func TestTranslation_validate(t *testing.T) {
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.True(t, strings.Contains(err.Error(), "text can not be empty"), i)
-				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				assert.True(t, strings.Contains(err.Error(), "meaning can not be empty"), i)
 				return true
 			},
 		},
@@ -218,7 +218,7 @@ func TestTranslation_validate(t *testing.T) {
 			tr := &Translation{
 				text:          tt.fields.text,
 				transcription: tt.fields.transcription,
-				translation:   tt.fields.translation,
+				meaning:       tt.fields.translation,
 				authorID:      tt.fields.authorID,
 				example:       tt.fields.example,
 				tagIDs:        tt.fields.tagIDs,

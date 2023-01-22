@@ -36,13 +36,13 @@ func TestSingleTranslationHandler_Handle(t *testing.T) {
 			func() fields {
 				repo := MockTranslationViewRepository{}
 				repo.On("GetView", "trID", "testAuthor").Return(TranslationView{
-					Translation: "testTranslation",
+					Meaning: "testTranslation",
 				}, nil)
 				return fields{translationRepo: &repo}
 			},
 			args{cmd: SingleTranslation{ID: "trID", AuthorID: "testAuthor"}},
 			TranslationView{
-				Translation: "testTranslation",
+				Meaning: "testTranslation",
 			},
 			false,
 		},
@@ -51,13 +51,13 @@ func TestSingleTranslationHandler_Handle(t *testing.T) {
 			func() fields {
 				repo := MockTranslationViewRepository{}
 				repo.On("GetView", "trID", "testAuthor").Return(TranslationView{
-					Translation: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Translation<a>`,
+					Meaning: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Meaning<a>`,
 				}, nil)
 				return fields{translationRepo: &repo}
 			},
 			args{cmd: SingleTranslation{ID: "trID", AuthorID: "testAuthor"}},
 			TranslationView{
-				Translation: "Test Translation",
+				Meaning: "Test Meaning",
 			},
 			false,
 		},

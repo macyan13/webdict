@@ -10,13 +10,13 @@ import (
 )
 
 func TestTranslationRepo_fromDomainToModel(t *testing.T) {
-	tr := "testTranslation"
+	meaning := "testTranslation"
 	authorID := "testAuthor"
 	transcription := "testTranscription"
 	text := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	domain, err := translation.NewTranslation(text, transcription, tr, authorID, example, tags)
+	domain, err := translation.NewTranslation(text, transcription, meaning, authorID, example, tags)
 	assert.Nil(t, err)
 	domainMap := domain.ToMap()
 
@@ -24,7 +24,7 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	model, err := repo.fromDomainToModel(domain)
 
 	assert.Nil(t, err)
-	assert.Equal(t, tr, model.Translation)
+	assert.Equal(t, meaning, model.Meaning)
 	assert.Equal(t, authorID, model.AuthorID)
 	assert.Equal(t, transcription, model.Transcription)
 	assert.Equal(t, text, model.Text)
@@ -41,7 +41,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 		CreatedAt:     time.Now().Add(5 * time.Second),
 		UpdatedAt:     time.Now().Add(10 * time.Second),
 		Transcription: "transcription",
-		Translation:   "translation",
+		Meaning:       "translation",
 		Text:          "text",
 		Example:       "example",
 		TagIDs:        []string{"tag1", "tag2"},
@@ -60,7 +60,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 
 	assert.Equal(t, model.ID, view.ID)
 	assert.Equal(t, model.CreatedAt, view.CreatedAd)
-	assert.Equal(t, model.Translation, view.Translation)
+	assert.Equal(t, model.Meaning, view.Meaning)
 	assert.Equal(t, model.Transcription, view.Transcription)
 	assert.Equal(t, model.Text, view.Text)
 	assert.Equal(t, model.Example, view.Example)

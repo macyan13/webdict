@@ -28,7 +28,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 
 		id, err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
-			Translation:   request.Translation,
+			Meaning:       request.Meaning,
 			Text:          request.Text,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
@@ -96,13 +96,13 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 		}
 
 		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
-			ID:            c.Param(translationIDParam),
-			Transcription: request.Transcription,
-			Translation:   request.Translation,
-			Text:          request.Text,
-			Example:       request.Example,
-			TagIds:        request.TagIds,
-			AuthorID:      user.ID,
+			ID:          c.Param(translationIDParam),
+			Meaning:     request.Transcription,
+			Translation: request.Meaning,
+			Text:        request.Text,
+			Example:     request.Example,
+			TagIds:      request.TagIds,
+			AuthorID:    user.ID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
@@ -188,7 +188,7 @@ func (s *HTTPServer) translationViewToResponse(translation query.TranslationView
 		ID:            translation.ID,
 		CreatedAt:     translation.CreatedAd,
 		Transcription: translation.Transcription,
-		Translation:   translation.Translation,
+		Meaning:       translation.Meaning,
 		Text:          translation.Text,
 		Example:       translation.Example,
 		Tags:          tags,

@@ -70,15 +70,15 @@ func TestTranslationView_sanitize(t *testing.T) {
 			"Case 2: translation with malicious content",
 			fields{
 				Text:          `<a onblur="alert(secret)" href="http://www.test.com">Text</a>`,
-				Transcription: `<a onblur="alert(secret)" href="http://www.test.com">[Transcription]</a>`,
-				Translation:   `<a onblur="alert(secret)" href="http://www.test.com">Translation</a>`,
+				Transcription: `<a onblur="alert(secret)" href="http://www.test.com">[Meaning]</a>`,
+				Translation:   `<a onblur="alert(secret)" href="http://www.test.com">Meaning</a>`,
 				Example:       `<a onblur="alert(secret)" href="http://www.test.com">Example</a>`,
 				Tag:           `<a onblur="alert(secret)" href="http://www.test.com">Tag</a>`,
 			},
 			fields{
 				Text:          `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Text&lt;/a&gt;`,
-				Transcription: `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;[Transcription]&lt;/a&gt;`,
-				Translation:   `<a href="http://www.test.com" rel="nofollow">Translation</a>`,
+				Transcription: `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;[Meaning]&lt;/a&gt;`,
+				Translation:   `<a href="http://www.test.com" rel="nofollow">Meaning</a>`,
 				Example:       `<a href="http://www.test.com" rel="nofollow">Example</a>`,
 				Tag:           `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Tag&lt;/a&gt;`,
 			},
@@ -91,7 +91,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 				ID:            id,
 				Text:          tt.rawFields.Text,
 				Transcription: tt.rawFields.Transcription,
-				Translation:   tt.rawFields.Translation,
+				Meaning:       tt.rawFields.Translation,
 				Example:       tt.rawFields.Example,
 				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
 			}
@@ -99,7 +99,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 			assert.Equal(t, id, v.ID)
 			assert.Equal(t, tt.sanitizedFields.Text, v.Text)
 			assert.Equal(t, tt.sanitizedFields.Transcription, v.Transcription)
-			assert.Equal(t, tt.sanitizedFields.Translation, v.Translation)
+			assert.Equal(t, tt.sanitizedFields.Translation, v.Meaning)
 			assert.Equal(t, tt.sanitizedFields.Example, v.Example)
 			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Tag)
 		})

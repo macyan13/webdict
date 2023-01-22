@@ -10,7 +10,7 @@ type MockRepository struct {
 }
 
 // mockery --name=Repository --filename=repository_mock.go --output=./ --structname=MockRepository --inpackage
-// Create provides a mock function with given fields: translation
+// Create provides a mock function with given fields: meaning
 func (_m *MockRepository) Create(translation *Translation) error {
 	ret := _m.Called(translation)
 
@@ -103,7 +103,7 @@ func (_m *MockRepository) Get(id string, authorID string) (*Translation, error) 
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: translation
+// Update provides a mock function with given fields: meaning
 func (_m *MockRepository) Update(translation *Translation) error {
 	ret := _m.Called(translation)
 

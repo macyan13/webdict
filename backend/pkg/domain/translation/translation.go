@@ -17,7 +17,7 @@ type Translation struct {
 	id            string
 	text          string
 	transcription string
-	translation   string
+	meaning       string
 	authorID      string
 	example       string
 	tagIDs        []string
@@ -26,14 +26,14 @@ type Translation struct {
 	lang          Lang
 }
 
-func NewTranslation(text, transcription, translation, authorID, example string, tagIDs []string) (*Translation, error) {
+func NewTranslation(text, transcription, meaning, authorID, example string, tagIDs []string) (*Translation, error) {
 	now := time.Now()
 	tr := Translation{
 		id:            uuid.New().String(),
 		authorID:      authorID,
 		createdAt:     now,
 		updatedAt:     now,
-		translation:   translation,
+		meaning:       meaning,
 		transcription: transcription,
 		text:          text,
 		example:       example,
@@ -72,7 +72,7 @@ func (t *Translation) applyChanges(text, transcription, translation, example str
 	t.tagIDs = tagIds
 	t.transcription = transcription
 	t.text = text
-	t.translation = translation
+	t.meaning = translation
 	t.example = example
 	t.updatedAt = time.Now()
 }
@@ -93,13 +93,13 @@ func (t *Translation) validate() error {
 		result = multierror.Append(result, fmt.Errorf("transcription max size is 255 characters, %d passed (%s)", transcriptionCount, t.transcription))
 	}
 
-	if t.translation == "" {
-		result = multierror.Append(result, fmt.Errorf("translation can not be empty"))
+	if t.meaning == "" {
+		result = multierror.Append(result, fmt.Errorf("meaning can not be empty"))
 	}
 
-	translationCount := utf8.RuneCountInString(t.translation)
+	translationCount := utf8.RuneCountInString(t.meaning)
 	if translationCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("translation max size is 255 characters, %d passed (%s)", translationCount, t.translation))
+		result = multierror.Append(result, fmt.Errorf("meaning max size is 255 characters, %d passed (%s)", translationCount, t.meaning))
 	}
 
 	exampleCount := utf8.RuneCountInString(t.example)
@@ -124,7 +124,7 @@ func (t *Translation) ToMap() map[string]interface{} {
 		"id":            t.id,
 		"text":          t.text,
 		"transcription": t.transcription,
-		"translation":   t.translation,
+		"meaning":       t.meaning,
 		"authorID":      t.authorID,
 		"example":       t.example,
 		"tagIDs":        t.tagIDs,
@@ -152,7 +152,7 @@ func UnmarshalFromDB(
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 		transcription: transcription,
-		translation:   translation,
+		meaning:       translation,
 		text:          text,
 		example:       example,
 		tagIDs:        tagIDs,

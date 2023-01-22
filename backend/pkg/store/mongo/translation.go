@@ -25,7 +25,7 @@ type TranslationModel struct {
 	CreatedAt     time.Time `bson:"created_at"`
 	UpdatedAt     time.Time `bson:"updatedAt"`
 	Transcription string    `bson:"transcription,omitempty"`
-	Translation   string    `bson:"translation"`
+	Meaning       string    `bson:"meaning"`
 	Text          string    `bson:"text"`
 	Example       string    `bson:"example,omitempty"`
 	TagIDs        []string  `bson:"tag_ids,omitempty"`
@@ -134,7 +134,7 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 		record.ID,
 		record.Text,
 		record.Transcription,
-		record.Translation,
+		record.Meaning,
 		record.AuthorID,
 		record.Example,
 		record.TagIDs,
@@ -259,7 +259,7 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		ID:            model.ID,
 		CreatedAd:     model.CreatedAt,
 		Transcription: model.Transcription,
-		Translation:   model.Translation,
+		Meaning:       model.Meaning,
 		Text:          model.Text,
 		Example:       model.Example,
 		Tags:          tagViews,
