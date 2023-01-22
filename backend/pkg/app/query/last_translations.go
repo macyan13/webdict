@@ -7,10 +7,12 @@ type LastTranslations struct {
 
 type LastTranslationsHandler struct {
 	translationRepo TranslationViewRepository
+	strictSntz      *strictSanitizer
+	richSntz        *richTextSanitizer
 }
 
 func NewLastTranslationsHandler(translationRepo TranslationViewRepository) LastTranslationsHandler {
-	return LastTranslationsHandler{translationRepo: translationRepo}
+	return LastTranslationsHandler{translationRepo: translationRepo, strictSntz: newStrictSanitizer(), richSntz: newRichTextSanitizer()}
 }
 
 // Handle todo: add test after finalizing solution
@@ -28,7 +30,7 @@ func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView
 	}
 
 	for i := range views {
-		views[i].sanitize()
+		views[i].sanitize(h.strictSntz, h.richSntz)
 	}
 
 	return views, nil

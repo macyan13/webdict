@@ -7,11 +7,12 @@ type AllTags struct {
 
 // AllTagsHandler get all tags for author query
 type AllTagsHandler struct {
-	tagRepo TagViewRepository
+	tagRepo   TagViewRepository
+	sanitizer *strictSanitizer
 }
 
 func NewAllTagsHandler(tagRepository TagViewRepository) AllTagsHandler {
-	return AllTagsHandler{tagRepo: tagRepository}
+	return AllTagsHandler{tagRepo: tagRepository, sanitizer: newStrictSanitizer()}
 }
 
 // Handle performs query to receive all tags for author
@@ -23,7 +24,7 @@ func (h AllTagsHandler) Handle(query AllTags) ([]TagView, error) {
 	}
 
 	for i := range tags {
-		tags[i].sanitize()
+		tags[i].sanitize(h.sanitizer)
 	}
 
 	return tags, nil

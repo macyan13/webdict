@@ -8,11 +8,12 @@ type SingleTag struct {
 
 // SingleTagHandler get tag query handler
 type SingleTagHandler struct {
-	tagRepo TagViewRepository
+	tagRepo    TagViewRepository
+	strictSntz *strictSanitizer
 }
 
 func NewSingleTagHandler(tagRepo TagViewRepository) SingleTagHandler {
-	return SingleTagHandler{tagRepo: tagRepo}
+	return SingleTagHandler{tagRepo: tagRepo, strictSntz: newStrictSanitizer()}
 }
 
 // Handle performs query to get tag by ID and authorID
@@ -23,6 +24,6 @@ func (h SingleTagHandler) Handle(cmd SingleTag) (TagView, error) {
 		return TagView{}, err
 	}
 
-	view.sanitize()
+	view.sanitize(h.strictSntz)
 	return view, nil
 }

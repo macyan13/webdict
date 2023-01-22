@@ -23,14 +23,14 @@ type TranslationView struct {
 	CreatedAd     time.Time
 }
 
-func (v *TranslationView) sanitize() {
-	v.Text = viewSanitizer.SanitizeAndEscape(v.Text)
-	v.Transcription = viewSanitizer.SanitizeAndEscape(v.Transcription)
-	v.Meaning = viewSanitizer.Sanitize(v.Meaning)
-	v.Example = viewSanitizer.Sanitize(v.Example)
+func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richTextSanitizer) {
+	v.Text = reachSntz.SanitizeAndEscape(v.Text)
+	v.Transcription = reachSntz.SanitizeAndEscape(v.Transcription)
+	v.Meaning = reachSntz.Sanitize(v.Meaning)
+	v.Example = reachSntz.Sanitize(v.Example)
 
 	for i := range v.Tags {
-		v.Tags[i].sanitize()
+		v.Tags[i].sanitize(strictSntz)
 	}
 }
 
@@ -39,6 +39,6 @@ type TagView struct {
 	Tag string
 }
 
-func (v *TagView) sanitize() {
-	v.Tag = viewSanitizer.SanitizeAndEscape(v.Tag)
+func (v *TagView) sanitize(sanitizer *strictSanitizer) {
+	v.Tag = sanitizer.Sanitize(v.Tag)
 }

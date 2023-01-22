@@ -54,7 +54,7 @@ func TestAllTagsHandler_Handle(t *testing.T) {
 				repo := MockTagViewRepository{}
 				repo.On("GetAllViews", "testAuthor").Return([]TagView{{
 					ID:  "testId",
-					Tag: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Tag<a>`,
+					Tag: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')"><br>Test Tag</br><a>`,
 				}}, nil)
 				return fields{tagRepo: &repo}
 			},

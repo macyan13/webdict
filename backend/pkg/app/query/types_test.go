@@ -19,17 +19,18 @@ func TestTagView_sanitize(t *testing.T) {
 		{
 			"Case 1: tag with malicious content",
 			`<a onblur="alert(secret)" href="http://www.test.com">Test</a>`,
-			`&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Test&lt;/a&gt;`,
+			`Test`,
 		},
 	}
 	id := "<must_not_change>"
+	sanitizer := newStrictSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &TagView{
 				ID:  id,
 				Tag: tt.rawTag,
 			}
-			v.sanitize()
+			v.sanitize(sanitizer)
 			assert.Equal(t, tt.sanitizedTag, v.Tag)
 			assert.Equal(t, id, v.ID)
 		})
@@ -80,11 +81,13 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Transcription: `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;[Meaning]&lt;/a&gt;`,
 				Translation:   `<a href="http://www.test.com" rel="nofollow">Meaning</a>`,
 				Example:       `<a href="http://www.test.com" rel="nofollow">Example</a>`,
-				Tag:           `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Tag&lt;/a&gt;`,
+				Tag:           `Tag`,
 			},
 		},
 	}
 	id := "<must_not_change>"
+	strictSntz := newStrictSanitizer()
+	reachSntz := newRichTextSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &TranslationView{
@@ -95,7 +98,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Example:       tt.rawFields.Example,
 				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
 			}
-			v.sanitize()
+			v.sanitize(strictSntz, reachSntz)
 			assert.Equal(t, id, v.ID)
 			assert.Equal(t, tt.sanitizedFields.Text, v.Text)
 			assert.Equal(t, tt.sanitizedFields.Transcription, v.Transcription)
