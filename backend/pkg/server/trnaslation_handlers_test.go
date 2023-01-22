@@ -36,7 +36,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 
 	request := translationRequest{
 		Transcription: transcription,
-		Translation:   tr,
+		Meaning:       tr,
 		Text:          text,
 		Example:       example,
 		TagIds:        []string{tagID},
@@ -52,7 +52,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	records := getExistingTranslations(t, s)
 	created := records[0]
 
-	assert.Equal(t, tr, created.Translation)
+	assert.Equal(t, tr, created.Meaning)
 	assert.Equal(t, text, created.Text)
 	assert.Equal(t, transcription, created.Transcription)
 	assert.Equal(t, example, created.Example)
@@ -68,7 +68,7 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 
 	request := translationRequest{
 		Transcription: transcription,
-		Translation:   tr,
+		Meaning:       tr,
 		Text:          text,
 		Example:       example,
 		TagIds:        []string{},
@@ -86,7 +86,7 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Meaning: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -103,7 +103,7 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Meaning: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -119,7 +119,7 @@ func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Translation: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Text: "test", Meaning: "test"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -132,7 +132,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 
 	request := translationRequest{
 		Transcription: transcription,
-		Translation:   tr,
+		Meaning:       tr,
 		Text:          text,
 		Example:       example,
 	}
@@ -152,7 +152,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &record)
 	assert.Nil(t, err)
 
-	assert.Equal(t, tr, record.Translation)
+	assert.Equal(t, tr, record.Meaning)
 	assert.Equal(t, text, record.Text)
 	assert.Equal(t, transcription, record.Transcription)
 	assert.Equal(t, example, record.Example)
@@ -161,7 +161,7 @@ func TestServer_UpdateTranslation(t *testing.T) {
 func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	s := initTestServer()
 	originalTranslation := "originalTranslation"
-	request := translationRequest{Translation: originalTranslation, Text: "test"}
+	request := translationRequest{Meaning: originalTranslation, Text: "test"}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
@@ -176,7 +176,7 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 
 	request = translationRequest{
 		Transcription: transcription,
-		Translation:   tr,
+		Meaning:       tr,
 		Text:          text,
 		Example:       example,
 	}
@@ -195,7 +195,7 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &record)
 	assert.Nil(t, err)
 
-	assert.Equal(t, originalTranslation, record.Translation)
+	assert.Equal(t, originalTranslation, record.Meaning)
 }
 
 func getExistingTranslations(t *testing.T, s *HTTPServer) []translationResponse {

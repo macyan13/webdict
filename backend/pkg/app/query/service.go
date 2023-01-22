@@ -7,6 +7,7 @@ import (
 
 var viewSanitizer *sanitizer
 
+// nolint:gochecknoinits // Will remove it later
 func init() {
 	viewSanitizer = &sanitizer{policy: bluemonday.UGCPolicy()}
 }

@@ -8,13 +8,13 @@ import (
 
 // UpdateTranslation update existing translation cmd
 type UpdateTranslation struct {
-	ID            string
-	Text          string
-	Transcription string
-	Translation   string
-	AuthorID      string
-	Example       string
-	TagIds        []string
+	ID          string
+	Text        string
+	Meaning     string
+	Translation string
+	AuthorID    string
+	Example     string
+	TagIds      []string
 }
 
 // UpdateTranslationHandler update existing translation cmd handler
@@ -42,7 +42,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 		return err
 	}
 
-	if err := tr.ApplyChanges(cmd.Text, cmd.Transcription, cmd.Translation, cmd.Example, cmd.TagIds); err != nil {
+	if err := tr.ApplyChanges(cmd.Text, cmd.Meaning, cmd.Translation, cmd.Example, cmd.TagIds); err != nil {
 		return err
 	}
 

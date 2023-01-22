@@ -17,7 +17,7 @@ type TranslationView struct {
 	ID            string
 	Text          string
 	Transcription string
-	Translation   string
+	Meaning       string
 	Example       string
 	Tags          []TagView
 	CreatedAd     time.Time
@@ -26,7 +26,7 @@ type TranslationView struct {
 func (v *TranslationView) sanitize() {
 	v.Text = viewSanitizer.SanitizeAndEscape(v.Text)
 	v.Transcription = viewSanitizer.SanitizeAndEscape(v.Transcription)
-	v.Translation = viewSanitizer.Sanitize(v.Translation)
+	v.Meaning = viewSanitizer.Sanitize(v.Meaning)
 	v.Example = viewSanitizer.Sanitize(v.Example)
 
 	for i := range v.Tags {

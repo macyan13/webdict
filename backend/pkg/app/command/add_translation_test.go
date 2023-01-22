@@ -57,7 +57,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Translation repo can not perform query",
+			"Meaning repo can not perform query",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, errors.New("testErr"))
@@ -73,7 +73,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Translation already exists",
+			"Meaning already exists",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByText", "text", "testAuthor").Return(true, nil)
@@ -100,7 +100,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "translation can not be empty"), i)
+				assert.True(t, strings.Contains(err.Error(), "meaning can not be empty"), i)
 				return true
 			},
 		},
@@ -115,7 +115,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					tagRepo:         &tag.MockRepository{},
 				}
 			},
-			args{cmd: AddTranslation{Text: "text", Translation: "test", AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{Text: "text", Meaning: "test", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -155,7 +155,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 
 	cmd := AddTranslation{
 		Transcription: "transcription",
-		Translation:   "translation",
+		Meaning:       "translation",
 		Text:          text,
 		Example:       "example",
 		TagIds:        tags,
@@ -169,7 +169,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	data := createdTranslation.ToMap()
 
 	assert.Equal(t, id, createdTranslation.ID())
-	assert.Equal(t, cmd.Translation, data["translation"])
+	assert.Equal(t, cmd.Meaning, data["meaning"])
 	assert.Equal(t, cmd.Transcription, data["transcription"])
 	assert.Equal(t, cmd.Text, data["text"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])

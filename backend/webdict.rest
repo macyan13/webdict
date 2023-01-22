@@ -82,7 +82,7 @@ Authorization: {{auth_type}} {{auth_token}}
 {
   "text": "test",
   "transcription": "test",
-  "translation": "test",
+  "meaning": "test",
   "example": "test"
 }
 
@@ -102,7 +102,7 @@ Authorization: {{auth_type}} {{auth_token}}
 {
   "text": "Give it a shot",
   "transcription": "[n/a]",
-  "translation": "Попробовать",
+  "meaning": "Попробовать",
   "example": "Just give it a shot",
   "tag_ids": ["{{tag_id}}"]
 }
@@ -127,7 +127,7 @@ client.test("Response body is correct", function () {
     client.assert(response.body.hasOwnProperty("created_at"), "Translation created_at is not present")
     client.assert(response.body.text === "Give it a shot", "text from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
-    client.assert(response.body.translation === "Попробовать", "translation from get translation by id is not correct")
+    client.assert(response.body.meaning === "Попробовать", "translation from get translation by id is not correct")
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags[0].hasOwnProperty("id"), "Tag from get translation by id does not have ID")
     client.assert(response.body.tags[0].tag === "Programming", "Tag from get translation by id is not correct")

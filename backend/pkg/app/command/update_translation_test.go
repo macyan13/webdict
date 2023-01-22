@@ -147,21 +147,21 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	)
 
 	cmd := UpdateTranslation{
-		ID:            id,
-		Transcription: "transcription",
-		Translation:   "translation",
-		Text:          "text",
-		Example:       "example",
-		TagIds:        tags,
-		AuthorID:      authorID,
+		ID:          id,
+		Meaning:     "transcription",
+		Translation: "translation",
+		Text:        "text",
+		Example:     "example",
+		TagIds:      tags,
+		AuthorID:    authorID,
 	}
 	assert.Nil(t, handler.Handle(cmd))
 
 	updatedTranslation := translationRepo.Calls[1].Arguments[0].(*translation.Translation)
 	data := updatedTranslation.ToMap()
 
-	assert.Equal(t, cmd.Translation, data["translation"])
-	assert.Equal(t, cmd.Transcription, data["transcription"])
+	assert.Equal(t, cmd.Translation, data["meaning"])
+	assert.Equal(t, cmd.Meaning, data["transcription"])
 	assert.Equal(t, cmd.Text, data["text"])
 	assert.Equal(t, cmd.Example, data["example"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])

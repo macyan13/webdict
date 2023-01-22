@@ -5,7 +5,7 @@ import "time"
 type translationRequest struct {
 	Text          string   `json:"text"`
 	Transcription string   `json:"transcription"`
-	Translation   string   `json:"translation"`
+	Meaning       string   `json:"meaning"`
 	Example       string   `json:"example"`
 	TagIds        []string `json:"tag_ids"`
 }
@@ -18,7 +18,7 @@ type translationResponse struct {
 	ID            string        `json:"id"`
 	Text          string        `json:"text"`
 	Transcription string        `json:"transcription"`
-	Translation   string        `json:"translation"`
+	Meaning       string        `json:"meaning"`
 	Example       string        `json:"example"`
 	Tags          []tagResponse `json:"tags"`
 	CreatedAt     time.Time     `json:"created_at"`
