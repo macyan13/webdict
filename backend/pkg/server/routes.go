@@ -9,6 +9,10 @@ func (s *HTTPServer) BuildRoutes() {
 
 	v1 := router.Group("/v1/api")
 	{
+		authAPI := v1.Group("/auth")
+		authAPI.POST("/signin", s.SighIn())
+		authAPI.POST("/refresh", s.Refresh())
+
 		translationAPI := v1.Group("/translations", s.authHandler.Middleware())
 		translationAPI.POST("", s.CreateTranslation())
 		translationAPI.GET("/last", s.GetLastTranslations())
@@ -23,8 +27,9 @@ func (s *HTTPServer) BuildRoutes() {
 		tagAPI.GET(fmt.Sprintf("/:%s", tagIDParam), s.GetTagByID())
 		tagAPI.DELETE(fmt.Sprintf("/:%s", tagIDParam), s.DeleteTagByID())
 
-		authAPI := v1.Group("/auth")
-		authAPI.POST("/signin", s.SighIn())
-		authAPI.POST("/refresh", s.Refresh())
+		userAPI := v1.Group("/users", s.authHandler.Middleware())
+		userAPI.POST("", s.CreateUser())
+		userAPI.GET("", s.GetUsers())
+		userAPI.GET(fmt.Sprintf("/:%s", userIDParam), s.GetUserByID())
 	}
 }

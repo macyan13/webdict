@@ -48,6 +48,8 @@ func initTestServer() *HTTPServer {
 		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
 		SingleTag:         query.NewSingleTagHandler(tagRepo),
 		AllTags:           query.NewAllTagsHandler(tagRepo),
+		SingleUser:        query.NewSingleUserHandler(userRepo),
+		AllUsers:          query.NewAllUsersHandler(userRepo),
 	}
 
 	application := app.Application{

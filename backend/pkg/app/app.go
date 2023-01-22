@@ -28,4 +28,7 @@ type Queries struct {
 
 	SingleTag query.SingleTagHandler
 	AllTags   query.AllTagsHandler
+
+	AllUsers   query.AllUsersHandler
+	SingleUser query.SingleUserHandler
 }

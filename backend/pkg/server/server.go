@@ -79,6 +79,8 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
 		SingleTag:         query.NewSingleTagHandler(tagRepo),
 		AllTags:           query.NewAllTagsHandler(tagRepo),
+		SingleUser:        query.NewSingleUserHandler(userRepo),
+		AllUsers:          query.NewAllUsersHandler(userRepo),
 	}
 
 	application := app.Application{
@@ -136,7 +138,7 @@ func (s *HTTPServer) unauthorized(c *gin.Context, err error) {
 	frames := runtime.CallersFrames(pc[:n])
 	frame, _ := frames.Next()
 
-	log.Printf("[Error] Can not authorize` action: %s:%s: %v", frame.File, frame.Function, err)
+	log.Printf("[Error] Can not authorize action: %s:%s: %v", frame.File, frame.Function, err)
 	c.JSON(http.StatusUnauthorized, nil)
 }
 

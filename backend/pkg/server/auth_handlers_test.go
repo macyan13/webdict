@@ -84,3 +84,8 @@ func setAuthToken(s *HTTPServer, r *http.Request) {
 	}
 	r.Header.Set("Authorization", authenticationToken.Type+" "+authenticationToken.Token)
 }
+
+func setAuthTokenWithCredentials(s *HTTPServer, r *http.Request, email string, passwd string) {
+	token, _ := s.authHandler.Authenticate(email, passwd)
+	r.Header.Set("Authorization", token.Type+" "+token.Token)
+}

@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
@@ -108,9 +109,56 @@ func (r *UserRepo) GetByEmail(email string) (*user.User, error) {
 	), nil
 }
 
+func (r *UserRepo) GetAllViews() ([]query.UserView, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := r.collection.Find(ctx, bson.D{})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var models []UserModel
+	if err = cursor.All(ctx, &models); err != nil {
+		return nil, err
+	}
+
+	views := make([]query.UserView, 0, len(models))
+	for _, model := range models {
+		views = append(views, r.fromModelToView(model))
+	}
+
+	return views, nil
+}
+
+func (r *UserRepo) GetView(id string) (query.UserView, error) {
+	var record UserModel
+
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&record)
+	if err != nil {
+		return query.UserView{}, err
+	}
+
+	return r.fromModelToView(record), nil
+}
+
 // fromDomainToModel converts domain user to mongo model
 func (r *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
 	model := UserModel{}
 	err := mapstructure.Decode(usr.ToMap(), &model)
 	return model, err
+}
+
+// fromModelToView converts mongo model to user View
+func (r *UserRepo) fromModelToView(model UserModel) query.UserView {
+	return query.UserView{
+		ID:    model.ID,
+		Name:  model.Name,
+		Email: model.Email,
+		Role:  model.Role,
+	}
 }
