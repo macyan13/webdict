@@ -126,6 +126,63 @@ func TestHTTPServer_GetUsers_NotAdmin(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
+func TestHTTPServer_UpdateUser_Unauthorized(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, name, email, pwd)
+
+	updRequest := userRequest{
+		Name:     "test",
+		Email:    "updated@test.com",
+		Password: "newPasswd12345",
+		Role:     int(user.Author),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	usr := getUserById(t, s, response.ID)
+	assert.Equal(t, name, usr.Name)
+	assert.Equal(t, response.ID, usr.ID)
+	assert.Equal(t, email, usr.Email)
+	assert.Equal(t, int(user.Author), usr.Role)
+}
+
+func TestHTTPServer_UpdateUser(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, "test", "test@mail.com", "passwd")
+
+	updRequest := userRequest{
+		Name:     name,
+		Email:    email,
+		Password: pwd,
+		Role:     int(user.Admin),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	setAuthToken(s, req)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	usr := getUserById(t, s, response.ID)
+	assert.Equal(t, name, usr.Name)
+	assert.Equal(t, response.ID, usr.ID)
+	assert.Equal(t, email, usr.Email)
+	assert.Equal(t, int(user.Admin), usr.Role)
+}
+
 func getUserById(t *testing.T, s *HTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
 	setAuthToken(s, req)

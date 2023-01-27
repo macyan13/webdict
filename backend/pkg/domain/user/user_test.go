@@ -124,3 +124,131 @@ func TestUnmarshalFromDB(t *testing.T) {
 
 	assert.Equal(t, &user, UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role)))
 }
+
+func TestRole_Valid(t *testing.T) {
+	tests := []struct {
+		name string
+		r    Role
+		want bool
+	}{
+		{
+			"Invalid role, value less than the actual min",
+			Role(0),
+			false,
+		},
+		{
+			"Invalid role, value bigger than the actual min",
+			Role(3),
+			false,
+		},
+		{
+			"Positive case",
+			Admin,
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.r.Valid(), "Valid()")
+		})
+	}
+}
+
+func TestUser_ApplyChanges(t *testing.T) {
+	type fields struct {
+		name     string
+		email    string
+		password string
+		role     Role
+	}
+	type args struct {
+		name   string
+		email  string
+		passwd string
+		role   Role
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		wantFn func(t assert.TestingT, err error, usr *User, details string)
+	}{
+		{
+			"Error on validation, changes should not be applied",
+			fields{
+				name:     "testName",
+				email:    "test@mail.com",
+				password: "testPasswd",
+				role:     Admin,
+			},
+			args{
+				name:   "name",
+				email:  "invalidEmail",
+				passwd: "testPasswd",
+				role:   Author,
+			},
+			func(t assert.TestingT, err error, usr *User, details string) {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
+				assert.Equal(t, "testName", usr.name)
+				assert.Equal(t, "test@mail.com", usr.email)
+				assert.Equal(t, "testPasswd", usr.password)
+				assert.Equal(t, Admin, usr.role)
+			},
+		},
+		{
+			"Applied changes, passwd was not changed",
+			fields{
+				name:     "testName",
+				email:    "test@mail.com",
+				password: "testPasswd",
+				role:     Admin,
+			},
+			args{
+				name:   "name",
+				email:  "updated@email.com",
+				passwd: "",
+				role:   Author,
+			},
+			func(t assert.TestingT, err error, usr *User, details string) {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
+				assert.Equal(t, "name", usr.name)
+				assert.Equal(t, "updated@email.com", usr.email)
+				assert.Equal(t, "testPasswd", usr.password)
+				assert.Equal(t, Author, usr.role)
+			},
+		},
+		{
+			"Applied changes, passwd was changed",
+			fields{
+				name:     "testName",
+				email:    "test@mail.com",
+				password: "testPasswd",
+				role:     Admin,
+			},
+			args{
+				name:   "name",
+				email:  "updated@email.com",
+				passwd: "updatedPasswd",
+				role:   Author,
+			},
+			func(t assert.TestingT, err error, usr *User, details string) {
+				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
+				assert.Equal(t, "name", usr.name)
+				assert.Equal(t, "updated@email.com", usr.email)
+				assert.Equal(t, "updatedPasswd", usr.password)
+				assert.Equal(t, Author, usr.role)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &User{
+				name:     tt.fields.name,
+				email:    tt.fields.email,
+				password: tt.fields.password,
+				role:     tt.fields.role,
+			}
+			tt.wantFn(t, u.ApplyChanges(tt.args.name, tt.args.email, tt.args.passwd, tt.args.role), u, fmt.Sprintf("ApplyChanges(%v, %v, %v, %v)", tt.args.name, tt.args.email, tt.args.passwd, tt.args.role))
+		})
+	}
+}

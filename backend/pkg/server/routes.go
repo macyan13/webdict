@@ -29,6 +29,7 @@ func (s *HTTPServer) BuildRoutes() {
 
 		userAPI := v1.Group("/users", s.authHandler.Middleware())
 		userAPI.POST("", s.CreateUser())
+		userAPI.PUT(fmt.Sprintf("/:%s", userIDParam), s.UpdateUser())
 		userAPI.GET("", s.GetUsers())
 		userAPI.GET(fmt.Sprintf("/:%s", userIDParam), s.GetUserByID())
 	}

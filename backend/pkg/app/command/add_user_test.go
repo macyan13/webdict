@@ -25,6 +25,25 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 		wantErr  assert.ErrorAssertionFunc
 	}{
 		{
+			"Invalid suer role",
+			func() fields {
+				return fields{
+					userRepo: &user.MockRepository{},
+					cipher:   &MockCipher{},
+				}
+			},
+			args{cmd: AddUser{
+				Name:     "testName",
+				Email:    "test@email.com",
+				Password: "testPwd",
+				Role:     user.Role(-1),
+			}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "attempt to create user with invalid role: -1", err.Error(), i)
+				return true
+			},
+		},
+		{
 			"Error during passwd hash generation",
 			func() fields {
 				cipher := MockCipher{}

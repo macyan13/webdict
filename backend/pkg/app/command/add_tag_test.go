@@ -68,6 +68,23 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 				return true
 			},
 		},
+		{
+			"Error on tag saving",
+			func() fields {
+				tagRepo := tag.MockRepository{}
+				tagRepo.On("ExistByTag", "testTag", "testAuthor").Return(false, nil)
+				tagRepo.On("Create", mock.AnythingOfType("*tag.Tag")).Return(errors.New("testError"))
+				return fields{tagRepo: &tagRepo}
+			},
+			args{cmd: AddTag{
+				Tag:      "testTag",
+				AuthorID: "testAuthor",
+			}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "testError", err.Error(), i)
+				return true
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

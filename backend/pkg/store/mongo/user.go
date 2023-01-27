@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/mitchellh/mapstructure"
@@ -96,17 +97,53 @@ func (r *UserRepo) GetByEmail(email string) (*user.User, error) {
 	if err == mongo.ErrNoDocuments {
 		return nil, user.ErrNotFound
 	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	return user.UnmarshalFromDB(
-		record.ID,
-		record.Name,
-		record.Email,
-		record.Password,
-		record.Role,
-	), nil
+	return r.fromModelToDomain(record), nil
+}
+
+func (r *UserRepo) Get(id string) (*user.User, error) {
+	var record UserModel
+
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	err := r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&record)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, user.ErrNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r.fromModelToDomain(record), nil
+}
+
+func (r *UserRepo) Update(usr *user.User) error {
+	model, err := r.fromDomainToModel(usr)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
+
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount != 1 {
+		return fmt.Errorf("usr with id %s which must be modified not found", model.ID)
+	}
+
+	return nil
 }
 
 func (r *UserRepo) GetAllViews() ([]query.UserView, error) {
@@ -161,4 +198,15 @@ func (r *UserRepo) fromModelToView(model UserModel) query.UserView {
 		Email: model.Email,
 		Role:  model.Role,
 	}
+}
+
+// fromModelToDomain converts mongo model to user entity
+func (r *UserRepo) fromModelToDomain(model UserModel) *user.User {
+	return user.UnmarshalFromDB(
+		model.ID,
+		model.Name,
+		model.Email,
+		model.Password,
+		model.Role,
+	)
 }

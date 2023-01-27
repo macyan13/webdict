@@ -19,7 +19,8 @@ type Commands struct {
 	UpdateTag command.UpdateTagHandler
 	DeleteTag command.DeleteTagHandler
 
-	AddUser command.AddUserHandler
+	AddUser    command.AddUserHandler
+	UpdateUser command.UpdateUserHandler
 }
 
 type Queries struct {

@@ -100,85 +100,36 @@ func (s *HTTPServer) GetUserByID() gin.HandlerFunc {
 	}
 }
 
-// func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		c.Header("Content-Type", "application/json")
-// 		var request tagRequest
-//
-// 		if err := c.ShouldBindJSON(&request); err != nil {
-// 			s.badRequest(c, fmt.Errorf("can not parse tag update request: %v", err))
-// 			return
-// 		}
-//
-// 		user, err := s.authHandler.UserFromContext(c)
-// 		if err != nil {
-// 			s.unauthorized(c, err)
-// 		}
-//
-// 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
-// 			TagID:    c.Param(userIDParam),
-// 			Tag:      request.Tag,
-// 			AuthorID: user.ID,
-// 		}); err != nil {
-// 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
-// 			return
-// 		}
-//
-// 		c.JSON(http.StatusOK, http.NoBody)
-// 	}
-// }
-//
-// func (s *HTTPServer) GetTagByID() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		c.Header("Content-Type", "application/json")
-//
-// 		user, err := s.authHandler.UserFromContext(c)
-// 		if err != nil {
-// 			s.unauthorized(c, err)
-// 		}
-//
-// 		view, err := s.app.Queries.SingleTag.Handle(query.SingleTag{
-// 			ID:       c.Param(userIDParam),
-// 			AuthorID: user.ID,
-// 		})
-//
-// 		if err != nil {
-// 			s.badRequest(c, fmt.Errorf("can get find requested tag - %v", err))
-// 			return
-// 		}
-//
-// 		c.JSON(http.StatusOK, s.tagViewToResponse(view))
-// 	}
-// }
-//
-// func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		c.Header("Content-Type", "application/json")
-//
-// 		user, err := s.authHandler.UserFromContext(c)
-// 		if err != nil {
-// 			s.unauthorized(c, err)
-// 			return
-// 		}
-//
-// 		if err := s.app.Commands.DeleteTag.Handle(command.DeleteTag{
-// 			ID:       c.Param(userIDParam),
-// 			AuthorID: user.ID,
-// 		}); err != nil {
-// 			s.badRequest(c, fmt.Errorf("can not delete tag: %v", err))
-// 			return
-// 		}
-//
-// 		c.JSON(http.StatusOK, http.NoBody)
-// 	}
-// }
+func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+		var request userRequest
 
-// func (s *HTTPServer) tagViewToResponse(tag query.TagView) tagResponse {
-// 	return tagResponse{
-// 		ID:  tag.ID,
-// 		Tag: tag.Tag,
-// 	}
-// }
+		if err := c.ShouldBindJSON(&request); err != nil {
+			s.badRequest(c, fmt.Errorf("can not parse user update request: %v", err))
+			return
+		}
+
+		usr, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorized(c, err)
+		}
+
+		if err := s.app.Commands.UpdateUser.Handle(command.UpdateUser{
+			ID:         c.Param(userIDParam),
+			Name:       request.Name,
+			Email:      request.Email,
+			Password:   request.Password,
+			Role:       user.Role(request.Role),
+			IsAdminCMD: usr.IsAdmin(),
+		}); err != nil {
+			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
+			return
+		}
+
+		c.JSON(http.StatusOK, http.NoBody)
+	}
+}
 
 func (s *HTTPServer) userViewsToResponse(users []query.UserView) []userResponse {
 	responses := make([]userResponse, len(users))

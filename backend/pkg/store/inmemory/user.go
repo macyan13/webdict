@@ -41,6 +41,21 @@ func (u *UserRepo) GetByEmail(email string) (*user.User, error) {
 	return nil, user.ErrNotFound
 }
 
+func (u *UserRepo) Get(id string) (*user.User, error) {
+	usr, ok := u.storage[id]
+
+	if ok {
+		return usr, nil
+	}
+
+	return nil, fmt.Errorf("not found")
+}
+
+func (u *UserRepo) Update(usr *user.User) error {
+	u.storage[usr.ID()] = usr
+	return nil
+}
+
 func (u *UserRepo) GetAllViews() ([]query.UserView, error) {
 	results := make([]query.UserView, 0, len(u.storage))
 

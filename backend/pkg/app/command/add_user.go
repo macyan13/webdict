@@ -13,11 +13,6 @@ type AddUser struct {
 	Role     user.Role
 }
 
-// Cipher service to generate password hash before saving a user to DB
-type Cipher interface {
-	GenerateHash(pwd string) (string, error)
-}
-
 // AddUserHandler create new User cmd handler
 type AddUserHandler struct {
 	userRepo user.Repository
@@ -30,6 +25,10 @@ func NewAddUserHandler(userRepo user.Repository, cipher Cipher) AddUserHandler {
 
 // Handle performs user creation cmd
 func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
+	if !cmd.Role.Valid() {
+		return "", fmt.Errorf("attempt to create user with invalid role: %d", cmd.Role)
+	}
+
 	hashedPwd, err := h.cipher.GenerateHash(cmd.Password)
 
 	if err != nil {

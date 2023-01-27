@@ -72,6 +72,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
+		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
 	}
 
 	queries := app.Queries{
