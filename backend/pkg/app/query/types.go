@@ -13,6 +13,11 @@ type TagViewRepository interface {
 	GetViews(ids []string, authorID string) ([]TagView, error)
 }
 
+type UserViewRepository interface {
+	GetAllViews() ([]UserView, error)
+	GetView(id string) (UserView, error)
+}
+
 type TranslationView struct {
 	ID            string
 	Text          string
@@ -41,4 +46,16 @@ type TagView struct {
 
 func (v *TagView) sanitize(sanitizer *strictSanitizer) {
 	v.Tag = sanitizer.Sanitize(v.Tag)
+}
+
+type UserView struct {
+	ID    string
+	Name  string
+	Email string
+	Role  int
+}
+
+func (v *UserView) sanitize(sanitizer *strictSanitizer) {
+	v.Name = sanitizer.Sanitize(v.Name)
+	v.Email = sanitizer.Sanitize(v.Email)
 }

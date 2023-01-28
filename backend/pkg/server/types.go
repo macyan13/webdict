@@ -14,6 +14,18 @@ type tagRequest struct {
 	Tag string `json:"tag"`
 }
 
+type userRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     int    `json:"role"`
+}
+
+type SignInRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type translationResponse struct {
 	ID            string        `json:"id"`
 	Text          string        `json:"text"`
@@ -29,13 +41,15 @@ type tagResponse struct {
 	Tag string `json:"tag"`
 }
 
-type idResponse struct {
-	ID string `json:"id"`
+type userResponse struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  int    `json:"role"`
 }
 
-type SignInRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type idResponse struct {
+	ID string `json:"id"`
 }
 
 type AuthTokenResponse struct {

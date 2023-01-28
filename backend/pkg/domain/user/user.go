@@ -24,6 +24,10 @@ const (
 	Author Role = 2
 )
 
+func (r Role) Valid() bool {
+	return r >= Admin && r <= Author
+}
+
 func NewUser(name, email, password string, role Role) (*User, error) {
 	u := User{
 		id:       uuid.New().String(),
@@ -54,6 +58,28 @@ func (u *User) Password() string {
 
 func (u *User) Role() Role {
 	return u.role
+}
+
+func (u *User) ApplyChanges(name, email, passwd string, role Role) error {
+	updated := *u
+	updated.applyChanges(name, email, passwd, role)
+
+	if err := updated.validate(); err != nil {
+		return err
+	}
+
+	u.applyChanges(name, email, passwd, role)
+	return nil
+}
+
+func (u *User) applyChanges(name, email, passwd string, role Role) {
+	u.name = name
+	u.email = email
+	u.role = role
+
+	if passwd != "" {
+		u.password = passwd
+	}
 }
 
 func (u *User) ToMap() map[string]interface{} {

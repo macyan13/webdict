@@ -23,6 +23,7 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc {
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		id, err := s.app.Commands.AddTag.Handle(command.AddTag{
@@ -46,6 +47,7 @@ func (s *HTTPServer) GetTags() gin.HandlerFunc {
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		tag, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorID: user.ID})
@@ -72,6 +74,7 @@ func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
@@ -94,6 +97,7 @@ func (s *HTTPServer) GetTagByID() gin.HandlerFunc {
 		user, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		view, err := s.app.Queries.SingleTag.Handle(query.SingleTag{
@@ -102,11 +106,11 @@ func (s *HTTPServer) GetTagByID() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			s.badRequest(c, fmt.Errorf("can get find requested tag - %v", err))
+			s.badRequest(c, fmt.Errorf("can not find requested tag - %v", err))
 			return
 		}
 
-		c.JSON(http.StatusOK, s.tagModelToResponse(view))
+		c.JSON(http.StatusOK, s.tagViewToResponse(view))
 	}
 }
 
@@ -132,7 +136,7 @@ func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 	}
 }
 
-func (s *HTTPServer) tagModelToResponse(tag query.TagView) tagResponse {
+func (s *HTTPServer) tagViewToResponse(tag query.TagView) tagResponse {
 	return tagResponse{
 		ID:  tag.ID,
 		Tag: tag.Tag,

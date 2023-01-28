@@ -26,6 +26,10 @@ type User struct {
 	Role  user.Role
 }
 
+func (u User) IsAdmin() bool {
+	return u.Role == user.Admin
+}
+
 type Params struct {
 	AuthTTL    time.Duration
 	RefreshTTL time.Duration

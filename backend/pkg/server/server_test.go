@@ -41,6 +41,7 @@ func initTestServer() *HTTPServer {
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
+		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
 	}
 
 	queries := app.Queries{
@@ -48,6 +49,8 @@ func initTestServer() *HTTPServer {
 		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
 		SingleTag:         query.NewSingleTagHandler(tagRepo),
 		AllTags:           query.NewAllTagsHandler(tagRepo),
+		SingleUser:        query.NewSingleUserHandler(userRepo),
+		AllUsers:          query.NewAllUsersHandler(userRepo),
 	}
 
 	application := app.Application{
