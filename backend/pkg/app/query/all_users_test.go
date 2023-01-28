@@ -2,7 +2,6 @@ package query
 
 import (
 	"errors"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -60,7 +59,7 @@ func TestAllUsersHandler_Handle(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := NewAllUsersHandler(tt.fieldsFn().userRepo)
 			got, err := h.Handle()
-			if !tt.wantErr(t, err, fmt.Sprintf("Handle()")) {
+			if !tt.wantErr(t, err, "Handle()") {
 				return
 			}
 			assert.Equalf(t, tt.want, got, "Handle()")

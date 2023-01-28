@@ -38,10 +38,10 @@ func (h UpdateUserHandler) Handle(cmd UpdateUser) error {
 	}
 
 	if usr.Email() != cmd.Email {
-		free, err := h.emailFree(cmd)
+		free, err2 := h.emailFree(cmd)
 
-		if err != nil {
-			return err
+		if err2 != nil {
+			return err2
 		}
 
 		if !free {

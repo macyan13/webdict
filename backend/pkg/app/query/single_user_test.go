@@ -9,8 +9,7 @@ import (
 
 func TestSingleUserHandler_Handle(t *testing.T) {
 	type fields struct {
-		userRepo   UserViewRepository
-		strictSntz *strictSanitizer
+		userRepo UserViewRepository
 	}
 	type args struct {
 		cmd SingleUser

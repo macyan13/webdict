@@ -20,7 +20,7 @@ func TestHTTPServer_CreateUser(t *testing.T) {
 
 	response := createUser(t, s, name, email, pwd)
 
-	usr := getUserById(t, s, response.ID)
+	usr := getUserByID(t, s, response.ID)
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
@@ -147,7 +147,7 @@ func TestHTTPServer_UpdateUser_Unauthorized(t *testing.T) {
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-	usr := getUserById(t, s, response.ID)
+	usr := getUserByID(t, s, response.ID)
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
@@ -176,14 +176,14 @@ func TestHTTPServer_UpdateUser(t *testing.T) {
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	usr := getUserById(t, s, response.ID)
+	usr := getUserByID(t, s, response.ID)
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
 	assert.Equal(t, int(user.Admin), usr.Role)
 }
 
-func getUserById(t *testing.T, s *HTTPServer, id string) userResponse {
+func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
@@ -196,7 +196,7 @@ func getUserById(t *testing.T, s *HTTPServer, id string) userResponse {
 	return record
 }
 
-func createUser(t *testing.T, s *HTTPServer, name string, email string, passwd string) idResponse {
+func createUser(t *testing.T, s *HTTPServer, name, email, passwd string) idResponse {
 	jsonValue, _ := json.Marshal(userRequest{
 		Name:     name,
 		Email:    email,

@@ -210,7 +210,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				role:   Author,
 			},
 			func(t assert.TestingT, err error, usr *User, details string) {
-				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
+				assert.Nil(t, err, details)
 				assert.Equal(t, "name", usr.name)
 				assert.Equal(t, "updated@email.com", usr.email)
 				assert.Equal(t, "testPasswd", usr.password)
@@ -232,7 +232,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				role:   Author,
 			},
 			func(t assert.TestingT, err error, usr *User, details string) {
-				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
+				assert.Nil(t, err, details)
 				assert.Equal(t, "name", usr.name)
 				assert.Equal(t, "updated@email.com", usr.email)
 				assert.Equal(t, "updatedPasswd", usr.password)

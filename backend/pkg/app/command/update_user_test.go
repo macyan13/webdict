@@ -187,10 +187,9 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := tt.fieldsFn()
 			h := UpdateUserHandler{
-				userRepo: f.userRepo,
-				cipher:   f.cipher,
+				userRepo: tt.fieldsFn().userRepo,
+				cipher:   tt.fieldsFn().cipher,
 			}
 			tt.wantErr(t, h.Handle(tt.args.cmd), fmt.Sprintf("Handle(%v)", tt.args.cmd))
 		})
