@@ -1,21 +1,103 @@
-### Generate Authentication token
+### Generate Admin Authentication token
 POST {{host}}/v1/api/auth/signin
 Content-Type: application/json
 
 {
-  "email": "{{email}}",
-  "password": "{{password}}"
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
 }
 
 > {%
-client.global.set("auth_token", response.body.accessToken)
-client.global.set("auth_type", response.body.type)
+client.global.set("admin_auth_token", response.body.accessToken)
+client.global.set("admin_auth_type", response.body.type)
+ %}
+
+### Crete User
+POST {{host}}/v1/api/users
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+{
+  "name": "test",
+  "email": "{{userEmail}}",
+  "password": "testPasswd",
+  "role": 2
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 201, "Response status is not 201")
+    client.assert(response.body.hasOwnProperty("id"), "ID is present")
+})
+client.global.set("user_id", response.body.id)
+ %}
+
+### Update User
+PUT {{host}}/v1/api/users/{{user_id}}
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+{
+  "name": "John Do",
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}",
+  "role": 2
+}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+ %}
+
+### Get user by ID
+GET {{host}}/v1/api/users/{{user_id}}
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not present")
+    client.assert(response.body.name === "John Do", "name from get user by id is not correct")
+})
+ %}
+
+### Get all users
+GET {{host}}/v1/api/users
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+> {%
+client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200")
+})
+client.test("Response body is correct", function () {
+    client.assert(response.body.length === 2, "Amount of users is not correct")
+})
+ %}
+
+
+### Generate Author Authentication token
+POST {{host}}/v1/api/auth/signin
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+> {%
+client.global.set("user_auth_token", response.body.accessToken)
+client.global.set("user_auth_type", response.body.type)
  %}
 
 ### Crete tag
 POST {{host}}/v1/api/tags
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
   "tag": "Business"
@@ -32,7 +114,7 @@ client.global.set("tag_id", response.body.id)
 ### Update tag
 PUT {{host}}/v1/api/tags/{{tag_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
   "tag": "Programming"
@@ -47,14 +129,14 @@ client.test("Request executed successfully", function () {
 ### Get all tags
 GET {{host}}/v1/api/tags
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 > {%
 client.test("Request executed successfully", function () {
     client.assert(response.status === 200, "Response status is not 200")
 })
 client.test("Response body is correct", function () {
-    client.assert(response.body.length === 1, "Tag ID is not correct")
+    client.assert(response.body.length === 1, "Amount of tags")
     client.assert(response.body[0].tag === "Programming", "Tag from get tag by id is not correct")
 })
  %}
@@ -62,14 +144,14 @@ client.test("Response body is correct", function () {
 ### Get tag by ID
 GET {{host}}/v1/api/tags/{{tag_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 > {%
 client.test("Request executed successfully", function () {
     client.assert(response.status === 200, "Response status is not 200")
 })
 client.test("Response body is correct", function () {
-    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not correct")
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not present")
     client.assert(response.body.tag === "Programming", "Tag from get tag by id is not correct")
 })
  %}
@@ -77,7 +159,7 @@ client.test("Response body is correct", function () {
 ### Create Translation
 POST {{host}}/v1/api/translations
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
   "text": "test",
@@ -89,7 +171,7 @@ Authorization: {{auth_type}} {{auth_token}}
 > {%
 client.test("Request executed successfully", function () {
     client.assert(response.status === 201, "Response status is not 201")
-    client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    client.assert(response.body.hasOwnProperty("id"), "ID is not present")
 })
 client.global.set("translation_id", response.body.id)
  %}
@@ -97,7 +179,7 @@ client.global.set("translation_id", response.body.id)
 ### Update translation
 PUT {{host}}/v1/api/translations/{{translation_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
   "text": "Give it a shot",
@@ -116,7 +198,7 @@ client.test("Request executed successfully", function () {
 ### Get translation by ID
 GET {{host}}/v1/api/translations/{{translation_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 > {%
 client.test("Request executed successfully", function () {
@@ -137,7 +219,7 @@ client.test("Response body is correct", function () {
 ### Delete translation
 DELETE {{host}}/v1/api/translations/{{translation_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 > {%
 client.test("Request executed successfully", function () {
@@ -148,7 +230,7 @@ client.test("Request executed successfully", function () {
 ### Delete tag
 DELETE {{host}}/v1/api/tags/{{tag_id}}
 Content-Type: application/json
-Authorization: {{auth_type}} {{auth_token}}
+Authorization: {{user_auth_type}} {{user_auth_token}}
 
 > {%
 client.test("Request executed successfully", function () {

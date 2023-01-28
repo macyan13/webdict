@@ -56,14 +56,9 @@ func TestAllUsersHandler_Handle(t *testing.T) {
 		},
 	}
 
-	s := newStrictSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			h := AllUsersHandler{
-				userRepo:  tt.fieldsFn().userRepo,
-				sanitizer: s,
-			}
+			h := NewAllUsersHandler(tt.fieldsFn().userRepo)
 			got, err := h.Handle()
 			if !tt.wantErr(t, err, fmt.Sprintf("Handle()")) {
 				return

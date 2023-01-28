@@ -70,13 +70,9 @@ func TestSingleUserHandler_Handle(t *testing.T) {
 			},
 		},
 	}
-	s := newStrictSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := SingleUserHandler{
-				userRepo:   tt.fieldsFn().userRepo,
-				strictSntz: s,
-			}
+			h := NewSingleUserHandler(tt.fieldsFn().userRepo)
 			got, err := h.Handle(tt.args.cmd)
 			if !tt.wantErr(t, err, fmt.Sprintf("Handle(%v)", tt.args.cmd)) {
 				return

@@ -113,6 +113,7 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 		usr, err := s.authHandler.UserFromContext(c)
 		if err != nil {
 			s.unauthorized(c, err)
+			return
 		}
 
 		if err := s.app.Commands.UpdateUser.Handle(command.UpdateUser{
