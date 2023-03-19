@@ -9,6 +9,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/domain/user"
+	"github.com/macyan13/webdict/backend/pkg/store/cache"
 	"github.com/macyan13/webdict/backend/pkg/store/mongo"
 	"log"
 	"net/http"
@@ -64,13 +65,16 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 
 	cipher := auth.Cipher{}
 
+	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL}
+	cachedTagRepo := cache.NewTagRepo(ctx, tagRepo, tagRepo, cacheOpts)
+
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo),
-		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo),
+		AddTranslation:    command.NewAddTranslationHandler(translationRepo, cachedTagRepo),
+		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, cachedTagRepo),
 		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo),
-		AddTag:            command.NewAddTagHandler(tagRepo),
-		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
-		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
+		AddTag:            command.NewAddTagHandler(cachedTagRepo),
+		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),
+		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
 	}
@@ -78,8 +82,8 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	queries := app.Queries{
 		SingleTranslation: query.NewSingleTranslationHandler(translationRepo),
 		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
-		SingleTag:         query.NewSingleTagHandler(tagRepo),
-		AllTags:           query.NewAllTagsHandler(tagRepo),
+		SingleTag:         query.NewSingleTagHandler(cachedTagRepo),
+		AllTags:           query.NewAllTagsHandler(cachedTagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
 	}

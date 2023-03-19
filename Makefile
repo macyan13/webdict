@@ -9,6 +9,6 @@ stop:
 	docker compose -f compose-dev-backend.yml stop
 
 clean:
-	docker compose -f compose-dev-backend.yml rm
+	docker compose -f compose-dev-backend.yml stop && docker compose -f compose-dev-backend.yml rm
 
 .PHONY: backend stop clean

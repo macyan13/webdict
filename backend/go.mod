@@ -3,6 +3,7 @@ module github.com/macyan13/webdict/backend
 go 1.18
 
 require (
+	github.com/Code-Hex/go-generics-cache v1.2.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/uuid v1.3.0
@@ -13,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.mongodb.org/mongo-driver v1.11.1
 	golang.org/x/crypto v0.3.0
+	golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0
 )
 
 require (
