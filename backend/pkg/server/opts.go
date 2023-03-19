@@ -7,6 +7,7 @@ type Opts struct {
 	Auth  AuthGroup  `group:"auth" namespace:"auth" env-namespace:"AUTH"`
 	Admin AdminGroup `group:"admin" namespace:"admin" env-namespace:"ADMIN"`
 	Mongo MongoGroup `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
+	Cache CacheGroup `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 
 	Port       int    `long:"port" env:"PORT" default:"4000" description:"port"`
 	WebdictURL string `long:"url" env:"URL" description:"url to webdict"`
@@ -37,4 +38,9 @@ type MongoGroup struct {
 	Port     int    `long:"port" env:"PORT" default:"27017" description:"mongo DB port"`
 	Username string `long:"username" env:"USERNAME" default:"root" description:"name of the mongo username"`
 	Passwd   string `long:"password" env:"PASSWD" default:"example" description:"mongo password"`
+}
+
+// CacheGroup defines options group for in memory cache
+type CacheGroup struct {
+	TagCacheTTL time.Duration `long:"tag_cache_ttl" env:"TAG_CACHE_TTL" default:"3600s" description:"Cache TTL for tags"`
 }
