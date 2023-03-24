@@ -2,8 +2,8 @@ package inmemory
 
 import (
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 )
 
 type TagRepo struct {

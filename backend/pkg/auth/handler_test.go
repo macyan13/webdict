@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/macyan13/webdict/backend/pkg/domain/user"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"

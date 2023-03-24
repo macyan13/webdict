@@ -3,8 +3,8 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/macyan13/webdict/backend/pkg/domain/user"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"time"
 )
 

@@ -3,8 +3,8 @@ package command
 import (
 	"errors"
 	"fmt"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 )
 
 // AddTranslation create new translation cmd

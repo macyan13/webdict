@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/user"
 	"net/http"
 )
 

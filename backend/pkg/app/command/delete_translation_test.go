@@ -3,7 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

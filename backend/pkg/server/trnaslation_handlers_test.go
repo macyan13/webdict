@@ -199,14 +199,14 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 }
 
 func getExistingTranslations(t *testing.T, s *HTTPServer) []translationResponse {
-	req, _ := http.NewRequest("GET", v1TranslationAPI+"/last?limit=10", http.NoBody)
+	req, _ := http.NewRequest("GET", v1TranslationAPI+"/last?pageSize=10", http.NoBody)
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
-	var records []translationResponse
-	err := json.Unmarshal(w.Body.Bytes(), &records)
+	var response lastTranslationsResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Nil(t, err)
 
-	return records
+	return response.Translations
 }

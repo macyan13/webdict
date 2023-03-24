@@ -1,14 +1,33 @@
-race_test:
+.DEFAULT_GOAL := help
+.PHONY: *
+
+help: ## Display available commands
+	@printf "\033[0;36mAvailable commands:\033[0m\n"
+	@IFS=$$'\n' ; \
+	help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//'`); \
+	for help_line in $${help_lines[@]}; do \
+		IFS=$$'#' ; \
+		help_split=($$help_line) ; \
+		help_command=`echo $${help_split[0]} | sed -e 's/^ *//' -e 's/ *$$//' -e 's/:.*//' -e 's/://'` ; \
+		help_info=`echo $${help_split[2]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
+		if [ "$$help_command" = "" ]; then \
+			printf "\033[0;35m %-15s \033[0m \t\n" $$help_info ; \
+		else \
+			printf "\033[0;32m  %-20s \033[0m \t %s\n" $$help_command $$help_info ; \
+		fi; \
+	done
+
+race_test: ## Runs unit tests with -race parameter
 	cd backend && go test -race -mod=vendor -timeout=60s -count 1 ./...
 
-backend:
+backend: ## Runs containers from compose-dev-backend.yml
 	docker compose -f compose-dev-backend.yml build
 	docker compose -f compose-dev-backend.yml up -d
 
-stop:
+stop: ## Stops ran containers
 	docker compose -f compose-dev-backend.yml stop
 
-clean:
+clean: ## Stops ran containers and destroys
 	docker compose -f compose-dev-backend.yml stop && docker compose -f compose-dev-backend.yml rm
 
-.PHONY: backend stop clean
+#.PHONY: backend stop clean help

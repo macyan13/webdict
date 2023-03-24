@@ -50,14 +50,14 @@ func (s *HTTPServer) GetTags() gin.HandlerFunc {
 			return
 		}
 
-		tag, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorID: user.ID})
+		tags, err := s.app.Queries.AllTags.Handle(query.AllTags{AuthorID: user.ID})
 
 		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not get tags from DB - %v", err))
 			return
 		}
 
-		c.JSON(http.StatusOK, s.tagViewsToResponse(tag))
+		c.JSON(http.StatusOK, s.tagViewsToResponse(tags))
 	}
 }
 

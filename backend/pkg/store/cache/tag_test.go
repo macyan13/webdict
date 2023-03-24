@@ -3,9 +3,9 @@ package cache
 import (
 	"context"
 	"fmt"
-	cache "github.com/Code-Hex/go-generics-cache"
+	"github.com/Code-Hex/go-generics-cache"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -611,6 +611,93 @@ func TestTagRepo_Delete(t *testing.T) {
 				return
 			}
 			tt.wantFn(t, repo.cache)
+		})
+	}
+}
+
+func TestTagRepo_Create(t *testing.T) {
+	type fields struct {
+		domainProxy tag.Repository
+		cache       *cache.Cache[string, map[string]query.TagView]
+	}
+	type args struct {
+		tag *tag.Tag
+	}
+	tests := []struct {
+		name     string
+		fieldsFn func() fields
+		argsFn   func() args
+		wantErr  assert.ErrorAssertionFunc
+		wantFn   assert.ValueAssertionFunc
+	}{
+		{
+			"Error on DB request",
+			func() fields {
+				domainProxy := tag.NewMockRepository(t)
+				domainProxy.On("Create", mock.AnythingOfType("*tag.Tag")).Return(fmt.Errorf("testErr"))
+				c := cache.New[string, map[string]query.TagView]()
+				c.Set("testAuthor", map[string]query.TagView{"tag1": {ID: "tag1"}})
+				return fields{
+					domainProxy: domainProxy,
+					cache:       c,
+				}
+			},
+			func() args {
+				tg, err := tag.NewTag("tag1", "testAuthor")
+				assert.Nil(t, err)
+				return args{tag: tg}
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "testErr", err.Error())
+				return false
+			},
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
+				_, ok := cacheMap["tag1"]
+				assert.True(t, ok)
+				return true
+			},
+		},
+		{
+			"Cache is set",
+			func() fields {
+				domainProxy := tag.NewMockRepository(t)
+				domainProxy.On("Create", mock.AnythingOfType("*tag.Tag")).Return(nil)
+				c := cache.New[string, map[string]query.TagView]()
+				c.Set("testAuthor", map[string]query.TagView{"tag1": {ID: "tag1"}})
+				return fields{
+					domainProxy: domainProxy,
+					cache:       c,
+				}
+			},
+			func() args {
+				tg, err := tag.NewTag("tag1", "testAuthor")
+				assert.Nil(t, err)
+				return args{tag: tg}
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Nil(t, err)
+				return false
+			},
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
+				assert.Zero(t, cacheMap)
+				return true
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := tt.fieldsFn()
+			repo := TagRepo{
+				domainProxy: f.domainProxy,
+				cache:       f.cache,
+				cacheTTL:    time.Minute,
+			}
+			if tt.wantErr(t, repo.Create(tt.argsFn().tag), fmt.Sprintf("Update(%v)", tt.argsFn().tag)) {
+				return
+			}
+			tt.wantFn(t, tt.argsFn().tag, repo.cache)
 		})
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/Code-Hex/go-generics-cache"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"golang.org/x/exp/maps"
 	"time"
 )
@@ -89,7 +89,13 @@ func (t TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error
 }
 
 func (t TagRepo) Create(tg *tag.Tag) error {
-	return t.domainProxy.Create(tg)
+	err := t.domainProxy.Create(tg)
+
+	if err == nil {
+		t.cache.Delete(tg.AuthorID())
+	}
+
+	return err
 }
 
 func (t TagRepo) Update(tg *tag.Tag) error {

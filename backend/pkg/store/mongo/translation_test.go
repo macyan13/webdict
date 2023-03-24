@@ -2,8 +2,8 @@ package mongo
 
 import (
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -65,6 +65,30 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 	assert.Equal(t, model.Text, view.Text)
 	assert.Equal(t, model.Example, view.Example)
 	assert.Equal(t, tagViews, view.Tags)
+}
+
+func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
+	model := TranslationModel{
+		ID:            "id",
+		AuthorID:      "testAuthor",
+		CreatedAt:     time.Now().Add(5 * time.Second),
+		UpdatedAt:     time.Now().Add(10 * time.Second),
+		Transcription: "transcription",
+		Meaning:       "translation",
+		Text:          "text",
+		Example:       "example",
+	}
+
+	translationRepo := &TranslationRepo{}
+
+	view, err := translationRepo.fromModelToView(model)
+	assert.Nil(t, err)
+	assert.Equal(t, model.ID, view.ID)
+	assert.Equal(t, model.CreatedAt, view.CreatedAd)
+	assert.Equal(t, model.Meaning, view.Meaning)
+	assert.Equal(t, model.Transcription, view.Transcription)
+	assert.Equal(t, model.Text, view.Text)
+	assert.Equal(t, model.Example, view.Example)
 }
 
 func TestTranslationRepo_fromModelToView_errorOnGetViews(t *testing.T) {
