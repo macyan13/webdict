@@ -10,7 +10,7 @@ import (
 // AddTranslation create new translation cmd
 type AddTranslation struct {
 	Transcription string
-	Meaning       string
+	Target        string
 	Text          string
 	Example       string
 	TagIds        []string
@@ -43,7 +43,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 	tr, err := translation.NewTranslation(
 		cmd.Text,
 		cmd.Transcription,
-		cmd.Meaning,
+		cmd.Target,
 		cmd.AuthorID,
 		cmd.Example,
 		cmd.TagIds,
@@ -81,7 +81,7 @@ func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
 
 // validateTranslation checks that there is not already creation translation with the cmd text
 func (h AddTranslationHandler) validateTranslation(cmd AddTranslation) error {
-	exist, err := h.translationRepo.ExistByText(cmd.Text, cmd.AuthorID)
+	exist, err := h.translationRepo.ExistBySource(cmd.Text, cmd.AuthorID)
 
 	if err != nil {
 		return err

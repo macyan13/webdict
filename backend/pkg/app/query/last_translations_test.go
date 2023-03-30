@@ -83,9 +83,9 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 					LastViews{
 						Views: []TranslationView{{
 							ID:            "testID",
-							Text:          "TestText",
+							Source:        "TestText",
 							Transcription: "testTranscription",
-							Meaning:       `<a href=\"javascript:alert('XSS1')\" onmouseover=\"alert('XSS2')\"><br>TestMeaning</br><a>`,
+							Target:        `<a href=\"javascript:alert('XSS1')\" onmouseover=\"alert('XSS2')\"><br>TestMeaning</br><a>`,
 							Example:       "testExample",
 						}},
 					}, nil)
@@ -94,9 +94,9 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 			args{LastTranslations{AuthorID: "authorID", PageSize: 105, Page: 1, TagIds: []string{}}},
 			LastViews{Views: []TranslationView{{
 				ID:            "testID",
-				Text:          "TestText",
+				Source:        "TestText",
 				Transcription: "testTranscription",
-				Meaning:       "<br>TestMeaning</br>",
+				Target:        "<br>TestMeaning</br>",
 				Example:       "testExample",
 			}}},
 			assert.NoError,

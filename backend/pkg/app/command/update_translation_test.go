@@ -90,7 +90,7 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					tagRepo:         &tag.MockRepository{},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", Text: "test", Translation: "test", AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -111,7 +111,7 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					tagRepo:         &tagRepo,
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", Text: "test", Translation: "test", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -147,22 +147,22 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	)
 
 	cmd := UpdateTranslation{
-		ID:          id,
-		Meaning:     "transcription",
-		Translation: "translation",
-		Text:        "text",
-		Example:     "example",
-		TagIds:      tags,
-		AuthorID:    authorID,
+		ID:            id,
+		Target:        "transcription",
+		Transcription: "translation",
+		Source:        "text",
+		Example:       "example",
+		TagIds:        tags,
+		AuthorID:      authorID,
 	}
 	assert.Nil(t, handler.Handle(cmd))
 
 	updatedTranslation := translationRepo.Calls[1].Arguments[0].(*translation.Translation)
 	data := updatedTranslation.ToMap()
 
-	assert.Equal(t, cmd.Translation, data["meaning"])
-	assert.Equal(t, cmd.Meaning, data["transcription"])
-	assert.Equal(t, cmd.Text, data["text"])
+	assert.Equal(t, cmd.Transcription, data["transcription"])
+	assert.Equal(t, cmd.Target, data["target"])
+	assert.Equal(t, cmd.Source, data["source"])
 	assert.Equal(t, cmd.Example, data["example"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])
 }

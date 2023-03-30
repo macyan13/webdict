@@ -51,13 +51,13 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
+func (r *TranslationRepo) ExistBySource(source, authorID string) (bool, error) {
 	for _, t := range r.storage {
 		if t.AuthorID() != authorID {
 			continue
 		}
 
-		if t.ToMap()["text"] == text {
+		if t.ToMap()["source"] == source {
 			return true, nil
 		}
 	}
@@ -185,8 +185,8 @@ func (r *TranslationRepo) translationToView(t *translation.Translation) (query.T
 		ID:            t.ID(),
 		CreatedAd:     translationData["createdAt"].(time.Time),
 		Transcription: translationData["transcription"].(string),
-		Meaning:       translationData["meaning"].(string),
-		Text:          translationData["text"].(string),
+		Target:        translationData["target"].(string),
+		Source:        translationData["source"].(string),
 		Example:       translationData["example"].(string),
 		Tags:          tagViews,
 	}, nil

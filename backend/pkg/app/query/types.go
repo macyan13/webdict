@@ -25,18 +25,18 @@ type UserViewRepository interface {
 
 type TranslationView struct {
 	ID            string
-	Text          string
+	Source        string
 	Transcription string
-	Meaning       string
+	Target        string
 	Example       string
 	Tags          []TagView
 	CreatedAd     time.Time
 }
 
 func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richTextSanitizer) {
-	v.Text = reachSntz.SanitizeAndEscape(v.Text)
+	v.Source = reachSntz.SanitizeAndEscape(v.Source)
 	v.Transcription = reachSntz.SanitizeAndEscape(v.Transcription)
-	v.Meaning = reachSntz.Sanitize(v.Meaning)
+	v.Target = reachSntz.Sanitize(v.Target)
 	v.Example = reachSntz.Sanitize(v.Example)
 
 	for i := range v.Tags {

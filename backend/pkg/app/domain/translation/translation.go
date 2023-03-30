@@ -15,9 +15,9 @@ const EN Lang = "en"
 
 type Translation struct {
 	id            string
-	text          string
+	source        string
 	transcription string
-	meaning       string
+	target        string
 	authorID      string
 	example       string
 	tagIDs        []string
@@ -26,16 +26,16 @@ type Translation struct {
 	lang          Lang
 }
 
-func NewTranslation(text, transcription, meaning, authorID, example string, tagIDs []string) (*Translation, error) {
+func NewTranslation(source, transcription, target, authorID, example string, tagIDs []string) (*Translation, error) {
 	now := time.Now()
 	tr := Translation{
 		id:            uuid.New().String(),
 		authorID:      authorID,
 		createdAt:     now,
 		updatedAt:     now,
-		meaning:       meaning,
+		target:        target,
 		transcription: transcription,
-		text:          text,
+		source:        source,
 		example:       example,
 		tagIDs:        tagIDs,
 		lang:          EN,
@@ -56,36 +56,36 @@ func (t *Translation) AuthorID() string {
 	return t.authorID
 }
 
-func (t *Translation) ApplyChanges(text, transcription, translation, example string, tagIds []string) error {
+func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string) error {
 	updated := *t
-	updated.applyChanges(text, transcription, translation, example, tagIds)
+	updated.applyChanges(source, transcription, target, example, tagIds)
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	t.applyChanges(text, transcription, translation, example, tagIds)
+	t.applyChanges(source, transcription, target, example, tagIds)
 	return nil
 }
 
-func (t *Translation) applyChanges(text, transcription, translation, example string, tagIds []string) {
+func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string) {
 	t.tagIDs = tagIds
 	t.transcription = transcription
-	t.text = text
-	t.meaning = translation
+	t.source = source
+	t.target = target
 	t.example = example
 	t.updatedAt = time.Now()
 }
 
 func (t *Translation) validate() error {
 	var result error
-	if t.text == "" {
-		result = multierror.Append(result, errors.New("text can not be empty"))
+	if t.source == "" {
+		result = multierror.Append(result, errors.New("source can not be empty"))
 	}
 
-	textCount := utf8.RuneCountInString(t.text)
+	textCount := utf8.RuneCountInString(t.source)
 	if textCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("text max size is 255 characters, %d passed (%s)", textCount, t.text))
+		result = multierror.Append(result, fmt.Errorf("source max size is 255 characters, %d passed (%s)", textCount, t.source))
 	}
 
 	transcriptionCount := utf8.RuneCountInString(t.transcription)
@@ -93,13 +93,13 @@ func (t *Translation) validate() error {
 		result = multierror.Append(result, fmt.Errorf("transcription max size is 255 characters, %d passed (%s)", transcriptionCount, t.transcription))
 	}
 
-	if t.meaning == "" {
-		result = multierror.Append(result, fmt.Errorf("meaning can not be empty"))
+	if t.target == "" {
+		result = multierror.Append(result, fmt.Errorf("target can not be empty"))
 	}
 
-	translationCount := utf8.RuneCountInString(t.meaning)
+	translationCount := utf8.RuneCountInString(t.target)
 	if translationCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("meaning max size is 255 characters, %d passed (%s)", translationCount, t.meaning))
+		result = multierror.Append(result, fmt.Errorf("target max size is 255 characters, %d passed (%s)", translationCount, t.target))
 	}
 
 	exampleCount := utf8.RuneCountInString(t.example)
@@ -122,9 +122,9 @@ func (t *Translation) validate() error {
 func (t *Translation) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":            t.id,
-		"text":          t.text,
+		"source":        t.source,
 		"transcription": t.transcription,
-		"meaning":       t.meaning,
+		"target":        t.target,
 		"authorID":      t.authorID,
 		"example":       t.example,
 		"tagIDs":        t.tagIDs,
@@ -136,9 +136,9 @@ func (t *Translation) ToMap() map[string]interface{} {
 
 func UnmarshalFromDB(
 	id string,
-	text string,
+	source string,
 	transcription string,
-	translation string,
+	target string,
 	authorID string,
 	example string,
 	tagIDs []string,
@@ -152,8 +152,8 @@ func UnmarshalFromDB(
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 		transcription: transcription,
-		meaning:       translation,
-		text:          text,
+		target:        target,
+		source:        source,
 		example:       example,
 		tagIDs:        tagIDs,
 		lang:          lang,

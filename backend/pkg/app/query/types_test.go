@@ -70,16 +70,16 @@ func TestTranslationView_sanitize(t *testing.T) {
 		{
 			"Case 2: translation with malicious content",
 			fields{
-				Text:          `<a onblur="alert(secret)" href="http://www.test.com">Text</a>`,
-				Transcription: `<a onblur="alert(secret)" href="http://www.test.com">[Meaning]</a>`,
-				Translation:   `<a onblur="alert(secret)" href="http://www.test.com">Meaning</a>`,
+				Text:          `<a onblur="alert(secret)" href="http://www.test.com">Source</a>`,
+				Transcription: `<a onblur="alert(secret)" href="http://www.test.com">[Target]</a>`,
+				Translation:   `<a onblur="alert(secret)" href="http://www.test.com">Target</a>`,
 				Example:       `<a onblur="alert(secret)" href="http://www.test.com">Example</a>`,
 				Tag:           `<a onblur="alert(secret)" href="http://www.test.com">Tag</a>`,
 			},
 			fields{
-				Text:          `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Text&lt;/a&gt;`,
-				Transcription: `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;[Meaning]&lt;/a&gt;`,
-				Translation:   `<a href="http://www.test.com" rel="nofollow">Meaning</a>`,
+				Text:          `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Source&lt;/a&gt;`,
+				Transcription: `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;[Target]&lt;/a&gt;`,
+				Translation:   `<a href="http://www.test.com" rel="nofollow">Target</a>`,
 				Example:       `<a href="http://www.test.com" rel="nofollow">Example</a>`,
 				Tag:           `Tag`,
 			},
@@ -92,17 +92,17 @@ func TestTranslationView_sanitize(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &TranslationView{
 				ID:            id,
-				Text:          tt.rawFields.Text,
+				Source:        tt.rawFields.Text,
 				Transcription: tt.rawFields.Transcription,
-				Meaning:       tt.rawFields.Translation,
+				Target:        tt.rawFields.Translation,
 				Example:       tt.rawFields.Example,
 				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
 			}
 			v.sanitize(strictSntz, reachSntz)
 			assert.Equal(t, id, v.ID)
-			assert.Equal(t, tt.sanitizedFields.Text, v.Text)
+			assert.Equal(t, tt.sanitizedFields.Text, v.Source)
 			assert.Equal(t, tt.sanitizedFields.Transcription, v.Transcription)
-			assert.Equal(t, tt.sanitizedFields.Translation, v.Meaning)
+			assert.Equal(t, tt.sanitizedFields.Translation, v.Target)
 			assert.Equal(t, tt.sanitizedFields.Example, v.Example)
 			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Tag)
 		})

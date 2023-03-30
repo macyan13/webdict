@@ -59,8 +59,8 @@ func (_m *MockRepository) ExistByTag(tagID string, authorID string) (bool, error
 	return r0, r1
 }
 
-// ExistByText provides a mock function with given fields: text, authorID
-func (_m *MockRepository) ExistByText(text string, authorID string) (bool, error) {
+// ExistByText provides a mock function with given fields: source, authorID
+func (_m *MockRepository) ExistBySource(text string, authorID string) (bool, error) {
 	ret := _m.Called(text, authorID)
 
 	var r0 bool
