@@ -25,8 +25,8 @@ type TranslationModel struct {
 	CreatedAt     time.Time `bson:"created_at"`
 	UpdatedAt     time.Time `bson:"updatedAt"`
 	Transcription string    `bson:"transcription,omitempty"`
-	Meaning       string    `bson:"meaning"`
-	Text          string    `bson:"text"`
+	Target        string    `bson:"target"`
+	Source        string    `bson:"source"`
 	Example       string    `bson:"example,omitempty"`
 	TagIDs        []string  `bson:"tag_ids,omitempty"`
 	Lang          string    `bson:"lang"`
@@ -54,7 +54,7 @@ func (r *TranslationRepo) initIndexes() error {
 		{
 			Keys: bson.D{
 				{Key: "author_id", Value: 1},
-				{Key: "text", Value: 1},
+				{Key: "source", Value: 1},
 			},
 		},
 		{
@@ -132,9 +132,9 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 
 	return translation.UnmarshalFromDB(
 		record.ID,
-		record.Text,
+		record.Source,
 		record.Transcription,
-		record.Meaning,
+		record.Target,
 		record.AuthorID,
 		record.Example,
 		record.TagIDs,
@@ -162,11 +162,11 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistByText(text, authorID string) (bool, error) {
+func (r *TranslationRepo) ExistBySource(text, authorID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "text", Value: text}, {Key: "author_id", Value: authorID}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: text}, {Key: "author_id", Value: authorID}})
 
 	return count > 0, err
 }
@@ -270,8 +270,8 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		ID:            model.ID,
 		CreatedAd:     model.CreatedAt,
 		Transcription: model.Transcription,
-		Meaning:       model.Meaning,
-		Text:          model.Text,
+		Target:        model.Target,
+		Source:        model.Source,
 		Example:       model.Example,
 	}
 

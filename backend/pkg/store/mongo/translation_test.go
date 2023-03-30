@@ -13,10 +13,10 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	meaning := "testTranslation"
 	authorID := "testAuthor"
 	transcription := "testTranscription"
-	text := "testText"
+	source := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	domain, err := translation.NewTranslation(text, transcription, meaning, authorID, example, tags)
+	domain, err := translation.NewTranslation(source, transcription, meaning, authorID, example, tags)
 	assert.Nil(t, err)
 	domainMap := domain.ToMap()
 
@@ -24,10 +24,10 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	model, err := repo.fromDomainToModel(domain)
 
 	assert.Nil(t, err)
-	assert.Equal(t, meaning, model.Meaning)
+	assert.Equal(t, meaning, model.Target)
 	assert.Equal(t, authorID, model.AuthorID)
 	assert.Equal(t, transcription, model.Transcription)
-	assert.Equal(t, text, model.Text)
+	assert.Equal(t, source, model.Source)
 	assert.Equal(t, example, model.Example)
 	assert.Equal(t, tags, model.TagIDs)
 	assert.Equal(t, domainMap["createdAt"], model.CreatedAt)
@@ -41,8 +41,8 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 		CreatedAt:     time.Now().Add(5 * time.Second),
 		UpdatedAt:     time.Now().Add(10 * time.Second),
 		Transcription: "transcription",
-		Meaning:       "translation",
-		Text:          "text",
+		Target:        "translation",
+		Source:        "text",
 		Example:       "example",
 		TagIDs:        []string{"tag1", "tag2"},
 	}
@@ -60,9 +60,9 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 
 	assert.Equal(t, model.ID, view.ID)
 	assert.Equal(t, model.CreatedAt, view.CreatedAd)
-	assert.Equal(t, model.Meaning, view.Meaning)
+	assert.Equal(t, model.Target, view.Target)
 	assert.Equal(t, model.Transcription, view.Transcription)
-	assert.Equal(t, model.Text, view.Text)
+	assert.Equal(t, model.Source, view.Source)
 	assert.Equal(t, model.Example, view.Example)
 	assert.Equal(t, tagViews, view.Tags)
 }
@@ -74,8 +74,8 @@ func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
 		CreatedAt:     time.Now().Add(5 * time.Second),
 		UpdatedAt:     time.Now().Add(10 * time.Second),
 		Transcription: "transcription",
-		Meaning:       "translation",
-		Text:          "text",
+		Target:        "translation",
+		Source:        "text",
 		Example:       "example",
 	}
 
@@ -85,9 +85,9 @@ func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, model.ID, view.ID)
 	assert.Equal(t, model.CreatedAt, view.CreatedAd)
-	assert.Equal(t, model.Meaning, view.Meaning)
+	assert.Equal(t, model.Target, view.Target)
 	assert.Equal(t, model.Transcription, view.Transcription)
-	assert.Equal(t, model.Text, view.Text)
+	assert.Equal(t, model.Source, view.Source)
 	assert.Equal(t, model.Example, view.Example)
 }
 

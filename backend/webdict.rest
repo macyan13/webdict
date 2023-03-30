@@ -198,9 +198,9 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "text": "test",
+  "source": "test",
   "transcription": "test",
-  "meaning": "test",
+  "target": "test",
   "example": "test"
 }
 
@@ -218,9 +218,9 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "text": "Give it a shot",
+  "source": "Give it a shot",
   "transcription": "[n/a]",
-  "meaning": "Попробовать",
+  "target": "Попробовать",
   "example": "Just give it a shot",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"]
 }
@@ -243,9 +243,9 @@ client.test("Request executed successfully", function () {
 client.test("Response body is correct", function () {
     client.assert(response.body.hasOwnProperty("id"), "Translation ID is not present")
     client.assert(response.body.hasOwnProperty("created_at"), "Translation created_at is not present")
-    client.assert(response.body.text === "Give it a shot", "text from get translation by id is not correct")
+    client.assert(response.body.source === "Give it a shot", "source from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
-    client.assert(response.body.meaning === "Попробовать", "translation from get translation by id is not correct")
+    client.assert(response.body.target === "Попробовать", "translation from get translation by id is not correct")
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags.length === 2, "Amount of tags from get translation by id is not correct")
     client.assert(function() {
@@ -261,9 +261,9 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "text": "test2",
+  "source": "test2",
   "transcription": "test2",
-  "meaning": "test2",
+  "target": "test2",
   "example": "test2",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"]
 }
@@ -283,9 +283,9 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "text": "test3",
+  "source": "test3",
   "transcription": "test3",
-  "meaning": "test3",
+  "target": "test3",
   "example": "test3"
 }
 
@@ -310,9 +310,9 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
         client.assert(response.body.hasOwnProperty("total_pages"), "Translation created_at is not present")
         client.assert(response.body.total_pages === 2, "amount of pages is not correct")
-        client.assert(response.body.translations[0].text === "test2", "Ordering of last translations is not correct")
+        client.assert(response.body.translations[0].source === "test2", "Ordering of last translations is not correct")
         client.assert(response.body.translations[0].transcription === "test2", "Ordering of last translations is not correct")
-        client.assert(response.body.translations[0].meaning === "test2", "Ordering of last translations is not correct")
+        client.assert(response.body.translations[0].target === "test2", "Ordering of last translations is not correct")
     })
 %}
 

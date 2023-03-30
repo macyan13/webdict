@@ -57,10 +57,10 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Meaning repo can not perform query",
+			"Target repo can not perform query",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, errors.New("testErr"))
+				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, errors.New("testErr"))
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
@@ -73,10 +73,10 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Meaning already exists",
+			"Target already exists",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("ExistByText", "text", "testAuthor").Return(true, nil)
+				translationRepo.On("ExistBySource", "text", "testAuthor").Return(true, nil)
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
@@ -92,7 +92,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			"Error on Apply changes",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, nil)
+				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, nil)
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
@@ -100,7 +100,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "meaning can not be empty"), i)
+				assert.True(t, strings.Contains(err.Error(), "target can not be empty"), i)
 				return true
 			},
 		},
@@ -108,14 +108,14 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			"Error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				translationRepo.On("ExistByText", "text", "testAuthor").Return(false, nil)
+				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, nil)
 				translationRepo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				return fields{
 					translationRepo: &translationRepo,
 					tagRepo:         &tag.MockRepository{},
 				}
 			},
-			args{cmd: AddTranslation{Text: "text", Meaning: "test", AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{Text: "text", Target: "test", AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -139,13 +139,13 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	tags := []string{"tag1", "tag2"}
 	authorID := "testAuthor"
-	text := "text"
+	source := "text"
 
 	tagRepo := tag.MockRepository{}
 	tagRepo.On("AllExist", tags, authorID).Return(true, nil)
 
 	translationRepo := translation.MockRepository{}
-	translationRepo.On("ExistByText", text, authorID).Return(false, nil)
+	translationRepo.On("ExistBySource", source, authorID).Return(false, nil)
 	translationRepo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(nil)
 
 	handler := NewAddTranslationHandler(
@@ -155,8 +155,8 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 
 	cmd := AddTranslation{
 		Transcription: "transcription",
-		Meaning:       "translation",
-		Text:          text,
+		Target:        "target",
+		Text:          source,
 		Example:       "example",
 		TagIds:        tags,
 		AuthorID:      "testAuthor",
@@ -169,9 +169,9 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	data := createdTranslation.ToMap()
 
 	assert.Equal(t, id, createdTranslation.ID())
-	assert.Equal(t, cmd.Meaning, data["meaning"])
+	assert.Equal(t, cmd.Target, data["target"])
 	assert.Equal(t, cmd.Transcription, data["transcription"])
-	assert.Equal(t, cmd.Text, data["text"])
+	assert.Equal(t, cmd.Text, data["source"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
 	assert.Equal(t, translation.EN, data["lang"])
