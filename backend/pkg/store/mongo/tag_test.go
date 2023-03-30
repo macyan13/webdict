@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

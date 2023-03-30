@@ -2,7 +2,7 @@ package command
 
 import (
 	"fmt"
-	"github.com/macyan13/webdict/backend/pkg/domain/user"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 )
 
 // AddUser create new user cmd

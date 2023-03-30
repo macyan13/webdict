@@ -3,8 +3,8 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -191,7 +191,10 @@ func (r *TagRepo) GetView(id, authorID string) (query.TagView, error) {
 
 // GetViews returns tag views for passed ids and authorId
 func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error) {
-	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}
+	filter := bson.D{
+		{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}},
+		{Key: "author_id", Value: authorID},
+	}
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()

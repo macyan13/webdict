@@ -2,8 +2,9 @@ package inmemory
 
 import (
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"sort"
 	"time"
 )
 
@@ -80,59 +81,113 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return false, nil
 }
 
+func (r *TranslationRepo) GetLastViews(authorID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+	type mapItem struct {
+		t         *translation.Translation
+		createdAt time.Time
+	}
+
+	items := make([]mapItem, 0, len(r.storage))
+
+	for _, v := range r.storage {
+		if v.AuthorID() != authorID {
+			continue
+		}
+
+		data := v.ToMap()
+
+		if !r.containsAll(data["tagIDs"].([]string), tagIds) {
+			continue
+		}
+
+		items = append(items, mapItem{
+			t:         v,
+			createdAt: data["createdAt"].(time.Time),
+		})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].createdAt.After(items[j].createdAt)
+	})
+
+	var offset int
+	if page > 1 {
+		offset = pageSize * page
+	}
+
+	if len(items) < offset && page != 1 {
+		return query.LastViews{}, fmt.Errorf("can not get translations from DB")
+	}
+
+	views := make([]query.TranslationView, 0, len(items))
+
+	i := 0
+	limit := offset + pageSize
+	for _, v := range items {
+		if i >= offset && i < limit {
+			view, err := r.translationToView(v.t)
+
+			if err != nil {
+				return query.LastViews{}, err
+			}
+			views = append(views, view)
+		} else if i >= offset+limit {
+			break
+		}
+		i++
+	}
+
+	totalPages := len(items) / pageSize
+	if len(items)%pageSize != 0 {
+		totalPages++
+	}
+	return query.LastViews{
+		Views:      views,
+		TotalPages: totalPages,
+	}, nil
+}
+
+func (r *TranslationRepo) containsAll(tags, searchTags []string) bool {
+	for _, searchTag := range searchTags {
+		found := false
+		for _, tag := range tags {
+			if searchTag == tag {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	for _, t := range r.storage {
 
 		if t.AuthorID() == authorID && t.ID() == id {
-			translationData := t.ToMap()
-			tagViews, err := r.tagRepo.GetViews(translationData["tagIDs"].([]string), authorID)
-
-			if err != nil {
-				return query.TranslationView{}, err
-			}
-			return query.TranslationView{
-				ID:            t.ID(),
-				CreatedAd:     translationData["createdAt"].(time.Time),
-				Transcription: translationData["transcription"].(string),
-				Meaning:       translationData["meaning"].(string),
-				Text:          translationData["text"].(string),
-				Example:       translationData["example"].(string),
-				Tags:          tagViews,
-			}, nil
+			return r.translationToView(t)
 		}
 	}
 
 	return query.TranslationView{}, fmt.Errorf("not found")
 }
 
-func (r *TranslationRepo) GetLastViews(authorID string, limit int) ([]query.TranslationView, error) {
-	results := make([]query.TranslationView, 0)
-	counter := 0
+func (r *TranslationRepo) translationToView(t *translation.Translation) (query.TranslationView, error) {
+	translationData := t.ToMap()
+	tagViews, err := r.tagRepo.GetViews(translationData["tagIDs"].([]string), translationData["authorID"].(string))
 
-	for _, t := range r.storage {
-		if t.AuthorID() != authorID || counter >= limit {
-			continue
-		}
-
-		translationData := t.ToMap()
-		tagViews, err := r.tagRepo.GetViews(translationData["tagIDs"].([]string), authorID)
-
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, query.TranslationView{
-			ID:            t.ID(),
-			CreatedAd:     translationData["createdAt"].(time.Time),
-			Transcription: translationData["transcription"].(string),
-			Meaning:       translationData["meaning"].(string),
-			Text:          translationData["text"].(string),
-			Example:       translationData["example"].(string),
-			Tags:          tagViews,
-		})
-
-		counter++
+	if err != nil {
+		return query.TranslationView{}, err
 	}
-
-	return results, nil
+	return query.TranslationView{
+		ID:            t.ID(),
+		CreatedAd:     translationData["createdAt"].(time.Time),
+		Transcription: translationData["transcription"].(string),
+		Meaning:       translationData["meaning"].(string),
+		Text:          translationData["text"].(string),
+		Example:       translationData["example"].(string),
+		Tags:          tagViews,
+	}, nil
 }

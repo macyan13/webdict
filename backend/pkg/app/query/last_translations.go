@@ -2,7 +2,9 @@ package query
 
 type LastTranslations struct {
 	AuthorID string
-	Limit    int
+	TagIds   []string
+	PageSize int
+	Page     int
 }
 
 type LastTranslationsHandler struct {
@@ -15,23 +17,33 @@ func NewLastTranslationsHandler(translationRepo TranslationViewRepository) LastT
 	return LastTranslationsHandler{translationRepo: translationRepo, strictSntz: newStrictSanitizer(), richSntz: newRichTextSanitizer()}
 }
 
-// Handle todo: add test after finalizing solution
-func (h LastTranslationsHandler) Handle(cmd LastTranslations) ([]TranslationView, error) {
-	limit := cmd.Limit
-
-	if limit == 0 {
-		limit = 10
-	}
-
-	views, err := h.translationRepo.GetLastViews(cmd.AuthorID, limit)
+func (h LastTranslationsHandler) Handle(query LastTranslations) (LastViews, error) {
+	pageSize, page := h.processParameters(query)
+	lastViews, err := h.translationRepo.GetLastViews(query.AuthorID, pageSize, page, query.TagIds)
 
 	if err != nil {
-		return nil, err
+		return lastViews, err
 	}
 
-	for i := range views {
-		views[i].sanitize(h.strictSntz, h.richSntz)
+	for i := range lastViews.Views {
+		lastViews.Views[i].sanitize(h.strictSntz, h.richSntz)
 	}
 
-	return views, nil
+	return lastViews, nil
+}
+
+func (h LastTranslationsHandler) processParameters(query LastTranslations) (pageSize, page int) {
+	pageSize = query.PageSize
+
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	page = query.Page
+
+	if page < 1 {
+		page = 1
+	}
+
+	return
 }

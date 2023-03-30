@@ -53,21 +53,18 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		var limit int
-		requestLimit, exist := c.GetQuery("limit")
+		var pageSize, page int
+		requestPageSize := c.Query("pageSize")
+		pageSize, _ = strconv.Atoi(requestPageSize)
 
-		if exist {
-			limit, err = strconv.Atoi(requestLimit)
+		requestPage := c.Query("page")
+		page, _ = strconv.Atoi(requestPage)
 
-			if err != nil {
-				s.badRequest(c, fmt.Errorf("can not return last translations, can not parse limit param: %v, %v", c.Query("limit"), err))
-				return
-			}
-		}
-
-		views, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
+		lastViews, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
 			AuthorID: user.ID,
-			Limit:    limit,
+			PageSize: pageSize,
+			Page:     page,
+			TagIds:   c.QueryArray("tagId"),
 		})
 
 		if err != nil {
@@ -75,7 +72,10 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, s.translationViewsToResponse(views))
+		c.JSON(http.StatusOK, lastTranslationsResponse{
+			Translations: s.translationViewsToResponse(lastViews.Views),
+			TotalPages:   lastViews.TotalPages,
+		})
 	}
 }
 

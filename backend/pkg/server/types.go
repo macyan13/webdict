@@ -36,6 +36,11 @@ type translationResponse struct {
 	CreatedAt     time.Time     `json:"created_at"`
 }
 
+type lastTranslationsResponse struct {
+	Translations []translationResponse `json:"translations"`
+	TotalPages   int                   `json:"total_pages"`
+}
+
 type tagResponse struct {
 	ID  string `json:"id"`
 	Tag string `json:"tag"`

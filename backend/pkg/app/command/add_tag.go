@@ -2,7 +2,7 @@ package command
 
 import (
 	"fmt"
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 )
 
 // AddTag create new tag cmd

@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 )
 
 // DeleteTranslation cmd

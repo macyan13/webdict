@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/macyan13/webdict/backend/pkg/domain/tag"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 )
 
 // UpdateTag update existing tag cmd

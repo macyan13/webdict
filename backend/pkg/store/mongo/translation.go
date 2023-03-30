@@ -3,8 +3,8 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
-	"github.com/macyan13/webdict/backend/pkg/domain/translation"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -180,7 +180,69 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return count > 0, err
 }
 
-// GetView perform search request based on translation id and author id parameters and returns translation view representation
+func (r *TranslationRepo) GetLastViews(authorID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "author_id", Value: authorID}}
+	if len(tagIds) != 0 {
+		filter = append(filter, bson.E{Key: "tag_ids", Value: bson.D{{Key: "$all", Value: tagIds}}})
+	}
+
+	totalDocuments, err := r.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return query.LastViews{}, err
+	}
+
+	if totalDocuments == 0 && page == 1 {
+		return query.LastViews{}, nil
+	}
+
+	totalPages := int(totalDocuments) / pageSize
+	if int(totalDocuments)%pageSize != 0 {
+		totalPages++
+	}
+
+	if totalPages < page {
+		return query.LastViews{}, fmt.Errorf("can not get %d translations page from DB as max page is %d", page, totalPages)
+	}
+
+	skip := (page - 1) * pageSize
+	sort := bson.M{"created_at": -1}
+	cursor, err := r.collection.Find(ctx, filter, options.Find().SetSkip(int64(skip)).SetLimit(int64(pageSize)).SetSort(sort))
+	if err != nil {
+		return query.LastViews{}, err
+	}
+
+	var models []TranslationModel
+
+	if err = cursor.All(ctx, &models); err != nil {
+		return query.LastViews{}, err
+	}
+
+	err = cursor.Close(ctx)
+	if err != nil {
+		return query.LastViews{}, err
+	}
+
+	views := make([]query.TranslationView, 0, pageSize)
+
+	for i := range models {
+		view, err := r.fromModelToView(models[i])
+
+		if err != nil {
+			return query.LastViews{}, err
+		}
+
+		views = append(views, view)
+	}
+
+	return query.LastViews{
+		Views:      views,
+		TotalPages: totalPages,
+	}, nil
+}
+
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	var record TranslationModel
 
@@ -195,47 +257,6 @@ func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, e
 	return r.fromModelToView(record)
 }
 
-// GetLastViews provide a limited slice of views ordered in DESC order by created_at field
-func (r *TranslationRepo) GetLastViews(authorID string, limit int) ([]query.TranslationView, error) {
-	filter := bson.D{{Key: "author_id", Value: authorID}}
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
-	opts.SetLimit(int64(limit))
-
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
-	cursor, err := r.collection.Find(ctx, filter, opts)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var models []TranslationModel
-
-	if err = cursor.All(ctx, &models); err != nil {
-		return nil, err
-	}
-
-	err = cursor.Close(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	views := make([]query.TranslationView, 0, limit)
-
-	for i := range models {
-		view, err := r.fromModelToView(models[i])
-
-		if err != nil {
-			return nil, err
-		}
-
-		views = append(views, view)
-	}
-
-	return views, nil
-}
-
 // fromDomainToModel converts domain translation to mongo model
 func (r *TranslationRepo) fromDomainToModel(t *translation.Translation) (TranslationModel, error) {
 	model := TranslationModel{}
@@ -245,6 +266,18 @@ func (r *TranslationRepo) fromDomainToModel(t *translation.Translation) (Transla
 
 // fromModelToView converts mongo model to translation View performing request for receiving related tag views
 func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.TranslationView, error) {
+	view := query.TranslationView{
+		ID:            model.ID,
+		CreatedAd:     model.CreatedAt,
+		Transcription: model.Transcription,
+		Meaning:       model.Meaning,
+		Text:          model.Text,
+		Example:       model.Example,
+	}
+
+	if model.TagIDs == nil {
+		return view, nil
+	}
 	tagViews, err := r.tagRepo.GetViews(model.TagIDs, model.AuthorID)
 
 	if err != nil {
@@ -255,13 +288,6 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		return query.TranslationView{}, fmt.Errorf("can not find all translation tags")
 	}
 
-	return query.TranslationView{
-		ID:            model.ID,
-		CreatedAd:     model.CreatedAt,
-		Transcription: model.Transcription,
-		Meaning:       model.Meaning,
-		Text:          model.Text,
-		Example:       model.Example,
-		Tags:          tagViews,
-	}, nil
+	view.Tags = tagViews
+	return view, nil
 }
