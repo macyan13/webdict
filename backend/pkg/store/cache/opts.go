@@ -3,5 +3,6 @@ package cache
 import "time"
 
 type Opts struct {
-	TagCacheTTL time.Duration
+	TagCacheTTL         time.Duration
+	TranslationCacheTTL time.Duration
 }

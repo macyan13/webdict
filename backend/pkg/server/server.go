@@ -68,20 +68,22 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL}
 	cachedTagRepo := cache.NewTagRepo(ctx, tagRepo, tagRepo, cacheOpts)
 
+	cachedTranslationRepo := cache.NewTranslationRepo(ctx, translationRepo, translationRepo, cacheOpts.TranslationCacheTTL)
+
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(translationRepo, cachedTagRepo),
-		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, cachedTagRepo),
-		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo),
+		AddTranslation:    command.NewAddTranslationHandler(cachedTranslationRepo, cachedTagRepo),
+		UpdateTranslation: command.NewUpdateTranslationHandler(cachedTranslationRepo, cachedTagRepo),
+		DeleteTranslation: command.NewDeleteTranslationHandler(cachedTranslationRepo),
 		AddTag:            command.NewAddTagHandler(cachedTagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),
-		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, translationRepo),
+		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, cachedTranslationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
 	}
 
 	queries := app.Queries{
-		SingleTranslation: query.NewSingleTranslationHandler(translationRepo),
-		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
+		SingleTranslation: query.NewSingleTranslationHandler(cachedTranslationRepo),
+		LastTranslations:  query.NewLastTranslationsHandler(cachedTranslationRepo),
 		SingleTag:         query.NewSingleTagHandler(cachedTagRepo),
 		AllTags:           query.NewAllTagsHandler(cachedTagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
