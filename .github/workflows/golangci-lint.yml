@@ -1,10 +1,6 @@
 name: golangci-lint
 
 on:
-  push:
-    tags:
-    branches:
-    paths:
   pull_request:
     types: [opened, reopened]
 permissions:

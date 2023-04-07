@@ -1,10 +1,6 @@
 name: Go
 
 on:
-  push:
-    tags:
-    branches:
-    paths:
   pull_request:
     types: [opened, reopened]
 
