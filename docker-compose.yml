@@ -7,12 +7,14 @@ services:
     container_name: "webdict"
     hostname: "webdict"
     restart: always
+    mem_limit: ${APP_MEMORY_LIMIT}
 
     # uncomment to expose directly (no proxy)
     ports:
       - "4000:${PORT}"
 
     environment:
+      - APP_MEMORY_LIMIT=${APP_MEMORY_LIMIT:-512m}
       - AUTH_TTL_AUTH
       - AUTH_TTL_REFRESH
       - AUTH_TTL_COOKIE
