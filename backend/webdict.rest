@@ -350,7 +350,6 @@ client.test("Request executed successfully", function () {
  %}
 
 ### Get Last Translations
-#GET {{host}}/v1/api/translations/last?pageSize=1&page=1
 GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
@@ -364,5 +363,17 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.body.hasOwnProperty("total_pages"), "Translation created_at is not present")
         client.assert(response.body.total_pages === 0, "Amount of pages is not correct")
         client.assert(response.body.translations.length === 0, "Amount of translations is not correct")
+    })
+%}
+
+### Check home page
+GET {{host}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.search("<title>Test Page</title>") !== -1, "Static data from index.html is not correct")
     })
 %}

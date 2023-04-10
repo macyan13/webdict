@@ -112,8 +112,9 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		opts:        opts,
 	}
 
-	s.BuildRoutes()
-	s.PopulateInitData()
+	s.buildRoutes()
+	s.loadStaticData()
+	s.populateInitData()
 	return &s, nil
 }
 
@@ -128,7 +129,11 @@ func (s *HTTPServer) Run() error {
 	return nil
 }
 
-func (s *HTTPServer) PopulateInitData() {
+func (s *HTTPServer) loadStaticData() {
+	s.engine.LoadHTMLGlob("public/*.html")
+}
+
+func (s *HTTPServer) populateInitData() {
 	if _, err := s.app.Commands.AddUser.Handle(command.AddUser{
 		Name:     "admin",
 		Email:    s.opts.Admin.AdminEmail,

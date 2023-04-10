@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
-func (s *HTTPServer) BuildRoutes() {
+func (s *HTTPServer) buildRoutes() {
 	router := s.engine
+
+	router.Group("/").GET("", s.ServeStatic())
 
 	v1 := router.Group("/v1/api")
 	{
