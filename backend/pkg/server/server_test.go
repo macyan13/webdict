@@ -74,7 +74,7 @@ func initTestServer() *HTTPServer {
 		userRepo:    userRepo,
 	}
 
-	s.BuildRoutes()
-	s.PopulateInitData()
+	s.buildRoutes()
+	s.populateInitData()
 	return &s
 }
