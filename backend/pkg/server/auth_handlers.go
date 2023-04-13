@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"log"
@@ -16,8 +17,7 @@ func (s *HTTPServer) SighIn() gin.HandlerFunc {
 		var request SignInRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Printf("[Error] Can not parse SighIn request: %v", err)
-			c.JSON(http.StatusBadRequest, nil)
+			s.badRequest(c, fmt.Errorf("[Error] Can not parse SighIn request: %v", err))
 			return
 		}
 
@@ -28,13 +28,14 @@ func (s *HTTPServer) SighIn() gin.HandlerFunc {
 				log.Printf("[Error] Can not handle auth request: %v", err)
 			}
 			c.JSON(http.StatusUnauthorized, nil)
+			return
 		}
 
 		refreshToken, err := s.authHandler.GenerateRefreshToken(request.Email)
 
 		if err != nil {
-			log.Printf("[Error] Can not generate Refresh token: %v", err)
-			c.JSON(http.StatusUnauthorized, nil)
+			s.unauthorized(c, fmt.Errorf("[Error] Can not generate Refresh token: %v", err))
+			return
 		}
 
 		c.SetCookie(refreshTokenCookieName, refreshToken.Token, int(time.Now().Add(s.opts.Auth.TTL.Cookie).Unix()), "/", s.opts.WebdictURL, false, true)

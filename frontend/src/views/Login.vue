@@ -14,7 +14,7 @@
         <h5  v-if="!loginError">You're not logged in - so you don't see much here. Try to log in:</h5>
 
         <form @submit.prevent="callLogin()">
-          <input type="text" placeholder="username" v-model="userName" required="required">
+          <input type="email" placeholder="email" v-model="email" required="required">
           <input type="password" placeholder="password" v-model="password" required="required">
           <b-btn variant="success" type="submit">Login</b-btn>
         </form>
@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       loginError: false,
-      userName: '',
+      email: '',
       password: '',
       error: []
     }
@@ -47,7 +47,7 @@ export default {
       return this.$store.getters['auth/isLoggedIn']
     },
     callLogin() {
-      let user = new User(this.userName, this.password)
+      let user = new User(this.email, this.password)
       this.$store.dispatch('auth/login', user)
           .then(() => this.$router.push({name: 'Home'}))
           .catch(error => {
