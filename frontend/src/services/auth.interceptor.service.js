@@ -31,7 +31,7 @@ export default () => {
                             function () {
                                 // New request with new token
                                 const config = error.config;
-                                config.headers['Authorization'] = `Bearer ${data.accessToken}`;
+                                config.headers['Authorization'] = `${data.type} ${data.accessToken}`;
 
                                 return new Promise((resolve, reject) => {
                                     axios.request(config).then(response => {
