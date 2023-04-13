@@ -1,0 +1,51 @@
+.error-screen {
+    background-color: #333333;
+    width: 100vw;
+    height: 100vh;
+    color: white;
+    font-family: 'Arial Black';
+    text-align: center;
+}
+
+.error-screen .container {
+    padding-top: 4em;
+    width: 50%;
+    display: block;
+    margin: 0 auto;
+}
+
+.error-screen .error-num {
+    font-size: 8em;
+}
+
+.error-screen .eye {
+    background: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    height: 100px;
+    position: relative;
+    width: 100px;
+}
+
+.error-screen .eye::after {
+    background: #000;
+    border-radius: 50%;
+    bottom: 56.1px;
+    content: ' ';
+    height: 33px;
+    position: absolute;
+    right: 33px;
+    width: 33px;
+}
+
+.error-screen .italic {
+    font-style: italic;
+}
+
+.error-screen p {
+    margin-bottom: 4em;
+}
+
+.error-screen a:hover {
+    color: lightgray;
+}
