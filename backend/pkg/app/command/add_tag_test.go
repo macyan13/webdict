@@ -64,7 +64,7 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not create new tag - tag:testTag already created", err.Error(), i)
+				assert.Equal(t, "tag already exists", err.Error(), i)
 				return true
 			},
 		},

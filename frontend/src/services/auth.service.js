@@ -12,7 +12,6 @@ class AuthService {
                 {withCredentials: true}
             )
             .then(response => {
-                console.log(response);
                 if (response.data.accessToken) {
                     localStorage.setItem(USER_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
                 }
@@ -25,7 +24,6 @@ class AuthService {
             axios
                 .post(this.getRefreshUrl(), {}, {withCredentials: true})
                 .then(response => {
-                    console.log(response);
                     if (response.data && response.data.accessToken) {
                         localStorage.setItem(USER_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
                     }
@@ -55,7 +53,7 @@ class AuthService {
     }
 
     getRefreshUrl() {
-        return '/api/auth/refresh'
+        return '/v1/api/auth/refresh';
     }
 }
 
