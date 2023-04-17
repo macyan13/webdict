@@ -111,6 +111,23 @@ client.test("Request executed successfully", function () {
 client.global.set("tag1_id", response.body.id)
  %}
 
+### Error on create already existing tag
+# Frontend app should receive 400 error code to be able to show for user error message
+POST {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "tag": "test"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 400, "Response status is not 400")
+        client.assert(response.body == "tag test already exists", "error message is not correct")
+    })
+%}
+
 ### Update tag
 PUT {{host}}/v1/api/tags/{{tag1_id}}
 Content-Type: application/json

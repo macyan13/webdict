@@ -1,10 +1,11 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/">Home</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTag">Create Tag</router-link> | </span>
       <router-link to="/about">About</router-link> |
       <router-link v-if="!currentUser" to="/login">Login</router-link>
-      <a to="" v-if="currentUser" href @click.prevent="logOut">Logout</a>
+      <a to="" v-if="this.$store.getters['auth/isLoggedIn']" href @click.prevent="logOut">Logout</a>
     </div>
     <router-view/>
   </div>

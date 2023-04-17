@@ -1,9 +1,11 @@
 package command
 
 import (
-	"fmt"
+	"errors"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 )
+
+var ErrTagAlreadyExists = errors.New("tag already exists")
 
 // AddTag create new tag cmd
 type AddTag struct {
@@ -49,7 +51,7 @@ func (h AddTagHandler) validate(cmd AddTag) error {
 	}
 
 	if exist {
-		return fmt.Errorf("can not create new tag - tag:%s already created", cmd.Tag)
+		return ErrTagAlreadyExists
 	}
 
 	return nil

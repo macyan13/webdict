@@ -9,8 +9,15 @@ export default () => {
             return response;
         },
         (error) => {
+            console.log(error)
+            if (error.response.status === 400) {
+                console.log(error.response)
+                return new Promise((resolve, reject) => {
+                    reject(error.response.data);
+                });
+            }
+
             if (error.response.status !== 401) {
-                // todo: add handling for error page
                 return new Promise((resolve, reject) => {
                     router.push({name: 'Error'})
                     reject(error);
@@ -37,6 +44,7 @@ export default () => {
                                     axios.request(config).then(response => {
                                         resolve(response);
                                     }).catch((error) => {
+                                        store.dispatch('auth/logout').then(() => router.push({name: 'Login'}));
                                         reject(error);
                                     })
                                 });
@@ -45,6 +53,7 @@ export default () => {
                         );
                     })
                     .catch((error) => {
+                        store.dispatch('auth/logout').then(() => router.push({name: 'Login'}));
                         console.log(error);
                         reject(error);
                     });

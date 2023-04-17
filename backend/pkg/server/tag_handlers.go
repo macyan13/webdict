@@ -31,6 +31,11 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc {
 			AuthorID: user.ID,
 		})
 
+		if err == command.ErrTagAlreadyExists {
+			c.JSON(http.StatusBadRequest, fmt.Sprintf("tag %s already exists", request.Tag))
+			return
+		}
+
 		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not create new tag: %v", err))
 			return
