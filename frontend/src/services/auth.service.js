@@ -40,13 +40,13 @@ class AuthService {
         localStorage.removeItem(USER_LOCAL_STORAGE_KEY);
     }
 
-    register(user) {
-        return axios.post('/v1/api/auth/signup', {
-            username: user.username,
-            email: user.email,
-            password: user.password
-        });
-    }
+    // register(user) {
+    //     return axios.post('/v1/api/auth/signup', {
+    //         username: user.username,
+    //         email: user.email,
+    //         password: user.password
+    //     });
+    // }
 
     getUser() {
         return JSON.parse(localStorage.getItem(USER_LOCAL_STORAGE_KEY));

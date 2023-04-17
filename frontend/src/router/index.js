@@ -35,8 +35,16 @@ const routes = [
   },
   {
     path: '/newTag',
-    name: 'New Tag',
+    name: 'NewTag',
     component: () => import('@/views/NewTag.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/tags',
+    name: 'Tags',
+    component: () => import('@/views/Tags.vue'),
     meta: {
       requiresAuth: true
     }

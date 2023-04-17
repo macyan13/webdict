@@ -29,18 +29,18 @@ export default {
             AuthService.logout();
             commit('logout');
         },
-        register({commit}, user) {
-            return AuthService.register(user).then(
-                response => {
-                    commit('registerSuccess');
-                    return Promise.resolve(response.data);
-                },
-                error => {
-                    commit('registerFailure');
-                    return Promise.reject(error);
-                }
-            );
-        }
+        // register({commit}, user) {
+        //     return AuthService.register(user).then(
+        //         response => {
+        //             commit('registerSuccess');
+        //             return Promise.resolve(response.data);
+        //         },
+        //         error => {
+        //             commit('registerFailure');
+        //             return Promise.reject(error);
+        //         }
+        //     );
+        // }
     },
     mutations: {
         loginSuccess(state, user) {

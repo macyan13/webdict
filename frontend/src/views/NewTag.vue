@@ -27,13 +27,11 @@ export default {
   methods: {
     async handleSubmit(newTag) {
       try {
-        console.log(newTag)
         let tag = new Tag(newTag)
         TagService.create(tag)
-            .then((data) => {
-              // todo: redirect to tag detail page or tags page
-              console.log(data);
-              router.push({name: 'Home'});
+            .then(() => {
+              this.$store.dispatch('tag/clear');
+              router.push({name: 'Tags'});
             })
             .catch((error) => {
               this.hasError = true;
