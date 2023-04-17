@@ -40,14 +40,14 @@ export default () => {
                                 const config = error.config;
                                 config.headers['Authorization'] = `${data.type} ${data.accessToken}`;
 
-                                return new Promise((resolve, reject) => {
+                                // return new Promise((resolve, reject) => {
                                     axios.request(config).then(response => {
                                         resolve(response);
                                     }).catch((error) => {
                                         store.dispatch('auth/logout').then(() => router.push({name: 'Login'}));
                                         reject(error);
                                     })
-                                });
+                                // });
                             }
 
                         );
