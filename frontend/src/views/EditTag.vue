@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TagForm />
+    <TagForm :id="$route.params.id"/>
   </div>
 </template>
 
@@ -8,10 +8,10 @@
 import TagForm from '@/components/Tag.vue'
 
 export default {
-  name: "NewTag",
+  name: "EditTag",
   components: {
     TagForm
-  }
+  },
 }
 </script>
 

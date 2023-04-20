@@ -31,49 +31,39 @@ func (t TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 		return maps.Values(cachedViews), nil
 	}
 
-	views, err := t.queryProxy.GetAllViews(authorID)
+	cachedViews, err := t.initCache(authorID)
 	if err != nil {
 		return nil, err
 	}
-
-	cacheMap := make(map[string]query.TagView, len(views))
-
-	for i := range views {
-		cacheMap[views[i].ID] = views[i]
-	}
-
-	t.cache.Set(authorID, cacheMap, cache.WithExpiration(t.cacheTTL))
-	return views, nil
+	return maps.Values(cachedViews), nil
 }
 
 func (t TagRepo) GetView(id, authorID string) (query.TagView, error) {
 	cachedViews, ok := t.cache.Get(authorID)
-
 	if !ok {
-		cachedViews = map[string]query.TagView{}
+		refreshedViews, err := t.initCache(authorID)
+		if err != nil {
+			return query.TagView{}, err
+		}
+		cachedViews = refreshedViews
 	}
 
-	if err := t.updateCacheWithMisses([]string{id}, authorID, cachedViews); err != nil {
-		return query.TagView{}, err
-	}
-
-	view, ok := cachedViews[id]
-	if ok {
-		t.cache.Set(authorID, cachedViews, cache.WithExpiration(t.cacheTTL))
+	if view, hit := cachedViews[id]; hit {
 		return view, nil
 	}
-
-	return query.TagView{}, fmt.Errorf("can not find tag, userID: %s, tagID: %s", id, authorID)
+	return query.TagView{}, fmt.Errorf("can not find tag, userID: %s, tagID: %s", authorID, id)
 }
 
 func (t TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error) {
 	cachedViews, ok := t.cache.Get(authorID)
-	if !ok {
-		cachedViews = map[string]query.TagView{}
-	}
 
-	if err := t.updateCacheWithMisses(ids, authorID, cachedViews); err != nil {
-		return nil, err
+	if !ok {
+		refreshedViews, err := t.initCache(authorID)
+		if err != nil {
+			return nil, err
+		}
+
+		cachedViews = refreshedViews
 	}
 
 	views := make([]query.TagView, 0, len(ids))
@@ -81,21 +71,21 @@ func (t TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, error
 	for i := range ids {
 		if view, hit := cachedViews[ids[i]]; hit {
 			views = append(views, view)
+		} else {
+			return nil, fmt.Errorf("can not find tag, userID: %s, tagID: %s", authorID, ids[i])
 		}
 	}
 
-	t.cache.Set(authorID, cachedViews, cache.WithExpiration(t.cacheTTL))
 	return views, nil
 }
 
 func (t TagRepo) Create(tg *tag.Tag) error {
-	err := t.domainProxy.Create(tg)
-
-	if err == nil {
-		t.cache.Delete(tg.AuthorID())
+	if err := t.domainProxy.Create(tg); err != nil {
+		return err
 	}
 
-	return err
+	t.cache.Delete(tg.AuthorID())
+	return nil
 }
 
 func (t TagRepo) Update(tg *tag.Tag) error {
@@ -103,10 +93,7 @@ func (t TagRepo) Update(tg *tag.Tag) error {
 		return err
 	}
 
-	if cachedViews, ok := t.cache.Get(tg.AuthorID()); ok {
-		delete(cachedViews, tg.ID())
-	}
-
+	t.cache.Delete(tg.AuthorID())
 	return nil
 }
 
@@ -123,10 +110,7 @@ func (t TagRepo) Delete(id, authorID string) error {
 		return err
 	}
 
-	if cachedViews, ok := t.cache.Get(authorID); ok {
-		delete(cachedViews, id)
-	}
-
+	t.cache.Delete(authorID)
 	return nil
 }
 
@@ -134,28 +118,18 @@ func (t TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	return t.domainProxy.AllExist(ids, authorID)
 }
 
-func (t TagRepo) updateCacheWithMisses(ids []string, authorID string, cacheMap map[string]query.TagView) error {
-	cacheMiss := make([]string, 0, len(ids))
-
-	for i := range ids {
-		if _, cacheHit := cacheMap[ids[i]]; !cacheHit {
-			cacheMiss = append(cacheMiss, ids[i])
-		}
-	}
-
-	if len(cacheMiss) == 0 {
-		return nil
-	}
-
-	views, err := t.queryProxy.GetViews(cacheMiss, authorID)
-
+func (t TagRepo) initCache(authorID string) (map[string]query.TagView, error) {
+	views, err := t.queryProxy.GetAllViews(authorID)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	cacheMap := make(map[string]query.TagView, len(views))
 
 	for i := range views {
 		cacheMap[views[i].ID] = views[i]
 	}
 
-	return nil
+	t.cache.Set(authorID, cacheMap, cache.WithExpiration(t.cacheTTL))
+	return cacheMap, nil
 }

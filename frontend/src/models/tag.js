@@ -1,5 +1,6 @@
 export default class Tag {
-    constructor(tag) {
+    constructor(tag, id = null) {
         this.tag = tag;
+        this.id = id;
     }
 }
