@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"context"
 	"fmt"
 	"github.com/Code-Hex/go-generics-cache"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
@@ -11,100 +10,6 @@ import (
 	"testing"
 	"time"
 )
-
-func TestTagRepo_updateCacheWithMisses(t *testing.T) {
-	type fields struct {
-		queryProxy query.TagViewRepository
-	}
-	type args struct {
-		ids      []string
-		authorID string
-		cacheMap map[string]query.TagView
-	}
-	tests := []struct {
-		name     string
-		fieldsFn func() fields
-		args     args
-		wantErr  bool
-		wantFn   assert.ValueAssertionFunc
-	}{
-		{
-			"Error on receiving tag views from repo",
-			func() fields {
-				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"ids"}, "testAuthor").Return(nil, fmt.Errorf("test"))
-				return fields{
-					queryProxy: queryProxy,
-				}
-			},
-			args{
-				ids:      []string{"ids"},
-				authorID: "testAuthor",
-				cacheMap: map[string]query.TagView{},
-			},
-			true,
-			nil,
-		},
-		{
-			"Missed views are filled",
-			func() fields {
-				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"miss2", "miss3"}, "testAuthor").Return([]query.TagView{{ID: "miss2"}, {ID: "miss3"}}, nil)
-				return fields{
-					queryProxy: queryProxy,
-				}
-			},
-			args{
-				ids:      []string{"miss1", "miss2", "miss3"},
-				authorID: "testAuthor",
-				cacheMap: map[string]query.TagView{"miss1": {ID: "miss1"}},
-			},
-			false,
-			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				cacheMap, ok := i.(map[string]query.TagView)
-				assert.True(t, ok)
-				assert.Equal(t, "miss2", cacheMap["miss2"].ID)
-				assert.Equal(t, "miss3", cacheMap["miss3"].ID)
-				return true
-			},
-		},
-		{
-			"All views are cached",
-			func() fields {
-				return fields{
-					queryProxy: nil,
-				}
-			},
-			args{
-				ids:      []string{"view1", "view2"},
-				authorID: "testAuthor",
-				cacheMap: map[string]query.TagView{"view1": {ID: "view1"}, "view2": {ID: "view2"}},
-			},
-			false,
-			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				cacheMap, ok := i.(map[string]query.TagView)
-				assert.True(t, ok)
-				assert.Equal(t, "view1", cacheMap["view1"].ID)
-				assert.Equal(t, "view2", cacheMap["view2"].ID)
-				return true
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := tt.fieldsFn()
-			repo := NewTagRepo(context.TODO(), nil, f.queryProxy, Opts{TagCacheTTL: time.Minute})
-			err := repo.updateCacheWithMisses(tt.args.ids, tt.args.authorID, tt.args.cacheMap)
-			if err != nil {
-				if !tt.wantErr {
-					t.Errorf("updateCacheWithMisses() error = %v, wantErr %v", err, tt.wantErr)
-				}
-				return
-			}
-			tt.wantFn(t, tt.args.cacheMap)
-		})
-	}
-}
 
 func TestTagRepo_GetAllViews(t *testing.T) {
 	type fields struct {
@@ -223,7 +128,7 @@ func TestTagRepo_GetView(t *testing.T) {
 			"Cache is missed",
 			func() fields {
 				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"tag1"}, "testAuthor").Return([]query.TagView{{ID: "tag1"}}, nil)
+				queryProxy.On("GetAllViews", "testAuthor").Return([]query.TagView{{ID: "tag1"}, {ID: "tag2"}}, nil)
 				return fields{
 					queryProxy: queryProxy,
 					cache:      cache.New[string, map[string]query.TagView](),
@@ -249,7 +154,7 @@ func TestTagRepo_GetView(t *testing.T) {
 			"Error on DB request",
 			func() fields {
 				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"tag1"}, "testAuthor").Return(nil, fmt.Errorf("testErr"))
+				queryProxy.On("GetAllViews", "testAuthor").Return(nil, fmt.Errorf("testErr"))
 				return fields{
 					queryProxy: queryProxy,
 					cache:      cache.New[string, map[string]query.TagView](),
@@ -269,18 +174,18 @@ func TestTagRepo_GetView(t *testing.T) {
 			"Tag not found",
 			func() fields {
 				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"tag1"}, "testAuthor").Return([]query.TagView{}, nil)
+				queryProxy.On("GetAllViews", "testAuthor").Return([]query.TagView{{ID: "tag1"}, {ID: "tag2"}}, nil)
 				return fields{
 					queryProxy: queryProxy,
 					cache:      cache.New[string, map[string]query.TagView](),
 				}
 			},
 			args{
-				id:       "tag1",
+				id:       "tag3",
 				authorID: "testAuthor",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not find tag, userID: tag1, tagID: testAuthor", err.Error(), i)
+				assert.Equal(t, "can not find tag, userID: testAuthor, tagID: tag3", err.Error(), i)
 				return true
 			},
 			nil,
@@ -345,7 +250,7 @@ func TestTagRepo_GetViews(t *testing.T) {
 			"Cache is missed",
 			func() fields {
 				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return([]query.TagView{{ID: "tag1"}, {ID: "tag2"}}, nil)
+				queryProxy.On("GetAllViews", "testAuthor").Return([]query.TagView{{ID: "tag1"}, {ID: "tag2"}}, nil)
 				return fields{
 					queryProxy: queryProxy,
 					cache:      cache.New[string, map[string]query.TagView](),
@@ -374,7 +279,7 @@ func TestTagRepo_GetViews(t *testing.T) {
 			"Error on DB request",
 			func() fields {
 				queryProxy := query.NewMockTagViewRepository(t)
-				queryProxy.On("GetViews", []string{"tag1"}, "testAuthor").Return(nil, fmt.Errorf("testErr"))
+				queryProxy.On("GetAllViews", "testAuthor").Return(nil, fmt.Errorf("testErr"))
 				return fields{
 					queryProxy: queryProxy,
 					cache:      cache.New[string, map[string]query.TagView](),
@@ -386,6 +291,26 @@ func TestTagRepo_GetViews(t *testing.T) {
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
+				return true
+			},
+			nil,
+		},
+		{
+			"Tag is not found",
+			func() fields {
+				queryProxy := query.NewMockTagViewRepository(t)
+				queryProxy.On("GetAllViews", "testAuthor").Return([]query.TagView{{ID: "tag1"}, {ID: "tag2"}}, nil)
+				return fields{
+					queryProxy: queryProxy,
+					cache:      cache.New[string, map[string]query.TagView](),
+				}
+			},
+			args{
+				ids:      []string{"tag1", "tag3"},
+				authorID: "testAuthor",
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "can not find tag, userID: testAuthor, tagID: tag3", err.Error(), i)
 				return true
 			},
 			nil,
@@ -479,7 +404,7 @@ func TestTagRepo_Update(t *testing.T) {
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
 				_, ok := cacheMap["tag1"]
-				assert.True(t, ok)
+				assert.True(t, ok, i2)
 				return true
 			},
 		},
@@ -505,9 +430,8 @@ func TestTagRepo_Update(t *testing.T) {
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
-				_, ok := cacheMap[i.(*tag.Tag).ID()]
-				assert.False(t, ok)
+				_, ok := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
+				assert.False(t, ok, i2)
 				return true
 			},
 		},
@@ -523,7 +447,7 @@ func TestTagRepo_Update(t *testing.T) {
 			if tt.wantErr(t, repo.Update(tt.argsFn().tag), fmt.Sprintf("Update(%v)", tt.argsFn().tag)) {
 				return
 			}
-			tt.wantFn(t, tt.argsFn().tag, repo.cache)
+			tt.wantFn(t, tt.argsFn().tag, repo.cache, fmt.Sprintf("Update(%v)", tt.argsFn().tag))
 		})
 	}
 }
@@ -567,7 +491,7 @@ func TestTagRepo_Delete(t *testing.T) {
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				cacheMap, _ := i.(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
 				_, ok := cacheMap["tag1"]
-				assert.True(t, ok)
+				assert.True(t, ok, i2)
 				return true
 			},
 		},
@@ -592,9 +516,8 @@ func TestTagRepo_Delete(t *testing.T) {
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				cacheMap, _ := i.(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
-				_, ok := cacheMap["tag1"]
-				assert.False(t, ok)
+				_, ok := i.(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
+				assert.False(t, ok, i2)
 				return true
 			},
 		},
@@ -610,7 +533,7 @@ func TestTagRepo_Delete(t *testing.T) {
 			if tt.wantErr(t, repo.Delete(tt.args.id, tt.args.authorID), fmt.Sprintf("Delete(%v:%v)", tt.args.id, tt.args.authorID)) {
 				return
 			}
-			tt.wantFn(t, repo.cache)
+			tt.wantFn(t, repo.cache, fmt.Sprintf("Delete(%v:%v)", tt.args.id, tt.args.authorID))
 		})
 	}
 }
@@ -654,7 +577,7 @@ func TestTagRepo_Create(t *testing.T) {
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
 				_, ok := cacheMap["tag1"]
-				assert.True(t, ok)
+				assert.True(t, ok, i2)
 				return true
 			},
 		},
@@ -680,8 +603,8 @@ func TestTagRepo_Create(t *testing.T) {
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
-				assert.Zero(t, cacheMap)
+				_, ok := i2[0].(*cache.Cache[string, map[string]query.TagView]).Get("testAuthor")
+				assert.False(t, ok, i2)
 				return true
 			},
 		},
@@ -697,7 +620,7 @@ func TestTagRepo_Create(t *testing.T) {
 			if tt.wantErr(t, repo.Create(tt.argsFn().tag), fmt.Sprintf("Update(%v)", tt.argsFn().tag)) {
 				return
 			}
-			tt.wantFn(t, tt.argsFn().tag, repo.cache)
+			tt.wantFn(t, tt.argsFn().tag, repo.cache, fmt.Sprintf("Update(%v)", tt.argsFn().tag))
 		})
 	}
 }

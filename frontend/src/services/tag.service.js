@@ -17,7 +17,36 @@ class TagService {
                 });
         });
     }
-
+    get(id) {
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/v1/api/tags/' + id, {headers: authHeader()})
+                .then(response => {
+                    console.log(response);
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
+    update(tag) {
+        return new Promise((resolve, reject) => {
+            axios
+                .put('/v1/api/tags/' + tag.id, {
+                    tag: tag.tag,
+                }, {headers: authHeader()})
+                .then(response => {
+                    console.log(response);
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
     getAll() {
         return new Promise((resolve, reject) => {
             axios

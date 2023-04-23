@@ -3,7 +3,10 @@
     <div class="tag-list" style="display: flex; justify-content: center;">
       <b-list-group style="width: 40%;">
         <b-list-group-item v-for="tag in tags" :key="tag.id">
-          {{ tag.tag }}
+          <div style="display: flex; justify-content: space-between;">
+            <span>{{ tag.tag }}</span>
+            <b-button variant="primary" @click="editTag(tag.id)">Edit</b-button>
+          </div>
         </b-list-group-item>
       </b-list-group>
     </div>
@@ -38,5 +41,10 @@ export default {
           this.errorMessage = 'Can not get tags from server :('
         })
   },
+  methods: {
+    editTag(id) {
+      this.$router.push(`/editTag/${id}`)
+    }
+  }
 };
 </script>
