@@ -22,7 +22,6 @@ class TagService {
             axios
                 .get('/v1/api/tags/' + id, {headers: authHeader()})
                 .then(response => {
-                    console.log(response);
                     resolve(response.data);
                 })
                 .catch(error => {
@@ -38,7 +37,19 @@ class TagService {
                     tag: tag.tag,
                 }, {headers: authHeader()})
                 .then(response => {
-                    console.log(response);
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
+    delete(id) {
+        return new Promise((resolve, reject) => {
+            axios
+                .delete('/v1/api/tags/' + id, {headers: authHeader()})
+                .then(response => {
                     resolve(response.data);
                 })
                 .catch(error => {

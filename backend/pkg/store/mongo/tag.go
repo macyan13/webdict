@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -35,6 +36,21 @@ func NewTagRepo(db *mongo.Database) (*TagRepo, error) {
 
 // initIndexes creates required for current queries indexes in tags collection
 func (r *TagRepo) initIndexes() error {
+	indexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	if _, err := r.collection.Indexes().CreateMany(ctx, indexes); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -155,7 +171,7 @@ func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := r.collection.Find(ctx, filter)
+	cursor, err := r.collection.Find(ctx, filter, &options.FindOptions{Sort: bson.M{"created_at": -1}})
 
 	if err != nil {
 		return nil, err
