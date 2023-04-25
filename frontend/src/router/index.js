@@ -54,6 +54,14 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/newTranslation',
+    name: 'NewTranslation',
+    component: () => import('@/views/NewTranslation.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = new VueRouter({

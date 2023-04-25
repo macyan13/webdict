@@ -1,16 +1,16 @@
 <template>
   <div>
-    <TagForm />
+    <Tag/>
   </div>
 </template>
 
 <script>
-import TagForm from '@/components/Tag.vue'
+import Tag from '@/components/Tag.vue'
 
 export default {
   name: "NewTag",
   components: {
-    TagForm
+    Tag
   }
 }
 </script>

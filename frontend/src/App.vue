@@ -2,6 +2,7 @@
   <div id="app">
     <div id="nav">
       <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/">Home</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTranslation">Create Translation</router-link> | </span>
       <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTag">Create Tag</router-link> | </span>
       <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/tags">Tags</router-link> | </span>
       <router-link to="/about">About</router-link> |
