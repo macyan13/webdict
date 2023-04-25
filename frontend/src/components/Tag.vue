@@ -23,6 +23,9 @@
         <b-button v-if="id" variant="danger" @click="confirmDelete">
           Delete
         </b-button>
+        <div v-if="showEditSpinner" class="d-flex justify-content-center m-3">
+          <b-spinner variant="primary" label="Spinning"></b-spinner>
+        </div>
       </b-form>
       <b-modal v-model="showConfirmationModal" title="Delete Tag?" hide-footer hide-backdrop>
         <p>Are you sure you want to delete this tag?</p>
@@ -33,6 +36,9 @@
           <b-button variant="danger" @click="deleteTag">
             Delete
           </b-button>
+        </div>
+        <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
+          <b-spinner variant="danger" label="Spinning"></b-spinner>
         </div>
       </b-modal>
     </b-card>
@@ -63,6 +69,8 @@ export default {
       tag: '',
       tagPlaceholder: 'Enter a tag...',
       showConfirmationModal: false,
+      showDeleteSpinner: false,
+      showEditSpinner: false,
     }
   },
   mounted() {
@@ -90,6 +98,7 @@ export default {
       this.showConfirmationModal = true;
     },
     deleteTag() {
+      this.showDeleteSpinner = true;
       TagService.delete(this.id)
           .then(() => {
             this.$store.dispatch('tag/clear');
@@ -98,10 +107,14 @@ export default {
           .catch((error) => {
             this.hasError = true;
             this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showDeleteSpinner = false;
+            this.showConfirmationModal = false;
           });
-      this.showConfirmationModal = false;
     },
     submitForm() {
+      this.showEditSpinner = true;
       let method = this.id ? TagService.update : TagService.create;
       method(new Tag(this.tag, this.id))
           .then(() => {
@@ -111,6 +124,9 @@ export default {
           .catch((error) => {
             this.hasError = true;
             this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showEditSpinner = false;
           });
     },
   },
