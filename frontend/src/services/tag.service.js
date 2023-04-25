@@ -5,9 +5,7 @@ class TagService {
     create(tag) {
         return new Promise((resolve, reject) => {
             axios
-                .post('/v1/api/tags', {
-                    tag: tag.tag,
-                }, {headers: authHeader()})
+                .post('/v1/api/tags', tag, {headers: authHeader()})
                 .then(response => {
                     resolve(response.data);
                 })

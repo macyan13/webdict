@@ -12,8 +12,8 @@
                 :required=true
                 id="tag-input"
                 v-model="tag"
-                :placeholder="tagPlaceholder"
-                style="width: 40%;"
+                placeholder="Enter a tag..."
+                class="w-25"
             ></b-form-input>
           </div>
         </b-form-group>
@@ -57,17 +57,12 @@ export default {
       type: String,
       default: null,
     },
-    initTag: {
-      type: String,
-      default: ''
-    },
   },
   data() {
     return {
       title: '',
       buttonLabel: '',
       tag: '',
-      tagPlaceholder: 'Enter a tag...',
       showConfirmationModal: false,
       showDeleteSpinner: false,
       showEditSpinner: false,
