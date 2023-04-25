@@ -14,6 +14,9 @@
       </b-list-group>
     </div>
     <div v-if="hasError" style="color: red;">There was an error processing your request - {{ errorMessage }}</div>
+    <div v-if="showLoadSpinner" class="d-flex justify-content-center m-3">
+      <b-spinner variant="primary" label="Spinning"></b-spinner>
+    </div>
     <b-modal v-model="showConfirmationModal" title="Delete Tag?" hide-footer hide-backdrop>
       <p>Are you sure you want to delete this tag?</p>
       <div class="d-flex justify-content-end">
@@ -23,6 +26,9 @@
         <b-button variant="danger" @click="deleteTag">
           Delete
         </b-button>
+      </div>
+      <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
+        <b-spinner variant="danger" label="Spinning"></b-spinner>
       </div>
     </b-modal>
   </b-card>
@@ -48,10 +54,13 @@ export default {
       errorMessage: '',
       showConfirmationModal: false,
       idToDelete: null,
+      showDeleteSpinner: false,
+      showLoadSpinner: true,
     }
   },
   mounted() {
     this.fetchTags();
+    this.showLoadSpinner = false;
   },
   methods: {
     editTag(id) {
@@ -62,6 +71,7 @@ export default {
       this.showConfirmationModal = true;
     },
     deleteTag() {
+      this.showDeleteSpinner = true;
       TagService.delete(this.idToDelete)
           .then(() => {
             this.$store.dispatch('tag/clear');
@@ -70,8 +80,11 @@ export default {
           .catch((error) => {
             this.hasError = true;
             this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showDeleteSpinner = false;
+            this.showConfirmationModal = false;
           });
-      this.showConfirmationModal = false;
     },
     deleteCancel() {
       this.showConfirmationModal = false;
