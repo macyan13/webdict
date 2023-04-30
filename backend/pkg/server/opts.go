@@ -9,9 +9,10 @@ type Opts struct {
 	Mongo MongoGroup `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 	Cache CacheGroup `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 
-	Port       int    `long:"port" env:"PORT" default:"4000" description:"port"`
-	WebdictURL string `long:"url" env:"URL" description:"url to webdict"`
-	Dbg        bool   `long:"dbg" env:"DEBUG" description:"debug mode"`
+	Languages  []string `long:"languages" short:"l" env:"LN" default:"EN" description:"Available languages"`
+	Port       int      `long:"port" env:"PORT" default:"4000" description:"port"`
+	WebdictURL string   `long:"url" env:"URL" description:"url to webdict"`
+	Dbg        bool     `long:"dbg" env:"DEBUG" description:"debug mode"`
 }
 
 // AuthGroup defines options group for auth params

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"net/http"
 	"strconv"
@@ -33,6 +34,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 			Example:       request.Example,
 			TagIds:        request.TagIds,
 			AuthorID:      user.ID,
+			Lang:          translation.Lang(request.Lang),
 		})
 
 		if err != nil {
@@ -103,6 +105,7 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			Example:       request.Example,
 			TagIds:        request.TagIds,
 			AuthorID:      user.ID,
+			Lang:          translation.Lang(request.Lang),
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
@@ -192,5 +195,6 @@ func (s *HTTPServer) translationViewToResponse(translation query.TranslationView
 		Source:        translation.Source,
 		Example:       translation.Example,
 		Tags:          tags,
+		Lang:          translation.Lang,
 	}
 }

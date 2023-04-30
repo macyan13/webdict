@@ -79,7 +79,6 @@ client.test("Response body is correct", function () {
 })
  %}
 
-
 ### Generate Author Authentication token
 POST {{host}}/v1/api/auth/signin
 Content-Type: application/json
@@ -93,6 +92,23 @@ Content-Type: application/json
 client.global.set("user_auth_token", response.body.accessToken)
 client.global.set("user_auth_type", response.body.type)
  %}
+
+### Get supported languages
+GET {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(function() {
+            const langs = response.body
+            return langs.every(lang => ["EN", "DE"].includes(lang))
+        }(), "Supported languages are not correct")
+    })
+%}
 
 ### Crete tag
 POST {{host}}/v1/api/tags
@@ -218,7 +234,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "source": "test",
   "transcription": "test",
   "target": "test",
-  "example": "test"
+  "example": "test",
+  "lang": "DE"
 }
 
 > {%
@@ -239,7 +256,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "[n/a]",
   "target": "Попробовать",
   "example": "Just give it a shot",
-  "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"]
+  "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
+  "lang": "EN"
 }
 
 > {%
@@ -263,6 +281,7 @@ client.test("Response body is correct", function () {
     client.assert(response.body.source === "Give it a shot", "source from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
     client.assert(response.body.target === "Попробовать", "translation from get translation by id is not correct")
+    client.assert(response.body.lang === "EN", "translation language from get translation by id is not correct")
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags.length === 2, "Amount of tags from get translation by id is not correct")
     client.assert(function() {
@@ -282,7 +301,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "test2",
   "target": "test2",
   "example": "test2",
-  "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"]
+  "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
+  "lang": "EN"
 }
 
 > {%
@@ -303,7 +323,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "source": "test3",
   "transcription": "test3",
   "target": "test3",
-  "example": "test3"
+  "example": "test3",
+  "lang": "EN"
 }
 
 > {%

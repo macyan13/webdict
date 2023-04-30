@@ -576,6 +576,6 @@ func createTranslationByAuthorAndID(authorID, id string) *translation.Translatio
 		[]string{},
 		time.Now(),
 		time.Now(),
-		translation.EN,
+		"EN",
 	)
 }

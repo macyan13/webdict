@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/store/inmemory"
@@ -32,10 +33,10 @@ func initTestServer() *HTTPServer {
 	userRepo := inmemory.NewUserRepository()
 
 	cipher := auth.Cipher{}
-
+	lns := []translation.Lang{"EN", "DE"}
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo),
-		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo),
+		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo, lns),
+		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo, lns),
 		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo),
 		AddTag:            command.NewAddTagHandler(tagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
@@ -51,6 +52,7 @@ func initTestServer() *HTTPServer {
 		AllTags:           query.NewAllTagsHandler(tagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
+		SupportedLangs:    query.NewASupportedLangsHandler([]string{"EN", "DE"}),
 	}
 
 	application := app.Application{

@@ -11,7 +11,7 @@ import (
 
 type Lang string
 
-const EN Lang = "en"
+//const EN Lang = "en"
 
 type Translation struct {
 	id            string
@@ -26,7 +26,7 @@ type Translation struct {
 	lang          Lang
 }
 
-func NewTranslation(source, transcription, target, authorID, example string, tagIDs []string) (*Translation, error) {
+func NewTranslation(source, transcription, target, authorID, example string, tagIDs []string, lang Lang) (*Translation, error) {
 	now := time.Now()
 	tr := Translation{
 		id:            uuid.New().String(),
@@ -38,7 +38,7 @@ func NewTranslation(source, transcription, target, authorID, example string, tag
 		source:        source,
 		example:       example,
 		tagIDs:        tagIDs,
-		lang:          EN,
+		lang:          lang,
 	}
 
 	if err := tr.validate(); err != nil {
@@ -56,25 +56,26 @@ func (t *Translation) AuthorID() string {
 	return t.authorID
 }
 
-func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string) error {
+func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string, lang Lang) error {
 	updated := *t
-	updated.applyChanges(source, transcription, target, example, tagIds)
+	updated.applyChanges(source, transcription, target, example, tagIds, lang)
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	t.applyChanges(source, transcription, target, example, tagIds)
+	t.applyChanges(source, transcription, target, example, tagIds, lang)
 	return nil
 }
 
-func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string) {
+func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string, lang Lang) {
 	t.tagIDs = tagIds
 	t.transcription = transcription
 	t.source = source
 	t.target = target
 	t.example = example
 	t.updatedAt = time.Now()
+	t.lang = lang
 }
 
 func (t *Translation) validate() error {
@@ -116,6 +117,10 @@ func (t *Translation) validate() error {
 		result = multierror.Append(result, fmt.Errorf("tag max amount is 5, %d passed", tagsCount))
 	}
 
+	if t.lang == "" {
+		result = multierror.Append(result, fmt.Errorf("lang can not be empty"))
+	}
+
 	return result
 }
 
@@ -130,7 +135,7 @@ func (t *Translation) ToMap() map[string]interface{} {
 		"tagIDs":        t.tagIDs,
 		"createdAt":     t.createdAt,
 		"updatedAt":     t.updatedAt,
-		"lang":          t.lang,
+		"lang":          string(t.lang),
 	}
 }
 

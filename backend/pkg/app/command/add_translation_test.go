@@ -12,8 +12,9 @@ import (
 
 func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 	type fields struct {
-		translationRepo translation.Repository
-		tagRepo         tag.Repository
+		translationRepo    translation.Repository
+		tagRepo            tag.Repository
+		supportedLanguages []translation.Lang
 	}
 	type args struct {
 		cmd AddTranslation
@@ -52,7 +53,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 			args{cmd: AddTranslation{TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not apply changes for translation tags, some passed tag are not found", err.Error(), i)
+				assert.Equal(t, "some passed tag are not found", err.Error(), i)
 				return true
 			},
 		},
@@ -89,16 +90,34 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
+			"Lang is not configured",
+			func() fields {
+				translationRepo := translation.MockRepository{}
+				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, nil)
+				return fields{
+					translationRepo:    &translationRepo,
+					tagRepo:            &tag.MockRepository{},
+					supportedLanguages: []translation.Lang{"DE"},
+				}
+			},
+			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "passed language EN is not supported", err.Error(), i)
+				return true
+			},
+		},
+		{
 			"Error on Apply changes",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, nil)
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tag.MockRepository{},
+					translationRepo:    &translationRepo,
+					tagRepo:            &tag.MockRepository{},
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{Text: "text", AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.True(t, strings.Contains(err.Error(), "target can not be empty"), i)
 				return true
@@ -111,11 +130,12 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 				translationRepo.On("ExistBySource", "text", "testAuthor").Return(false, nil)
 				translationRepo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tag.MockRepository{},
+					translationRepo:    &translationRepo,
+					tagRepo:            &tag.MockRepository{},
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: AddTranslation{Text: "text", Target: "test", AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{Text: "text", Target: "test", AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -124,10 +144,11 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fields := tt.fieldsFn()
+			f := tt.fieldsFn()
 			h := NewAddTranslationHandler(
-				fields.translationRepo,
-				fields.tagRepo,
+				f.translationRepo,
+				f.tagRepo,
+				f.supportedLanguages,
 			)
 			id, err := h.Handle(tt.args.cmd)
 			assert.Equal(t, "", id)
@@ -151,6 +172,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	handler := NewAddTranslationHandler(
 		&translationRepo,
 		&tagRepo,
+		[]translation.Lang{"EN"},
 	)
 
 	cmd := AddTranslation{
@@ -160,6 +182,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 		Example:       "example",
 		TagIds:        tags,
 		AuthorID:      "testAuthor",
+		Lang:          translation.Lang("EN"),
 	}
 
 	id, err := handler.Handle(cmd)
@@ -174,5 +197,5 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	assert.Equal(t, cmd.Text, data["source"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
-	assert.Equal(t, translation.EN, data["lang"])
+	assert.Equal(t, string(cmd.Lang), data["lang"])
 }

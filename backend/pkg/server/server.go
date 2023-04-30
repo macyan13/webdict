@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
@@ -70,9 +71,14 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 
 	cachedTranslationRepo := cache.NewTranslationRepo(ctx, translationRepo, translationRepo, cacheOpts.TranslationCacheTTL)
 
+	lns := make([]translation.Lang, len(opts.Languages))
+	for _, l := range opts.Languages {
+		lns = append(lns, translation.Lang(l))
+	}
+
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(cachedTranslationRepo, cachedTagRepo),
-		UpdateTranslation: command.NewUpdateTranslationHandler(cachedTranslationRepo, cachedTagRepo),
+		AddTranslation:    command.NewAddTranslationHandler(cachedTranslationRepo, cachedTagRepo, lns),
+		UpdateTranslation: command.NewUpdateTranslationHandler(cachedTranslationRepo, cachedTagRepo, lns),
 		DeleteTranslation: command.NewDeleteTranslationHandler(cachedTranslationRepo),
 		AddTag:            command.NewAddTagHandler(cachedTagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),
@@ -88,6 +94,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		AllTags:           query.NewAllTagsHandler(cachedTagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
+		SupportedLangs:    query.NewASupportedLangsHandler(opts.Languages),
 	}
 
 	application := app.Application{

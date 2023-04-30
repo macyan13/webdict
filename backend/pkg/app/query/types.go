@@ -31,6 +31,7 @@ type TranslationView struct {
 	Example       string
 	Tags          []TagView
 	CreatedAd     time.Time
+	Lang          string
 }
 
 func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richTextSanitizer) {

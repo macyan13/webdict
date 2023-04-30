@@ -16,7 +16,8 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	source := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	domain, err := translation.NewTranslation(source, transcription, meaning, authorID, example, tags)
+	ln := "EN"
+	domain, err := translation.NewTranslation(source, transcription, meaning, authorID, example, tags, translation.Lang(ln))
 	assert.Nil(t, err)
 	domainMap := domain.ToMap()
 
@@ -30,6 +31,7 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	assert.Equal(t, source, model.Source)
 	assert.Equal(t, example, model.Example)
 	assert.Equal(t, tags, model.TagIDs)
+	assert.Equal(t, ln, model.Lang)
 	assert.Equal(t, domainMap["createdAt"], model.CreatedAt)
 	assert.Equal(t, domainMap["updatedAt"], model.UpdatedAt)
 }
@@ -45,6 +47,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 		Source:        "text",
 		Example:       "example",
 		TagIDs:        []string{"tag1", "tag2"},
+		Lang:          "EN",
 	}
 
 	tagViews := []query.TagView{{Tag: "tag1"}, {Tag: "tag2"}}
@@ -65,6 +68,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 	assert.Equal(t, model.Source, view.Source)
 	assert.Equal(t, model.Example, view.Example)
 	assert.Equal(t, tagViews, view.Tags)
+	assert.Equal(t, model.Lang, view.Lang)
 }
 
 func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {

@@ -189,5 +189,6 @@ func (r *TranslationRepo) translationToView(t *translation.Translation) (query.T
 		Source:        translationData["source"].(string),
 		Example:       translationData["example"].(string),
 		Tags:          tagViews,
+		Lang:          translationData["lang"].(string),
 	}, nil
 }

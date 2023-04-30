@@ -20,6 +20,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	text := "CreateText"
 	example := "CreateExample"
 	tg := "testTag"
+	ln := "EN"
 
 	user, err := s.userRepo.GetByEmail(s.opts.Admin.AdminEmail)
 	assert.Nil(t, err)
@@ -40,6 +41,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 		Source:        text,
 		Example:       example,
 		TagIds:        []string{tagID},
+		Lang:          ln,
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -57,6 +59,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	assert.Equal(t, transcription, created.Transcription)
 	assert.Equal(t, example, created.Example)
 	assert.Equal(t, tagID, created.Tags[0].ID)
+	assert.Equal(t, ln, created.Lang)
 }
 
 func TestServer_CreateTranslationUnauthorised(t *testing.T) {
@@ -86,7 +89,7 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -103,7 +106,7 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -119,7 +122,7 @@ func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
@@ -129,12 +132,14 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	tr := "UpdateTranslation"
 	source := "UpdateText"
 	example := "UpdateExample"
+	ln := "DE"
 
 	request := translationRequest{
 		Transcription: transcription,
 		Target:        tr,
 		Source:        source,
 		Example:       example,
+		Lang:          ln,
 	}
 	jsonValue, _ = json.Marshal(request)
 	req, _ = http.NewRequest("PUT", v1TranslationAPI+"/"+id, bytes.NewBuffer(jsonValue))
@@ -156,12 +161,13 @@ func TestServer_UpdateTranslation(t *testing.T) {
 	assert.Equal(t, source, record.Source)
 	assert.Equal(t, transcription, record.Transcription)
 	assert.Equal(t, example, record.Example)
+	assert.Equal(t, ln, record.Lang)
 }
 
 func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	s := initTestServer()
 	originalTranslation := "originalTranslation"
-	request := translationRequest{Target: originalTranslation, Source: "test"}
+	request := translationRequest{Target: originalTranslation, Source: "test", Lang: "EN"}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))

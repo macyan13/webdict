@@ -15,18 +15,21 @@ type UpdateTranslation struct {
 	AuthorID      string
 	Example       string
 	TagIds        []string
+	Lang          translation.Lang
 }
 
 // UpdateTranslationHandler update existing translation cmd handler
 type UpdateTranslationHandler struct {
-	translationRepo translation.Repository
-	tagRepo         tag.Repository
+	translationRepo    translation.Repository
+	tagRepo            tag.Repository
+	supportedLanguages []translation.Lang
 }
 
-func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository) UpdateTranslationHandler {
+func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository, supportedLanguages []translation.Lang) UpdateTranslationHandler {
 	return UpdateTranslationHandler{
-		translationRepo: translationRep,
-		tagRepo:         tagRepo,
+		translationRepo:    translationRep,
+		tagRepo:            tagRepo,
+		supportedLanguages: supportedLanguages,
 	}
 }
 
@@ -38,11 +41,15 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 		return err
 	}
 
+	if err := h.validateLang(cmd); err != nil {
+		return err
+	}
+
 	if err := h.validateTags(cmd); err != nil {
 		return err
 	}
 
-	if err := tr.ApplyChanges(cmd.Source, cmd.Transcription, cmd.Target, cmd.Example, cmd.TagIds); err != nil {
+	if err := tr.ApplyChanges(cmd.Source, cmd.Transcription, cmd.Target, cmd.Example, cmd.TagIds, cmd.Lang); err != nil {
 		return err
 	}
 
@@ -66,4 +73,14 @@ func (h UpdateTranslationHandler) validateTags(cmd UpdateTranslation) error {
 	}
 
 	return nil
+}
+
+// validateLang check that passed lang is supported
+func (h UpdateTranslationHandler) validateLang(cmd UpdateTranslation) error {
+	for _, lang := range h.supportedLanguages {
+		if cmd.Lang == lang {
+			return nil
+		}
+	}
+	return fmt.Errorf("passed language %s is not supported", cmd.Lang)
 }

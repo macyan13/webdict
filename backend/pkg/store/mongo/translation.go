@@ -273,6 +273,7 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		Target:        model.Target,
 		Source:        model.Source,
 		Example:       model.Example,
+		Lang:          model.Lang,
 	}
 
 	if model.TagIDs == nil {
