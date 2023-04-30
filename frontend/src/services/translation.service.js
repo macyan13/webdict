@@ -15,6 +15,32 @@ class TranslationService {
                 });
         });
     }
+    get(id) {
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/v1/api/translations/' + id, {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
+    update(translation) {
+        return new Promise((resolve, reject) => {
+            axios
+                .put('/v1/api/translations/' + translation.id, translation, {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
 }
 
 export default new TranslationService();

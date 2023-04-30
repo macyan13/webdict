@@ -86,7 +86,7 @@ export default {
           })
           .catch((error) => {
             this.hasError = true;
-            this.errorMessage = error;
+            this.errorMessage = "Can not get tag data from server: " + error;
           });
     },
     confirmDelete() {

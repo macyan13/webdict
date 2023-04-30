@@ -1,5 +1,6 @@
 export default class User {
-    constructor(source, transcription, target, example, tag_ids) {
+    constructor(id, source, transcription, target, example, tag_ids) {
+        this.id = id;
         this.source = source;
         this.transcription = transcription;
         this.target = target;

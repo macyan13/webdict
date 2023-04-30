@@ -62,6 +62,14 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/editTranslation/:id',
+    name: 'EditTranslation',
+    component: () => import('@/views/EditTranslation.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = new VueRouter({

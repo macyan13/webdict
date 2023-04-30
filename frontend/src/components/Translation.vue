@@ -85,6 +85,22 @@
           </div>
         </b-form-group>
 
+        <b-form-group
+            v-if="id"
+            id="createdAt-group"
+            label="Created:"
+            label-for="createdAt-input"
+        >
+          <div class="d-inline-flex">
+            <b-form-input
+                :disabled="true"
+                id="createdAt-input"
+                v-model="createdAtFormatted"
+                class="flex-grow-1"
+            ></b-form-input>
+          </div>
+        </b-form-group>
+
         <b-button type="submit" variant="primary">
           {{ buttonLabel }}
         </b-button>
@@ -99,7 +115,7 @@
       </b-form>
 
       <b-modal v-model="showConfirmationModal" title="Delete Translation?" hide-footer hide-backdrop>
-        <p>Are you sure you want to delete this Translation?</p>
+        <p>Are you sure you want to delete this translation?</p>
         <div class="d-flex justify-content-end">
           <b-button variant="secondary" class="mr-2" @click="showConfirmationModal = false">
             Cancel
@@ -142,15 +158,19 @@ export default {
       target: '',
       example: '',
       tags: [],
-      tagOptions: ["tag1", "tag2", "tag3"],
+      tagOptions: [],
       buttonLabel: '',
       title: '',
       showConfirmationModal: false,
       showDeleteSpinner: false,
       showEditSpinner: false,
+      createdAt: null,
+      createdAtFormatted: null,
     }
   },
   mounted() {
+    this.fetchTags();
+
     if (this.id) {
       this.loadData();
       this.title = 'Edit Translation';
@@ -159,7 +179,6 @@ export default {
       this.title = 'Create New Translation';
       this.buttonLabel = 'Create';
     }
-    this.fetchTags();
   },
   methods: {
     fetchTags() {
@@ -171,7 +190,21 @@ export default {
           })
     },
     loadData() {
-      // todo: load data from server
+      TranslationService.get(this.id)
+          .then((translation) => {
+            this.source = translation.source;
+            this.transcription = translation.transcription;
+            this.target = translation.target;
+            this.example = translation.example;
+            this.tags = translation.tags;
+            this.createdAt = translation.created_at;
+            const dateObj = new Date(translation.created_at);
+            this.createdAtFormatted = dateObj.toLocaleString();
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = "Can not get translation data from server: " + error;
+          });
     },
     confirmDelete() {
       this.showConfirmationModal = true;
@@ -194,13 +227,14 @@ export default {
     },
     submitForm() {
       this.showEditSpinner = true;
-      // let method = this.id ? TranslationService.update : TranslationService.create;
-      let method = TranslationService.create;
+      let method = this.id ? TranslationService.update : TranslationService.create;
       let tagIds = this.tags.map((tag) => tag.id);
-      method(new Translation(this.source, this.transcription, this.target, this.example, tagIds))
-          .then(() => {
+      method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds))
+          .then((data) => {
             // this.$store.dispatch('tag/clear');
-            router.push({name: 'Home'});
+            // router.push({name: 'Home'});
+            let id = this.id ? this.id : data.id;
+            router.push("/editTranslation/" + id);
           })
           .catch((error) => {
             this.hasError = true;

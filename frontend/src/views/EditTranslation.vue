@@ -1,16 +1,16 @@
 <template>
   <div>
-    <Tag :id="$route.params.id"/>
+    <Translation :id="$route.params.id"/>
   </div>
 </template>
 
 <script>
-import Tag from '@/components/Tag.vue'
+import Translation from '@/components/Translation'
 
 export default {
   name: "EditTag",
   components: {
-    Tag
+    Translation
   },
 }
 </script>
