@@ -51,9 +51,9 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistBySource(source, authorID string) (bool, error) {
+func (r *TranslationRepo) ExistBySource(source, authorID string, lang translation.Lang) (bool, error) {
 	for _, t := range r.storage {
-		if t.AuthorID() != authorID {
+		if t.AuthorID() != authorID || t.Lang() != lang {
 			continue
 		}
 
@@ -81,7 +81,7 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return false, nil
 }
 
-func (r *TranslationRepo) GetLastViews(authorID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (r *TranslationRepo) GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	type mapItem struct {
 		t         *translation.Translation
 		createdAt time.Time
@@ -90,7 +90,7 @@ func (r *TranslationRepo) GetLastViews(authorID string, pageSize, page int, tagI
 	items := make([]mapItem, 0, len(r.storage))
 
 	for _, v := range r.storage {
-		if v.AuthorID() != authorID {
+		if v.AuthorID() != authorID || string(v.Lang()) != lang {
 			continue
 		}
 
@@ -189,5 +189,6 @@ func (r *TranslationRepo) translationToView(t *translation.Translation) (query.T
 		Source:        translationData["source"].(string),
 		Example:       translationData["example"].(string),
 		Tags:          tagViews,
+		Lang:          translationData["lang"].(string),
 	}, nil
 }

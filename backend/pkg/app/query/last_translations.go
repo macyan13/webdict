@@ -2,6 +2,7 @@ package query
 
 type LastTranslations struct {
 	AuthorID string
+	Lang     string
 	TagIds   []string
 	PageSize int
 	Page     int
@@ -19,7 +20,7 @@ func NewLastTranslationsHandler(translationRepo TranslationViewRepository) LastT
 
 func (h LastTranslationsHandler) Handle(query LastTranslations) (LastViews, error) {
 	pageSize, page := h.processParameters(query)
-	lastViews, err := h.translationRepo.GetLastViews(query.AuthorID, pageSize, page, query.TagIds)
+	lastViews, err := h.translationRepo.GetLastViews(query.AuthorID, query.Lang, pageSize, page, query.TagIds)
 
 	if err != nil {
 		return lastViews, err

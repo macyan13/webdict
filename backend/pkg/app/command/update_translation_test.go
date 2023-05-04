@@ -12,8 +12,9 @@ import (
 
 func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 	type fields struct {
-		translationRepo translation.Repository
-		tagRepo         tag.Repository
+		translationRepo    translation.Repository
+		tagRepo            tag.Repository
+		supportedLanguages []translation.Lang
 	}
 	type args struct {
 		cmd UpdateTranslation
@@ -25,7 +26,7 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 		wantErr  assert.ErrorAssertionFunc
 	}{
 		{
-			"Case 1: Can not get translation from DB",
+			"Can not get translation from DB",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("Get", "testID", "testAuthor").Return(nil, errors.New("testErr"))
@@ -41,77 +42,97 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Case 2: Tags repo can not perform query",
+			"Tags repo can not perform query",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("Get", "testID", "testAuthor").Return(&translation.Translation{}, nil)
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(false, errors.New("testErr"))
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tagRepo,
+					translationRepo:    &translationRepo,
+					tagRepo:            &tagRepo,
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
 			},
 		},
 		{
-			"Case 3: Tags not exist",
+			"Lang is not supported",
+			func() fields {
+				translationRepo := translation.MockRepository{}
+				translationRepo.On("Get", "testID", "testAuthor").Return(&translation.Translation{}, nil)
+				return fields{
+					translationRepo:    &translationRepo,
+					supportedLanguages: []translation.Lang{"EN"},
+				}
+			},
+			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor", Lang: translation.Lang("DE")}},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "passed language DE is not supported", err.Error(), i)
+				return true
+			},
+		},
+		{
+			"Tags not exist",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("Get", "testID", "testAuthor").Return(&translation.Translation{}, nil)
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(false, nil)
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tagRepo,
+					translationRepo:    &translationRepo,
+					tagRepo:            &tagRepo,
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", TagIds: []string{"tag1"}, AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "can not apply changes for translation testID, some passed tag are not found", err.Error(), i)
 				return true
 			},
 		},
 		{
-			"Case 4: tags no set, error on save",
+			"tags no set, error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{})
+				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{}, translation.Lang("EN"))
 				assert.Nil(t, err)
 
 				translationRepo.On("Get", "testID", "testAuthor").Return(tr, nil)
 				translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tag.MockRepository{},
+					translationRepo:    &translationRepo,
+					tagRepo:            &tag.MockRepository{},
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
 			},
 		},
 		{
-			"Case 5: error on save",
+			"error on save",
 			func() fields {
 				translationRepo := translation.MockRepository{}
-				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{})
+				tr, err := translation.NewTranslation("new", "new", "new", "new", "new", []string{}, translation.Lang("EN"))
 				assert.Nil(t, err)
 				translationRepo.On("Get", "testID", "testAuthor").Return(tr, nil)
 				translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(errors.New("testErr"))
 				tagRepo := tag.MockRepository{}
 				tagRepo.On("AllExist", []string{"tag1"}, "testAuthor").Return(true, nil)
 				return fields{
-					translationRepo: &translationRepo,
-					tagRepo:         &tagRepo,
+					translationRepo:    &translationRepo,
+					tagRepo:            &tagRepo,
+					supportedLanguages: []translation.Lang{"EN"},
 				}
 			},
-			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: UpdateTranslation{ID: "testID", Source: "test", Target: "test", TagIds: []string{"tag1"}, AuthorID: "testAuthor", Lang: translation.Lang("EN")}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
 				return true
@@ -120,8 +141,8 @@ func TestUpdateTranslationHandler_Handle_NegativeCases(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fields := tt.fieldsFn()
-			h := NewUpdateTranslationHandler(fields.translationRepo, fields.tagRepo)
+			f := tt.fieldsFn()
+			h := NewUpdateTranslationHandler(f.translationRepo, f.tagRepo, f.supportedLanguages)
 			tt.wantErr(t, h.Handle(tt.args.cmd), fmt.Sprintf("Handle(%v)", tt.args.cmd))
 		})
 	}
@@ -136,7 +157,7 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	tagRepo.On("AllExist", tags, authorID).Return(true, nil)
 
 	translationRepo := translation.MockRepository{}
-	tr, err := translation.NewTranslation("test", "", "test", authorID, "", []string{})
+	tr, err := translation.NewTranslation("test", "", "test", authorID, "", []string{}, translation.Lang("EN"))
 	assert.Nil(t, err)
 	translationRepo.On("Get", id, authorID).Return(tr, nil)
 	translationRepo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(nil)
@@ -144,6 +165,7 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	handler := NewUpdateTranslationHandler(
 		&translationRepo,
 		&tagRepo,
+		[]translation.Lang{"EN"},
 	)
 
 	cmd := UpdateTranslation{
@@ -154,6 +176,7 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 		Example:       "example",
 		TagIds:        tags,
 		AuthorID:      authorID,
+		Lang:          translation.Lang("EN"),
 	}
 	assert.Nil(t, handler.Handle(cmd))
 
@@ -165,4 +188,5 @@ func TestUpdateTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	assert.Equal(t, cmd.Source, data["source"])
 	assert.Equal(t, cmd.Example, data["example"])
 	assert.Equal(t, cmd.TagIds, data["tagIDs"])
+	assert.Equal(t, string(cmd.Lang), data["lang"])
 }

@@ -15,18 +15,25 @@ type AddTranslation struct {
 	Example       string
 	TagIds        []string
 	AuthorID      string
+	Lang          translation.Lang
 }
 
 // AddTranslationHandler create new translation cmd handler
 type AddTranslationHandler struct {
-	translationRepo translation.Repository
-	tagRepo         tag.Repository
+	translationRepo    translation.Repository
+	tagRepo            tag.Repository
+	supportedLanguages []translation.Lang
 }
 
-func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository) AddTranslationHandler {
+func NewAddTranslationHandler(
+	translationRep translation.Repository,
+	tagRepo tag.Repository,
+	supportedLanguages []translation.Lang,
+) AddTranslationHandler {
 	return AddTranslationHandler{
-		translationRepo: translationRep,
-		tagRepo:         tagRepo,
+		translationRepo:    translationRep,
+		tagRepo:            tagRepo,
+		supportedLanguages: supportedLanguages,
 	}
 }
 
@@ -40,6 +47,10 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 		return "", err
 	}
 
+	if err := h.validateLang(cmd); err != nil {
+		return "", err
+	}
+
 	tr, err := translation.NewTranslation(
 		cmd.Text,
 		cmd.Transcription,
@@ -47,6 +58,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 		cmd.AuthorID,
 		cmd.Example,
 		cmd.TagIds,
+		cmd.Lang,
 	)
 	if err != nil {
 		return "", err
@@ -73,15 +85,25 @@ func (h AddTranslationHandler) validateTags(cmd AddTranslation) error {
 		return err
 	}
 	if !exist {
-		return errors.New("can not apply changes for translation tags, some passed tag are not found")
+		return errors.New("some passed tag are not found")
 	}
 
 	return nil
 }
 
+// validateLang check that passed lang is supported
+func (h AddTranslationHandler) validateLang(cmd AddTranslation) error {
+	for _, lang := range h.supportedLanguages {
+		if cmd.Lang == lang {
+			return nil
+		}
+	}
+	return fmt.Errorf("passed language %s is not supported", cmd.Lang)
+}
+
 // validateTranslation checks that there is not already creation translation with the cmd text
 func (h AddTranslationHandler) validateTranslation(cmd AddTranslation) error {
-	exist, err := h.translationRepo.ExistBySource(cmd.Text, cmd.AuthorID)
+	exist, err := h.translationRepo.ExistBySource(cmd.Text, cmd.AuthorID, cmd.Lang)
 
 	if err != nil {
 		return err

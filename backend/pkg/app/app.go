@@ -32,4 +32,6 @@ type Queries struct {
 
 	AllUsers   query.AllUsersHandler
 	SingleUser query.SingleUserHandler
+
+	SupportedLangs query.SupportedLangsHandler
 }
