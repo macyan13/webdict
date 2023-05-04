@@ -10,7 +10,6 @@ export default {
             if (state.tags.length > 0) {
                 return Promise.resolve(state.tags);
             }
-            console.log(1234)
             return TagService.getAll().then(
                 tags => {
                     commit('allTagsSuccess', tags);
@@ -18,7 +17,6 @@ export default {
                 },
                 error => {
                     console.log("Error: " + error);
-                    commit('loginFailure');
                     return Promise.reject(error);
                 }
             );
@@ -36,9 +34,4 @@ export default {
             state.tags = [];
         },
     },
-    getters: {
-        getAll: function (state) {
-            return state.tags;
-        },
-    }
 };

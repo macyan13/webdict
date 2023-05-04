@@ -27,6 +27,9 @@
           <b-spinner variant="primary" label="Spinning"></b-spinner>
         </div>
       </b-form>
+
+      <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
+
       <b-modal v-model="showConfirmationModal" title="Delete Tag?" hide-footer hide-backdrop>
         <p>Are you sure you want to delete this tag?</p>
         <div class="d-flex justify-content-end">
@@ -41,6 +44,7 @@
           <b-spinner variant="danger" label="Spinning"></b-spinner>
         </div>
       </b-modal>
+
     </b-card>
   </div>
 </template>
@@ -66,6 +70,8 @@ export default {
       showConfirmationModal: false,
       showDeleteSpinner: false,
       showEditSpinner: false,
+      hasError: false,
+      errorMessage: '',
     }
   },
   mounted() {
