@@ -68,10 +68,10 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 			"Error on getting last views from repository",
 			func() fields {
 				repo := MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", 10, 1, []string{}).Return(LastViews{}, fmt.Errorf("error"))
+				repo.On("GetLastViews", "authorID", "EN", 10, 1, []string{}).Return(LastViews{}, fmt.Errorf("error"))
 				return fields{translationRepo: &repo}
 			},
-			args{LastTranslations{AuthorID: "authorID", PageSize: 10, Page: 1, TagIds: []string{}}},
+			args{LastTranslations{AuthorID: "authorID", Lang: "EN", PageSize: 10, Page: 1, TagIds: []string{}}},
 			LastViews{},
 			assert.Error,
 		},
@@ -79,7 +79,7 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 			"Positive case",
 			func() fields {
 				repo := MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", 10, 1, []string{}).Return(
+				repo.On("GetLastViews", "authorID", "EN", 10, 1, []string{}).Return(
 					LastViews{
 						Views: []TranslationView{{
 							ID:            "testID",
@@ -91,7 +91,7 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 					}, nil)
 				return fields{translationRepo: &repo}
 			},
-			args{LastTranslations{AuthorID: "authorID", PageSize: 105, Page: 1, TagIds: []string{}}},
+			args{LastTranslations{AuthorID: "authorID", Lang: "EN", PageSize: 105, Page: 1, TagIds: []string{}}},
 			LastViews{Views: []TranslationView{{
 				ID:            "testID",
 				Source:        "TestText",

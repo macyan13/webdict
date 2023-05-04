@@ -103,7 +103,7 @@ func (h AddTranslationHandler) validateLang(cmd AddTranslation) error {
 
 // validateTranslation checks that there is not already creation translation with the cmd text
 func (h AddTranslationHandler) validateTranslation(cmd AddTranslation) error {
-	exist, err := h.translationRepo.ExistBySource(cmd.Text, cmd.AuthorID)
+	exist, err := h.translationRepo.ExistBySource(cmd.Text, cmd.AuthorID, cmd.Lang)
 
 	if err != nil {
 		return err

@@ -4,7 +4,7 @@ import "time"
 
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
-	GetLastViews(authorID string, pageSize, page int, tagIds []string) (LastViews, error)
+	GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (LastViews, error)
 }
 
 type LastViews struct {

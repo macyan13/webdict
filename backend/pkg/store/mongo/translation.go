@@ -47,18 +47,21 @@ func (r *TranslationRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.D{
+				{Key: "lang", Value: 1},
 				{Key: "author_id", Value: 1},
 				{Key: "created_at", Value: -1},
 			},
 		},
 		{
 			Keys: bson.D{
+				{Key: "lang", Value: 1},
 				{Key: "author_id", Value: 1},
 				{Key: "source", Value: 1},
 			},
 		},
 		{
 			Keys: bson.D{
+				{Key: "lang", Value: 1},
 				{Key: "author_id", Value: 1},
 				{Key: "tag_ids", Value: 1},
 			},
@@ -162,11 +165,11 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistBySource(text, authorID string) (bool, error) {
+func (r *TranslationRepo) ExistBySource(text, authorID string, lang translation.Lang) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: text}, {Key: "author_id", Value: authorID}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: text}, {Key: "author_id", Value: authorID}, {Key: "lang", Value: string(lang)}})
 
 	return count > 0, err
 }
@@ -180,11 +183,11 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return count > 0, err
 }
 
-func (r *TranslationRepo) GetLastViews(authorID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (r *TranslationRepo) GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	filter := bson.D{{Key: "author_id", Value: authorID}}
+	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang", Value: lang}}
 	if len(tagIds) != 0 {
 		filter = append(filter, bson.E{Key: "tag_ids", Value: bson.D{{Key: "$all", Value: tagIds}}})
 	}

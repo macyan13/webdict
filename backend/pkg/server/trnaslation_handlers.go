@@ -67,6 +67,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			PageSize: pageSize,
 			Page:     page,
 			TagIds:   c.QueryArray("tagId"),
+			Lang:     c.Query("lang"),
 		})
 
 		if err != nil {
@@ -177,10 +178,10 @@ func (s *HTTPServer) translationViewsToResponse(translations []query.Translation
 	return responses
 }
 
-func (s *HTTPServer) translationViewToResponse(translation query.TranslationView) translationResponse {
-	tags := make([]tagResponse, len(translation.Tags))
+func (s *HTTPServer) translationViewToResponse(view query.TranslationView) translationResponse {
+	tags := make([]tagResponse, len(view.Tags))
 
-	for i, tag := range translation.Tags {
+	for i, tag := range view.Tags {
 		tags[i] = tagResponse{
 			ID:  tag.ID,
 			Tag: tag.Tag,
@@ -188,13 +189,13 @@ func (s *HTTPServer) translationViewToResponse(translation query.TranslationView
 	}
 
 	return translationResponse{
-		ID:            translation.ID,
-		CreatedAt:     translation.CreatedAd,
-		Transcription: translation.Transcription,
-		Target:        translation.Target,
-		Source:        translation.Source,
-		Example:       translation.Example,
+		ID:            view.ID,
+		CreatedAt:     view.CreatedAd,
+		Transcription: view.Transcription,
+		Target:        view.Target,
+		Source:        view.Source,
+		Example:       view.Example,
 		Tags:          tags,
-		Lang:          translation.Lang,
+		Lang:          view.Lang,
 	}
 }

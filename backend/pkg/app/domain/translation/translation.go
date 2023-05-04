@@ -11,8 +11,6 @@ import (
 
 type Lang string
 
-//const EN Lang = "en"
-
 type Translation struct {
 	id            string
 	source        string
@@ -54,6 +52,10 @@ func (t *Translation) ID() string {
 
 func (t *Translation) AuthorID() string {
 	return t.authorID
+}
+
+func (t *Translation) Lang() Lang {
+	return t.lang
 }
 
 func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string, lang Lang) error {

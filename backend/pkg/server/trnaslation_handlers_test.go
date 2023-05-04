@@ -51,7 +51,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	records := getExistingTranslations(t, s)
+	records := getExistingTranslations(t, s, ln)
 	created := records[0]
 
 	assert.Equal(t, tr, created.Target)
@@ -68,6 +68,7 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 	tr := "CreateTranslation"
 	text := "CreateText"
 	example := "CreateExample"
+	ln := "DE"
 
 	request := translationRequest{
 		Transcription: transcription,
@@ -83,56 +84,58 @@ func TestServer_CreateTranslationUnauthorised(t *testing.T) {
 	s.engine.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Zero(t, len(getExistingTranslations(t, s)))
+	assert.Zero(t, len(getExistingTranslations(t, s, ln)))
 }
 
 func TestServer_DeleteTranslationById(t *testing.T) {
 	s := initTestServer()
+	ln := "EN"
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: ln})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
-	id := getExistingTranslations(t, s)[0].ID
+	id := getExistingTranslations(t, s, ln)[0].ID
 	req, _ = http.NewRequest("DELETE", v1TranslationAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Zero(t, len(getExistingTranslations(t, s)))
+	assert.Zero(t, len(getExistingTranslations(t, s, ln)))
 }
 
 func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
+	ln := "EN"
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: ln})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
-	id := getExistingTranslations(t, s)[0].ID
+	id := getExistingTranslations(t, s, ln)[0].ID
 	req, _ = http.NewRequest("DELETE", v1TranslationAPI+"/"+id, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Equal(t, 1, len(getExistingTranslations(t, s)))
+	assert.Equal(t, 1, len(getExistingTranslations(t, s, ln)))
 }
 
 func TestServer_UpdateTranslation(t *testing.T) {
 	s := initTestServer()
+	ln := "EN"
 
-	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: "EN"})
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: "test", Lang: ln})
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
-	id := getExistingTranslations(t, s)[0].ID
+	id := getExistingTranslations(t, s, ln)[0].ID
 
 	transcription := "[updateTranscription]"
 	tr := "UpdateTranslation"
 	source := "UpdateText"
 	example := "UpdateExample"
-	ln := "DE"
 
 	request := translationRequest{
 		Transcription: transcription,
@@ -167,13 +170,15 @@ func TestServer_UpdateTranslation(t *testing.T) {
 func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	s := initTestServer()
 	originalTranslation := "originalTranslation"
-	request := translationRequest{Target: originalTranslation, Source: "test", Lang: "EN"}
+	ln := "EN"
+
+	request := translationRequest{Target: originalTranslation, Source: "test", Lang: ln}
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
 	setAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
-	id := getExistingTranslations(t, s)[0].ID
+	id := getExistingTranslations(t, s, ln)[0].ID
 
 	transcription := "[updateTranscription]"
 	tr := "UpdateTranslation"
@@ -204,8 +209,8 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	assert.Equal(t, originalTranslation, record.Target)
 }
 
-func getExistingTranslations(t *testing.T, s *HTTPServer) []translationResponse {
-	req, _ := http.NewRequest("GET", v1TranslationAPI+"/last?pageSize=10", http.NoBody)
+func getExistingTranslations(t *testing.T, s *HTTPServer, lang string) []translationResponse {
+	req, _ := http.NewRequest("GET", v1TranslationAPI+"/last?pageSize=10&lang="+lang, http.NoBody)
 	setAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
