@@ -13,7 +13,9 @@
         </b-list-group-item>
       </b-list-group>
     </div>
-    <div v-if="hasError" style="color: red;"></div>
+
+    <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
+
     <div v-if="showLoadSpinner" class="d-flex justify-content-center m-3">
       <b-spinner variant="primary" label="Spinning"></b-spinner>
     </div>

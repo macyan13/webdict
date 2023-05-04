@@ -26,7 +26,6 @@
           <div style="display: flex; justify-content: center;">
             <b-form-input
                 class="w-25"
-                :required=true
                 id="transcription-input"
                 v-model="transcription"
                 placeholder="Enter transcription..."
@@ -60,11 +59,31 @@
                 :options="tagOptions"
                 v-model="tags"
                 :multiple="true"
+                :max="5"
                 :show-labels="false"
                 label="tag"
                 track-by="id"
                 placeholder="Pick a tag"
                 style="width: 25%"
+            ></VueMultiselect>
+          </div>
+        </b-form-group>
+
+        <b-form-group
+            id="lang-group"
+            label="Lang:"
+            label-for="lang-input"
+        >
+          <div style="display: flex; justify-content: center;">
+            <VueMultiselect
+                :preselect-first="true"
+                :allow-empty="false"
+                :options="langOptions"
+                v-model="lang"
+                :multiple="false"
+                deselectLabel=""
+                placeholder="Pick a language"
+                style="width: 15%"
             ></VueMultiselect>
           </div>
         </b-form-group>
@@ -76,7 +95,6 @@
         >
           <div style="display: flex; justify-content: center;">
             <b-form-textarea
-                :required=true
                 id="example-input"
                 v-model="example"
                 placeholder="Enter example..."
@@ -113,6 +131,8 @@
           <b-spinner variant="primary" label="Spinning"></b-spinner>
         </div>
       </b-form>
+
+      <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
 
       <b-modal v-model="showConfirmationModal" title="Delete Translation?" hide-footer hide-backdrop>
         <p>Are you sure you want to delete this translation?</p>
@@ -161,15 +181,20 @@ export default {
       tagOptions: [],
       buttonLabel: '',
       title: '',
+      lang: null,
+      langOptions: [],
       showConfirmationModal: false,
       showDeleteSpinner: false,
       showEditSpinner: false,
       createdAt: null,
       createdAtFormatted: null,
+      hasError: false,
+      errorMessage: '',
     }
   },
   mounted() {
     this.fetchTags();
+    this.fetchLangs();
 
     if (this.id) {
       this.loadData();
@@ -189,6 +214,17 @@ export default {
             this.errorMessage = 'Can not get tags from server :('
           })
     },
+    fetchLangs() {
+      this.$store.dispatch('lang/fetchAll')
+          .then((langs) =>{
+            this.langOptions = langs
+            this.lang = langs.length > 0 ? langs[0] : null;
+          })
+          .catch(() => {
+            this.hasError = true
+            this.errorMessage = 'Can not get languages from server :('
+          })
+    },
     loadData() {
       TranslationService.get(this.id)
           .then((translation) => {
@@ -197,6 +233,7 @@ export default {
             this.target = translation.target;
             this.example = translation.example;
             this.tags = translation.tags;
+            this.lang = translation.lang;
             this.createdAt = translation.created_at;
             const dateObj = new Date(translation.created_at);
             this.createdAtFormatted = dateObj.toLocaleString();
@@ -225,11 +262,23 @@ export default {
       //       this.showConfirmationModal = false;
       //     });
     },
+    validate() {
+      if (!this.lang) {
+        this.hasError = true;
+        this.errorMessage = "Please select the language";
+        return false;
+      }
+      return true;
+    },
     submitForm() {
+      if (!this.validate()) {
+        return;
+      }
+
       this.showEditSpinner = true;
       let method = this.id ? TranslationService.update : TranslationService.create;
       let tagIds = this.tags.map((tag) => tag.id);
-      method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds))
+      method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang))
           .then((data) => {
             // this.$store.dispatch('tag/clear');
             // router.push({name: 'Home'});
@@ -237,8 +286,9 @@ export default {
             router.push("/editTranslation/" + id);
           })
           .catch((error) => {
+            console.log(error);
             this.hasError = true;
-            this.errorMessage = error;
+            this.errorMessage = 'Can not handle request:' + error;
           })
           .finally(() => {
             this.showEditSpinner = false;
