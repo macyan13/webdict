@@ -64,12 +64,18 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
+	langRepo, err := mongo.NewLangRepo(dbConnect)
+	if err != nil {
+		return nil, err
+	}
+
 	cipher := auth.Cipher{}
 
-	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL}
+	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL, TranslationCacheTTL: opts.Cache.TranslationCacheTTL, LangCacheTTL: opts.Cache.LangCacheTTL}
 	cachedTagRepo := cache.NewTagRepo(ctx, tagRepo, tagRepo, cacheOpts)
 
 	cachedTranslationRepo := cache.NewTranslationRepo(ctx, translationRepo, translationRepo, cacheOpts.TranslationCacheTTL)
+	cachedLangRepo := cache.NewLangRepo(ctx, langRepo, langRepo, cacheOpts)
 
 	lns := make([]translation.Lang, len(opts.Languages))
 	for _, l := range opts.Languages {
@@ -85,6 +91,9 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, cachedTranslationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		AddLang:           command.NewAddLangHandler(cachedLangRepo),
+		UpdateLang:        command.NewUpdateLangHandler(cachedLangRepo),
+		DeleteLang:        command.NewDeleteLangHandler(cachedLangRepo, cachedTranslationRepo),
 	}
 
 	queries := app.Queries{
@@ -94,7 +103,8 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		AllTags:           query.NewAllTagsHandler(cachedTagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
-		SupportedLangs:    query.NewASupportedLangsHandler(opts.Languages),
+		SingleLang:        query.NewSingleLangHandler(cachedLangRepo),
+		AllLangs:          query.NewAllLangsHandler(cachedLangRepo),
 	}
 
 	application := app.Application{

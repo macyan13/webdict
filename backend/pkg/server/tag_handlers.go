@@ -152,10 +152,7 @@ func (s *HTTPServer) tagViewsToResponse(tags []query.TagView) []tagResponse {
 	responses := make([]tagResponse, len(tags))
 
 	for i, t := range tags {
-		responses[i] = tagResponse{
-			ID:  t.ID,
-			Tag: t.Tag,
-		}
+		responses[i] = s.tagViewToResponse(t)
 	}
 
 	return responses

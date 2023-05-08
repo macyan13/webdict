@@ -45,4 +45,5 @@ type MongoGroup struct {
 type CacheGroup struct {
 	TagCacheTTL         time.Duration `long:"tag_cache_ttl" env:"TAG_CACHE_TTL" default:"3600s" description:"Cache TTL for tags"`
 	TranslationCacheTTL time.Duration `long:"translation_cache_ttl" env:"TRANSLATION_CACHE_TTL" default:"3600s" description:"Cache TTL for translations"`
+	LangCacheTTL        time.Duration `long:"lang_cache_ttl" env:"LANG_CACHE_TTL" default:"3600s" description:"Cache TTL for languages"`
 }

@@ -65,6 +65,11 @@ func (r *TranslationRepo) ExistBySource(source, authorID string, lang translatio
 	return false, nil
 }
 
+func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
+	// todo implement me
+	return false, nil
+}
+
 func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	for _, t := range r.storage {
 		if t.AuthorID() != authorID {

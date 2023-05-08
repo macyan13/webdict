@@ -165,6 +165,11 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 	return nil
 }
 
+func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
+	// todo implement me
+	return false, nil
+}
+
 func (r *TranslationRepo) ExistBySource(text, authorID string, lang translation.Lang) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()

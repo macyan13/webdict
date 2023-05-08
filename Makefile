@@ -28,6 +28,10 @@ stop: ## Stops ran containers
 	docker compose -f compose-dev-backend.yml stop
 
 clean: ## Stops ran containers and destroys
-	docker compose -f compose-dev-backend.yml stop && docker compose -f compose-dev-backend.yml rm
+	docker compose -f compose-dev-backend.yml stop && docker compose -f compose-dev-backend.yml rm -f
 
-#.PHONY: backend stop clean help
+restart: ## Stops ran containers, destroys them and restart
+	docker compose -f compose-dev-backend.yml stop ;\
+ 	docker compose -f compose-dev-backend.yml rm -f ;\
+	docker compose -f compose-dev-backend.yml build  ;\
+	docker compose -f compose-dev-backend.yml up -d

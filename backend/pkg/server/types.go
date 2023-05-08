@@ -22,6 +22,10 @@ type userRequest struct {
 	Role     int    `json:"role"`
 }
 
+type langRequest struct {
+	Name string `json:"name"`
+}
+
 type SignInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -46,6 +50,11 @@ type lastTranslationsResponse struct {
 type tagResponse struct {
 	ID  string `json:"id"`
 	Tag string `json:"tag"`
+}
+
+type langResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type userResponse struct {

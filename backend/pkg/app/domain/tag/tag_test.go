@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestTag_ApplyChanges(t1 *testing.T) {
+func TestTag_ApplyChanges(t *testing.T) {
 	type fields struct {
 		tag      string
 		authorID string
@@ -47,7 +47,7 @@ func TestTag_ApplyChanges(t1 *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t1.Run(tt.name, func(t1 *testing.T) {
+		t.Run(tt.name, func(t1 *testing.T) {
 			t := &Tag{
 				tag:      tt.fields.tag,
 				authorID: tt.fields.authorID,

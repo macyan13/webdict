@@ -21,6 +21,10 @@ type Commands struct {
 
 	AddUser    command.AddUserHandler
 	UpdateUser command.UpdateUserHandler
+
+	AddLang    command.AddLangHandler
+	UpdateLang command.UpdateLangHandler
+	DeleteLang command.DeleteLangHandler
 }
 
 type Queries struct {
@@ -33,5 +37,6 @@ type Queries struct {
 	AllUsers   query.AllUsersHandler
 	SingleUser query.SingleUserHandler
 
-	SupportedLangs query.SupportedLangsHandler
+	SingleLang query.SingleLangHandler
+	AllLangs   query.AllLangsHandler
 }

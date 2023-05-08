@@ -31,6 +31,7 @@ func initTestServer() *HTTPServer {
 	tagRepo := inmemory.NewTagRepository()
 	translationRepo := inmemory.NewTranslationRepository(*tagRepo)
 	userRepo := inmemory.NewUserRepository()
+	langRepo := inmemory.NewLangRepository()
 
 	cipher := auth.Cipher{}
 	lns := []translation.Lang{"EN", "DE"}
@@ -43,6 +44,9 @@ func initTestServer() *HTTPServer {
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		AddLang:           command.NewAddLangHandler(langRepo),
+		UpdateLang:        command.NewUpdateLangHandler(langRepo),
+		DeleteLang:        command.NewDeleteLangHandler(langRepo, translationRepo),
 	}
 
 	queries := app.Queries{
@@ -52,7 +56,8 @@ func initTestServer() *HTTPServer {
 		AllTags:           query.NewAllTagsHandler(tagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
-		SupportedLangs:    query.NewASupportedLangsHandler([]string{"EN", "DE"}),
+		SingleLang:        query.NewSingleLangHandler(langRepo),
+		AllLangs:          query.NewAllLangsHandler(langRepo),
 	}
 
 	application := app.Application{
