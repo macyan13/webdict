@@ -10,7 +10,7 @@ import (
 
 const tagIDParam = "tagId"
 
-func (s *HTTPServer) CreateTag() gin.HandlerFunc {
+func (s *HTTPServer) CreateTag() gin.HandlerFunc { //nolint:dupl // it's not fully duplicate
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request tagRequest

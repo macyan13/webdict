@@ -38,6 +38,30 @@ func (_m *MockRepository) Delete(id string, authorID string) error {
 	return r0
 }
 
+// Exist provides a mock function with given fields: id, authorID
+func (_m *MockRepository) Exist(id string, authorID string) (bool, error) {
+	ret := _m.Called(id, authorID)
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (bool, error)); ok {
+		return rf(id, authorID)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
+		r0 = rf(id, authorID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(id, authorID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ExistByName provides a mock function with given fields: name, authorID
 func (_m *MockRepository) ExistByName(name string, authorID string) (bool, error) {
 	ret := _m.Called(name, authorID)

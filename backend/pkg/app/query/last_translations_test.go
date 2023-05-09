@@ -71,7 +71,7 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 				repo.On("GetLastViews", "authorID", "EN", 10, 1, []string{}).Return(LastViews{}, fmt.Errorf("error"))
 				return fields{translationRepo: &repo}
 			},
-			args{LastTranslations{AuthorID: "authorID", Lang: "EN", PageSize: 10, Page: 1, TagIds: []string{}}},
+			args{LastTranslations{AuthorID: "authorID", LangID: "EN", PageSize: 10, Page: 1, TagIds: []string{}}},
 			LastViews{},
 			assert.Error,
 		},
@@ -91,7 +91,7 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 					}, nil)
 				return fields{translationRepo: &repo}
 			},
-			args{LastTranslations{AuthorID: "authorID", Lang: "EN", PageSize: 105, Page: 1, TagIds: []string{}}},
+			args{LastTranslations{AuthorID: "authorID", LangID: "EN", PageSize: 105, Page: 1, TagIds: []string{}}},
 			LastViews{Views: []TranslationView{{
 				ID:            "testID",
 				Source:        "TestText",

@@ -153,6 +153,19 @@ func (r *LangRepo) ExistByName(name, authorID string) (bool, error) {
 	return count > 0, nil
 }
 
+func (r *LangRepo) Exist(id, authorID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "_id", Value: id}, {Key: "author_id", Value: authorID}})
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func (r *LangRepo) GetAllViews(authorID string) ([]query.LangView, error) {
 	filter := bson.D{{Key: "author_id", Value: authorID}}
 

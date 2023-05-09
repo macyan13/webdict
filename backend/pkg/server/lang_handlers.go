@@ -10,7 +10,7 @@ import (
 
 const langIDParam = "langId"
 
-func (s *HTTPServer) CreateLang() gin.HandlerFunc {
+func (s *HTTPServer) CreateLang() gin.HandlerFunc { //nolint:dupl // it's not fully duplicate
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request langRequest

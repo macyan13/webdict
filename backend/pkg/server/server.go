@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
-	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
@@ -49,12 +48,23 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
+	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL, TranslationCacheTTL: opts.Cache.TranslationCacheTTL, LangCacheTTL: opts.Cache.LangCacheTTL}
+
 	tagRepo, err := mongo.NewTagRepo(dbConnect)
 	if err != nil {
 		return nil, err
 	}
 
-	translationRepo, err := mongo.NewTranslationRepo(dbConnect, tagRepo)
+	cachedTagRepo := cache.NewTagRepo(ctx, tagRepo, tagRepo, cacheOpts)
+
+	langRepo, err := mongo.NewLangRepo(dbConnect)
+	if err != nil {
+		return nil, err
+	}
+
+	cachedLangRepo := cache.NewLangRepo(ctx, langRepo, langRepo, cacheOpts)
+
+	translationRepo, err := mongo.NewTranslationRepo(dbConnect, cachedTagRepo, cachedLangRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -64,27 +74,13 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	langRepo, err := mongo.NewLangRepo(dbConnect)
-	if err != nil {
-		return nil, err
-	}
-
 	cipher := auth.Cipher{}
 
-	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL, TranslationCacheTTL: opts.Cache.TranslationCacheTTL, LangCacheTTL: opts.Cache.LangCacheTTL}
-	cachedTagRepo := cache.NewTagRepo(ctx, tagRepo, tagRepo, cacheOpts)
-
 	cachedTranslationRepo := cache.NewTranslationRepo(ctx, translationRepo, translationRepo, cacheOpts.TranslationCacheTTL)
-	cachedLangRepo := cache.NewLangRepo(ctx, langRepo, langRepo, cacheOpts)
-
-	lns := make([]translation.Lang, len(opts.Languages))
-	for _, l := range opts.Languages {
-		lns = append(lns, translation.Lang(l))
-	}
 
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(cachedTranslationRepo, cachedTagRepo, lns),
-		UpdateTranslation: command.NewUpdateTranslationHandler(cachedTranslationRepo, cachedTagRepo, lns),
+		AddTranslation:    command.NewAddTranslationHandler(cachedTranslationRepo, cachedTagRepo, cachedLangRepo),
+		UpdateTranslation: command.NewUpdateTranslationHandler(cachedTranslationRepo, cachedTagRepo, cachedLangRepo),
 		DeleteTranslation: command.NewDeleteTranslationHandler(cachedTranslationRepo),
 		AddTag:            command.NewAddTagHandler(cachedTagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),

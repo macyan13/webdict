@@ -59,7 +59,7 @@ func TestDeleteLangHandler_Handle(t *testing.T) {
 			},
 		},
 		{
-			"Lang repo returns error",
+			"LangID repo returns error",
 			func() fields {
 				translationRepo := translation.MockRepository{}
 				translationRepo.On("ExistByLang", "testId", "testAuthorID").Return(false, nil)

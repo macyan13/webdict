@@ -16,6 +16,7 @@ import (
 type TranslationRepo struct {
 	collection *mongo.Collection
 	tagRepo    query.TagViewRepository
+	langRepo   query.LangViewRepository
 }
 
 // TranslationModel represents mongo translation document
@@ -29,12 +30,12 @@ type TranslationModel struct {
 	Source        string    `bson:"source"`
 	Example       string    `bson:"example,omitempty"`
 	TagIDs        []string  `bson:"tag_ids,omitempty"`
-	Lang          string    `bson:"lang"`
+	LangID        string    `bson:"lang_id"`
 }
 
 // NewTranslationRepo creates new TranslationRepo
-func NewTranslationRepo(db *mongo.Database, tagRepo query.TagViewRepository) (*TranslationRepo, error) {
-	t := TranslationRepo{collection: db.Collection("translations"), tagRepo: tagRepo}
+func NewTranslationRepo(db *mongo.Database, tagRepo query.TagViewRepository, langRepo query.LangViewRepository) (*TranslationRepo, error) {
+	t := TranslationRepo{collection: db.Collection("translations"), tagRepo: tagRepo, langRepo: langRepo}
 
 	if err := t.initIndexes(); err != nil {
 		return nil, err
@@ -47,21 +48,14 @@ func (r *TranslationRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.D{
-				{Key: "lang", Value: 1},
+				{Key: "lang_id", Value: 1},
 				{Key: "author_id", Value: 1},
 				{Key: "created_at", Value: -1},
 			},
 		},
 		{
 			Keys: bson.D{
-				{Key: "lang", Value: 1},
-				{Key: "author_id", Value: 1},
-				{Key: "source", Value: 1},
-			},
-		},
-		{
-			Keys: bson.D{
-				{Key: "lang", Value: 1},
+				{Key: "lang_id", Value: 1},
 				{Key: "author_id", Value: 1},
 				{Key: "tag_ids", Value: 1},
 			},
@@ -143,7 +137,7 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 		record.TagIDs,
 		record.CreatedAt,
 		record.UpdatedAt,
-		translation.Lang(record.Lang),
+		record.LangID,
 	), nil
 }
 
@@ -166,15 +160,19 @@ func (r *TranslationRepo) Delete(id, authorID string) error {
 }
 
 func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
-	// todo implement me
-	return false, nil
-}
-
-func (r *TranslationRepo) ExistBySource(text, authorID string, lang translation.Lang) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: text}, {Key: "author_id", Value: authorID}, {Key: "lang", Value: string(lang)}})
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "lang_id", Value: langID}, {Key: "author_id", Value: authorID}})
+
+	return count > 0, err
+}
+
+func (r *TranslationRepo) ExistBySource(source, authorID, langID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: source}, {Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}})
 
 	return count > 0, err
 }
@@ -188,11 +186,11 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return count > 0, err
 }
 
-func (r *TranslationRepo) GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
 
-	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang", Value: lang}}
+	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}}
 	if len(tagIds) != 0 {
 		filter = append(filter, bson.E{Key: "tag_ids", Value: bson.D{{Key: "$all", Value: tagIds}}})
 	}
@@ -281,7 +279,6 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		Target:        model.Target,
 		Source:        model.Source,
 		Example:       model.Example,
-		Lang:          model.Lang,
 	}
 
 	if model.TagIDs == nil {
@@ -298,5 +295,12 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 	}
 
 	view.Tags = tagViews
+
+	langView, err := r.langRepo.GetView(model.LangID, model.AuthorID)
+	if err != nil {
+		return query.TranslationView{}, err
+	}
+
+	view.Lang = langView
 	return view, nil
 }

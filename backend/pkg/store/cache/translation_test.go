@@ -42,7 +42,7 @@ func TestTranslationRepo_Create(t *testing.T) {
 				}
 			},
 			args{
-				record: createTranslationByAuthorAndIDAndLang("testID", "test", "DE"),
+				record: createTranslationByAuthorIDAndIDAndLangID("testID", "test", "DE"),
 			},
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
@@ -67,7 +67,7 @@ func TestTranslationRepo_Create(t *testing.T) {
 				}
 			},
 			args{
-				record: createTranslationByAuthorAndIDAndLang("authorID", "test", "EN"),
+				record: createTranslationByAuthorIDAndIDAndLangID("authorID", "test", "EN"),
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Nil(t, err, i...)
@@ -126,7 +126,7 @@ func TestTranslationRepo_Update(t *testing.T) {
 					singleRecordCache: singleCache,
 				}
 			},
-			args{record: createTranslationByAuthorAndIDAndLang("authorID", "testID", "EN")},
+			args{record: createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN")},
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
@@ -155,7 +155,7 @@ func TestTranslationRepo_Update(t *testing.T) {
 					singleRecordCache: singleCache,
 				}
 			},
-			args{record: createTranslationByAuthorAndIDAndLang("authorID", "testID", "EN")},
+			args{record: createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN")},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Nil(t, err, i...)
 			},
@@ -208,7 +208,7 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			"Error on DB DELETE",
 			func() fields {
 				repo := translation.MockRepository{}
-				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorAndIDAndLang("authorID", "testID", "EN"), nil)
+				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN"), nil)
 				repo.On("Delete", "testID", "authorID").Return(fmt.Errorf("error"))
 				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
 				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
@@ -264,7 +264,7 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Delete", "testID", "authorID").Return(nil)
-				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorAndIDAndLang("authorID", "testID", "EN"), nil)
+				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN"), nil)
 				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
 				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
 				pageCache.Set("authorID-DE", map[string]query.LastViews{"key": {}})
@@ -595,7 +595,7 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 	}
 }
 
-func createTranslationByAuthorAndIDAndLang(authorID, id, lang string) *translation.Translation {
+func createTranslationByAuthorIDAndIDAndLangID(authorID, id, langID string) *translation.Translation {
 	return translation.UnmarshalFromDB(
 		id,
 		"test",
@@ -606,7 +606,7 @@ func createTranslationByAuthorAndIDAndLang(authorID, id, lang string) *translati
 		[]string{},
 		time.Now(),
 		time.Now(),
-		translation.Lang(lang),
+		langID,
 	)
 }
 

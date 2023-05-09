@@ -431,7 +431,7 @@ func TestLangRepo_GetView(t *testing.T) {
 			nil,
 		},
 		{
-			"Lang not found",
+			"LangID not found",
 			func() fields {
 				queryProxy := query.NewMockLangViewRepository(t)
 				queryProxy.On("GetAllViews", "testAuthor").Return([]query.LangView{{ID: "lang1"}, {ID: "lang2"}}, nil)

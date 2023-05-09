@@ -47,7 +47,7 @@ func TestAddLangHandler_Handle_NegativeCases(t *testing.T) {
 			assert.Error,
 		},
 		{
-			"Lang already exists",
+			"LangID already exists",
 			func() fields {
 				langRepo := lang.MockRepository{}
 				langRepo.On("ExistByName", "en", "testAuthor").Return(true, nil)

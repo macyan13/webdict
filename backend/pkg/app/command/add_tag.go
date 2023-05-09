@@ -1,4 +1,4 @@
-package command
+package command //nolint:dupl // it's not fully duplicate
 
 import (
 	"errors"

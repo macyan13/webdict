@@ -326,7 +326,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "test",
   "target": "test",
   "example": "test",
-  "lang": "DE"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -348,7 +348,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "target": "Попробовать",
   "example": "Just give it a shot",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -372,7 +372,7 @@ client.test("Response body is correct", function () {
     client.assert(response.body.source === "Give it a shot", "source from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
     client.assert(response.body.target === "Попробовать", "translation from get translation by id is not correct")
-    client.assert(response.body.lang === "EN", "translation language from get translation by id is not correct")
+    client.assert(response.body.lang.name === "EN", "translation language from get translation by id is not correct")
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags.length === 2, "Amount of tags from get translation by id is not correct")
     client.assert(function() {
@@ -393,7 +393,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "target": "test2",
   "example": "test2",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -415,7 +415,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "test3",
   "target": "test3",
   "example": "test3",
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -426,7 +426,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&lang=EN
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -478,7 +478,7 @@ client.test("Request executed successfully", function () {
  %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 

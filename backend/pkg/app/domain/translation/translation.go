@@ -9,8 +9,6 @@ import (
 	"unicode/utf8"
 )
 
-type Lang string
-
 type Translation struct {
 	id            string
 	source        string
@@ -21,10 +19,10 @@ type Translation struct {
 	tagIDs        []string
 	createdAt     time.Time
 	updatedAt     time.Time
-	lang          Lang
+	langID        string
 }
 
-func NewTranslation(source, transcription, target, authorID, example string, tagIDs []string, lang Lang) (*Translation, error) {
+func NewTranslation(source, transcription, target, authorID, example string, tagIDs []string, langID string) (*Translation, error) {
 	now := time.Now()
 	tr := Translation{
 		id:            uuid.New().String(),
@@ -36,7 +34,7 @@ func NewTranslation(source, transcription, target, authorID, example string, tag
 		source:        source,
 		example:       example,
 		tagIDs:        tagIDs,
-		lang:          lang,
+		langID:        langID,
 	}
 
 	if err := tr.validate(); err != nil {
@@ -54,30 +52,30 @@ func (t *Translation) AuthorID() string {
 	return t.authorID
 }
 
-func (t *Translation) Lang() Lang {
-	return t.lang
+func (t *Translation) LangID() string {
+	return t.langID
 }
 
-func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string, lang Lang) error {
+func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string, langID string) error {
 	updated := *t
-	updated.applyChanges(source, transcription, target, example, tagIds, lang)
+	updated.applyChanges(source, transcription, target, example, tagIds, langID)
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	t.applyChanges(source, transcription, target, example, tagIds, lang)
+	t.applyChanges(source, transcription, target, example, tagIds, langID)
 	return nil
 }
 
-func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string, lang Lang) {
+func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string, langID string) {
 	t.tagIDs = tagIds
 	t.transcription = transcription
 	t.source = source
 	t.target = target
 	t.example = example
 	t.updatedAt = time.Now()
-	t.lang = lang
+	t.langID = langID
 }
 
 func (t *Translation) validate() error {
@@ -119,8 +117,8 @@ func (t *Translation) validate() error {
 		result = multierror.Append(result, fmt.Errorf("tag max amount is 5, %d passed", tagsCount))
 	}
 
-	if t.lang == "" {
-		result = multierror.Append(result, fmt.Errorf("lang can not be empty"))
+	if t.langID == "" {
+		result = multierror.Append(result, fmt.Errorf("langID can not be empty"))
 	}
 
 	return result
@@ -137,7 +135,7 @@ func (t *Translation) ToMap() map[string]interface{} {
 		"tagIDs":        t.tagIDs,
 		"createdAt":     t.createdAt,
 		"updatedAt":     t.updatedAt,
-		"lang":          string(t.lang),
+		"langID":        t.langID,
 	}
 }
 
@@ -151,7 +149,7 @@ func UnmarshalFromDB(
 	tagIDs []string,
 	createdAt time.Time,
 	updatedAt time.Time,
-	lang Lang,
+	langID string,
 ) *Translation {
 	return &Translation{
 		id:            id,
@@ -163,6 +161,6 @@ func UnmarshalFromDB(
 		source:        source,
 		example:       example,
 		tagIDs:        tagIDs,
-		lang:          lang,
+		langID:        langID,
 	}
 }

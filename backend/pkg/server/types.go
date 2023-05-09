@@ -8,7 +8,7 @@ type translationRequest struct {
 	Target        string   `json:"target"`
 	Example       string   `json:"example"`
 	TagIds        []string `json:"tag_ids"`
-	Lang          string   `json:"lang"`
+	LangID        string   `json:"lang_id"`
 }
 
 type tagRequest struct {
@@ -26,7 +26,7 @@ type langRequest struct {
 	Name string `json:"name"`
 }
 
-type SignInRequest struct {
+type signInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -39,7 +39,7 @@ type translationResponse struct {
 	Example       string        `json:"example"`
 	Tags          []tagResponse `json:"tags"`
 	CreatedAt     time.Time     `json:"created_at"`
-	Lang          string        `json:"lang"`
+	Lang          langResponse  `json:"lang"`
 }
 
 type lastTranslationsResponse struct {
