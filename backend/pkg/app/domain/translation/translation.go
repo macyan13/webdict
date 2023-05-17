@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/hashicorp/go-multierror"
 	"time"
 	"unicode/utf8"
 )
@@ -79,49 +78,49 @@ func (t *Translation) applyChanges(source, transcription, target, example string
 }
 
 func (t *Translation) validate() error {
-	var result error
+	var err error
 	if t.source == "" {
-		result = multierror.Append(result, errors.New("source can not be empty"))
+		err = errors.Join(errors.New("source can not be empty"), err)
 	}
 
 	textCount := utf8.RuneCountInString(t.source)
 	if textCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("source max size is 255 characters, %d passed (%s)", textCount, t.source))
+		err = errors.Join(fmt.Errorf("source max size is 255 characters, %d passed (%s)", textCount, t.source), err)
 	}
 
 	transcriptionCount := utf8.RuneCountInString(t.transcription)
 	if transcriptionCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("transcription max size is 255 characters, %d passed (%s)", transcriptionCount, t.transcription))
+		err = errors.Join(fmt.Errorf("transcription max size is 255 characters, %d passed (%s)", transcriptionCount, t.transcription), err)
 	}
 
 	if t.target == "" {
-		result = multierror.Append(result, fmt.Errorf("target can not be empty"))
+		err = errors.Join(fmt.Errorf("target can not be empty"), err)
 	}
 
 	translationCount := utf8.RuneCountInString(t.target)
 	if translationCount > 255 {
-		result = multierror.Append(result, fmt.Errorf("target max size is 255 characters, %d passed (%s)", translationCount, t.target))
+		err = errors.Join(fmt.Errorf("target max size is 255 characters, %d passed (%s)", translationCount, t.target), err)
 	}
 
 	exampleCount := utf8.RuneCountInString(t.example)
 	if utf8.RuneCountInString(t.example) > 255 {
-		result = multierror.Append(result, fmt.Errorf("example max size is 255 characters, %d passed (%s)", exampleCount, t.example))
+		err = errors.Join(fmt.Errorf("example max size is 255 characters, %d passed (%s)", exampleCount, t.example), err)
 	}
 
 	if t.authorID == "" {
-		result = multierror.Append(result, fmt.Errorf("authorID can not be empty"))
+		err = errors.Join(fmt.Errorf("authorID can not be empty"), err)
 	}
 
 	tagsCount := len(t.tagIDs)
 	if tagsCount > 5 {
-		result = multierror.Append(result, fmt.Errorf("tag max amount is 5, %d passed", tagsCount))
+		err = errors.Join(fmt.Errorf("tag max amount is 5, %d passed", tagsCount), err)
 	}
 
 	if t.langID == "" {
-		result = multierror.Append(result, fmt.Errorf("langID can not be empty"))
+		err = errors.Join(fmt.Errorf("langID can not be empty"), err)
 	}
 
-	return result
+	return err
 }
 
 func (t *Translation) ToMap() map[string]interface{} {
