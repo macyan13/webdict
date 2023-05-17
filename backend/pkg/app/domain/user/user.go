@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/hashicorp/go-multierror"
 	"net/mail"
 	"unicode/utf8"
 )
@@ -109,25 +108,25 @@ func UnmarshalFromDB(
 }
 
 func (u *User) validate() error {
-	var result error
+	var err error
 	nameCount := utf8.RuneCountInString(u.name)
 
 	if nameCount < 2 {
-		result = multierror.Append(result, fmt.Errorf("name must contain at least 2 characters, %d passed (%s)", nameCount, u.name))
+		err = errors.Join(fmt.Errorf("name must contain at least 2 characters, %d passed (%s)", nameCount, u.name), err)
 	}
 
 	if nameCount > 30 {
-		result = multierror.Append(result, fmt.Errorf("name max size is 30 characters, %d passed (%s)", nameCount, u.name))
+		err = errors.Join(fmt.Errorf("name max size is 30 characters, %d passed (%s)", nameCount, u.name), err)
 	}
 
-	if _, err := mail.ParseAddress(u.email); err != nil {
-		result = multierror.Append(result, fmt.Errorf("email is not valid: %s", err.Error()))
+	if _, addressErr := mail.ParseAddress(u.email); addressErr != nil {
+		err = errors.Join(fmt.Errorf("email is not valid: %s", addressErr.Error()), err)
 	}
 
 	// it should never happen as domain receives passwd as hash from cipher
 	if len(u.password) < 8 {
-		result = multierror.Append(result, errors.New("password must contain at least 8 character"))
+		err = errors.Join(errors.New("password must contain at least 8 character"), err)
 	}
 
-	return result
+	return err
 }
