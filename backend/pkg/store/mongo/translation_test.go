@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"errors"
 	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
@@ -16,8 +17,8 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	source := "testText"
 	example := "testExample"
 	tags := []string{"test1", "test2"}
-	ln := "EN"
-	domain, err := translation.NewTranslation(source, transcription, meaning, authorID, example, tags, translation.Lang(ln))
+	langID := "EN"
+	domain, err := translation.NewTranslation(source, transcription, meaning, authorID, example, tags, langID)
 	assert.Nil(t, err)
 	domainMap := domain.ToMap()
 
@@ -31,7 +32,7 @@ func TestTranslationRepo_fromDomainToModel(t *testing.T) {
 	assert.Equal(t, source, model.Source)
 	assert.Equal(t, example, model.Example)
 	assert.Equal(t, tags, model.TagIDs)
-	assert.Equal(t, ln, model.Lang)
+	assert.Equal(t, langID, model.LangID)
 	assert.Equal(t, domainMap["createdAt"], model.CreatedAt)
 	assert.Equal(t, domainMap["updatedAt"], model.UpdatedAt)
 }
@@ -47,15 +48,19 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 		Source:        "text",
 		Example:       "example",
 		TagIDs:        []string{"tag1", "tag2"},
-		Lang:          "EN",
+		LangID:        "EN",
 	}
 
 	tagViews := []query.TagView{{Tag: "tag1"}, {Tag: "tag2"}}
 	tagRepo := query.MockTagViewRepository{}
 	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return(tagViews, nil)
 
+	langRepo := query.MockLangViewRepository{}
+	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{ID: "EN", Name: "English"}, nil)
+
 	translationRepo := &TranslationRepo{
-		tagRepo: &tagRepo,
+		tagRepo:  &tagRepo,
+		langRepo: &langRepo,
 	}
 
 	view, err := translationRepo.fromModelToView(model)
@@ -68,7 +73,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 	assert.Equal(t, model.Source, view.Source)
 	assert.Equal(t, model.Example, view.Example)
 	assert.Equal(t, tagViews, view.Tags)
-	assert.Equal(t, model.Lang, view.Lang)
+	assert.Equal(t, model.LangID, view.Lang.ID)
 }
 
 func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
@@ -127,4 +132,26 @@ func TestTranslationRepo_fromModelToView_errorOnTagViewsMiscount(t *testing.T) {
 
 	_, err := translationRepo.fromModelToView(model)
 	assert.Equal(t, "can not find all translation tags", err.Error())
+}
+
+func TestTranslationRepo_fromModelToView_errorOnGetLangView(t *testing.T) {
+	model := TranslationModel{
+		AuthorID: "testAuthor",
+		TagIDs:   []string{"tag1"},
+		LangID:   "EN",
+	}
+
+	tagRepo := query.MockTagViewRepository{}
+	tagRepo.On("GetViews", []string{"tag1"}, "testAuthor").Return([]query.TagView{{Tag: "tag1"}}, nil)
+
+	langRepo := query.MockLangViewRepository{}
+	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{}, errors.New("testError"))
+
+	translationRepo := &TranslationRepo{
+		tagRepo:  &tagRepo,
+		langRepo: &langRepo,
+	}
+
+	_, err := translationRepo.fromModelToView(model)
+	assert.Equal(t, "testError", err.Error())
 }

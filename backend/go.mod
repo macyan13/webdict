@@ -1,6 +1,6 @@
 module github.com/macyan13/webdict/backend
 
-go 1.18
+go 1.20
 
 require (
 	github.com/Code-Hex/go-generics-cache v1.2.1

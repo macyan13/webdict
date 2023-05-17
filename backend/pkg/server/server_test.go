@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
-	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/store/inmemory"
@@ -29,20 +28,23 @@ func initTestServer() *HTTPServer {
 	}
 
 	tagRepo := inmemory.NewTagRepository()
-	translationRepo := inmemory.NewTranslationRepository(*tagRepo)
+	langRepo := inmemory.NewLangRepository()
+	translationRepo := inmemory.NewTranslationRepository(*tagRepo, *langRepo)
 	userRepo := inmemory.NewUserRepository()
 
 	cipher := auth.Cipher{}
-	lns := []translation.Lang{"EN", "DE"}
 	cmd := app.Commands{
-		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo, lns),
-		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo, lns),
+		AddTranslation:    command.NewAddTranslationHandler(translationRepo, tagRepo, langRepo),
+		UpdateTranslation: command.NewUpdateTranslationHandler(translationRepo, tagRepo, langRepo),
 		DeleteTranslation: command.NewDeleteTranslationHandler(translationRepo),
 		AddTag:            command.NewAddTagHandler(tagRepo),
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		AddLang:           command.NewAddLangHandler(langRepo),
+		UpdateLang:        command.NewUpdateLangHandler(langRepo),
+		DeleteLang:        command.NewDeleteLangHandler(langRepo, translationRepo),
 	}
 
 	queries := app.Queries{
@@ -52,7 +54,8 @@ func initTestServer() *HTTPServer {
 		AllTags:           query.NewAllTagsHandler(tagRepo),
 		SingleUser:        query.NewSingleUserHandler(userRepo),
 		AllUsers:          query.NewAllUsersHandler(userRepo),
-		SupportedLangs:    query.NewASupportedLangsHandler([]string{"EN", "DE"}),
+		SingleLang:        query.NewSingleLangHandler(langRepo),
+		AllLangs:          query.NewAllLangsHandler(langRepo),
 	}
 
 	application := app.Application{

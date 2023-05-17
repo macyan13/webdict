@@ -93,7 +93,72 @@ client.global.set("user_auth_token", response.body.accessToken)
 client.global.set("user_auth_type", response.body.type)
  %}
 
-### Get supported languages
+### Crete Lang
+POST {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "DE"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    })
+    client.global.set("lang_id", response.body.id)
+%}
+
+
+### Get lang by ID
+GET {{host}}/v1/api/langs/{{lang_id}}
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.hasOwnProperty("id"), "Lang ID is not present")
+        client.assert(response.body.name === "DE", "name from get lang by id is not correct")
+    })
+%}
+
+### Update Lang
+PUT {{host}}/v1/api/langs/{{lang_id}}
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "EN"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+%}
+
+### Crete another Lang
+POST {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "SP"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    })
+    client.global.set("lang2_id", response.body.id)
+%}
+
+### Get all langs
 GET {{host}}/v1/api/langs
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
@@ -105,8 +170,34 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     client.test("Response body is correct", function () {
         client.assert(function() {
             const langs = response.body
-            return langs.every(lang => ["EN", "DE"].includes(lang))
-        }(), "Supported languages are not correct")
+            return langs.every(lang => ["EN", "SP"].includes(lang.name))
+        }(), "all languages are not correct")
+    })
+%}
+
+### Delete lang
+DELETE {{host}}/v1/api/langs/{{lang2_id}}
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+%}
+
+### Get all langs
+GET {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.length === 1, "Amount of langs is not correct")
+        client.assert(response.body[0].name === "EN", "Lang from get tag by id is not correct")
     })
 %}
 
@@ -235,7 +326,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "test",
   "target": "test",
   "example": "test",
-  "lang": "DE"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -257,7 +348,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "target": "Попробовать",
   "example": "Just give it a shot",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -281,7 +372,7 @@ client.test("Response body is correct", function () {
     client.assert(response.body.source === "Give it a shot", "source from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
     client.assert(response.body.target === "Попробовать", "translation from get translation by id is not correct")
-    client.assert(response.body.lang === "EN", "translation language from get translation by id is not correct")
+    client.assert(response.body.lang.name === "EN", "translation language from get translation by id is not correct")
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags.length === 2, "Amount of tags from get translation by id is not correct")
     client.assert(function() {
@@ -302,7 +393,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "target": "test2",
   "example": "test2",
   "tag_ids": ["{{tag1_id}}", "{{tag2_id}}"],
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -324,7 +415,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
   "transcription": "test3",
   "target": "test3",
   "example": "test3",
-  "lang": "EN"
+  "lang_id": "{{lang_id}}"
 }
 
 > {%
@@ -335,7 +426,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&lang=EN
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -387,7 +478,7 @@ client.test("Request executed successfully", function () {
  %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 

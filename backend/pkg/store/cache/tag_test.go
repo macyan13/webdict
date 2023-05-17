@@ -617,10 +617,10 @@ func TestTagRepo_Create(t *testing.T) {
 				cache:       f.cache,
 				cacheTTL:    time.Minute,
 			}
-			if tt.wantErr(t, repo.Create(tt.argsFn().tag), fmt.Sprintf("Update(%v)", tt.argsFn().tag)) {
+			if tt.wantErr(t, repo.Create(tt.argsFn().tag), fmt.Sprintf("Create(%v)", tt.argsFn().tag)) {
 				return
 			}
-			tt.wantFn(t, tt.argsFn().tag, repo.cache, fmt.Sprintf("Update(%v)", tt.argsFn().tag))
+			tt.wantFn(t, tt.argsFn().tag, repo.cache, fmt.Sprintf("Create(%v)", tt.argsFn().tag))
 		})
 	}
 }

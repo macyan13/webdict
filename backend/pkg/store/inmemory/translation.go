@@ -9,14 +9,16 @@ import (
 )
 
 type TranslationRepo struct {
-	tagRepo TagRepo
-	storage map[string]*translation.Translation
+	tagRepo  TagRepo
+	langRepo LangRepo
+	storage  map[string]*translation.Translation
 }
 
-func NewTranslationRepository(tagRepo TagRepo) *TranslationRepo {
+func NewTranslationRepository(tagRepo TagRepo, langRepo LangRepo) *TranslationRepo {
 	return &TranslationRepo{
-		storage: map[string]*translation.Translation{},
-		tagRepo: tagRepo,
+		tagRepo:  tagRepo,
+		langRepo: langRepo,
+		storage:  map[string]*translation.Translation{},
 	}
 }
 
@@ -51,15 +53,27 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistBySource(source, authorID string, lang translation.Lang) (bool, error) {
+func (r *TranslationRepo) ExistBySource(source, authorID, langID string) (bool, error) {
 	for _, t := range r.storage {
-		if t.AuthorID() != authorID || t.Lang() != lang {
+		if t.AuthorID() != authorID || t.LangID() != langID {
 			continue
 		}
 
 		if t.ToMap()["source"] == source {
 			return true, nil
 		}
+	}
+
+	return false, nil
+}
+
+func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
+	for _, t := range r.storage {
+		if t.AuthorID() != authorID || t.LangID() != langID {
+			continue
+		}
+
+		return true, nil
 	}
 
 	return false, nil
@@ -81,7 +95,7 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return false, nil
 }
 
-func (r *TranslationRepo) GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	type mapItem struct {
 		t         *translation.Translation
 		createdAt time.Time
@@ -90,7 +104,7 @@ func (r *TranslationRepo) GetLastViews(authorID, lang string, pageSize, page int
 	items := make([]mapItem, 0, len(r.storage))
 
 	for _, v := range r.storage {
-		if v.AuthorID() != authorID || string(v.Lang()) != lang {
+		if v.AuthorID() != authorID || v.LangID() != langID {
 			continue
 		}
 
@@ -177,10 +191,15 @@ func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, e
 func (r *TranslationRepo) translationToView(t *translation.Translation) (query.TranslationView, error) {
 	translationData := t.ToMap()
 	tagViews, err := r.tagRepo.GetViews(translationData["tagIDs"].([]string), translationData["authorID"].(string))
-
 	if err != nil {
 		return query.TranslationView{}, err
 	}
+
+	langView, err := r.langRepo.GetView(translationData["langID"].(string), translationData["authorID"].(string))
+	if err != nil {
+		return query.TranslationView{}, err
+	}
+
 	return query.TranslationView{
 		ID:            t.ID(),
 		CreatedAd:     translationData["createdAt"].(time.Time),
@@ -189,6 +208,6 @@ func (r *TranslationRepo) translationToView(t *translation.Translation) (query.T
 		Source:        translationData["source"].(string),
 		Example:       translationData["example"].(string),
 		Tags:          tagViews,
-		Lang:          translationData["lang"].(string),
+		Lang:          langView,
 	}, nil
 }

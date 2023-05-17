@@ -9,10 +9,9 @@ type Opts struct {
 	Mongo MongoGroup `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 	Cache CacheGroup `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 
-	Languages  []string `long:"languages" short:"l" env:"LN" default:"EN" description:"Available languages"`
-	Port       int      `long:"port" env:"PORT" default:"4000" description:"port"`
-	WebdictURL string   `long:"url" env:"URL" description:"url to webdict"`
-	Dbg        bool     `long:"dbg" env:"DEBUG" description:"debug mode"`
+	Port       int    `long:"port" env:"PORT" default:"4000" description:"port"`
+	WebdictURL string `long:"url" env:"URL" description:"url to webdict"`
+	Dbg        bool   `long:"dbg" env:"DEBUG" description:"debug mode"`
 }
 
 // AuthGroup defines options group for auth params
@@ -45,4 +44,5 @@ type MongoGroup struct {
 type CacheGroup struct {
 	TagCacheTTL         time.Duration `long:"tag_cache_ttl" env:"TAG_CACHE_TTL" default:"3600s" description:"Cache TTL for tags"`
 	TranslationCacheTTL time.Duration `long:"translation_cache_ttl" env:"TRANSLATION_CACHE_TTL" default:"3600s" description:"Cache TTL for translations"`
+	LangCacheTTL        time.Duration `long:"lang_cache_ttl" env:"LANG_CACHE_TTL" default:"3600s" description:"Cache TTL for languages"`
 }

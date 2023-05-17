@@ -14,7 +14,7 @@ const refreshTokenCookieName = "refreshToken"
 func (s *HTTPServer) SighIn() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var request SignInRequest
+		var request signInRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			s.badRequest(c, fmt.Errorf("[Error] Can not parse SighIn request: %v", err))

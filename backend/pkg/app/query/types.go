@@ -4,7 +4,7 @@ import "time"
 
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
-	GetLastViews(authorID, lang string, pageSize, page int, tagIds []string) (LastViews, error)
+	GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (LastViews, error)
 }
 
 type LastViews struct {
@@ -16,6 +16,11 @@ type TagViewRepository interface {
 	GetAllViews(authorID string) ([]TagView, error)
 	GetView(id, authorID string) (TagView, error)
 	GetViews(ids []string, authorID string) ([]TagView, error)
+}
+
+type LangViewRepository interface {
+	GetAllViews(authorID string) ([]LangView, error)
+	GetView(id, authorID string) (LangView, error)
 }
 
 type UserViewRepository interface {
@@ -31,7 +36,7 @@ type TranslationView struct {
 	Example       string
 	Tags          []TagView
 	CreatedAd     time.Time
-	Lang          string
+	Lang          LangView
 }
 
 func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richTextSanitizer) {
@@ -52,6 +57,15 @@ type TagView struct {
 
 func (v *TagView) sanitize(sanitizer *strictSanitizer) {
 	v.Tag = sanitizer.Sanitize(v.Tag)
+}
+
+type LangView struct {
+	ID   string
+	Name string
+}
+
+func (v *LangView) sanitize(sanitizer *strictSanitizer) {
+	v.Name = sanitizer.Sanitize(v.Name)
 }
 
 type UserView struct {

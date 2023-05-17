@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
-	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"net/http"
 	"strconv"
@@ -30,11 +29,11 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 		id, err := s.app.Commands.AddTranslation.Handle(command.AddTranslation{
 			Transcription: request.Transcription,
 			Target:        request.Target,
-			Text:          request.Source,
+			Source:        request.Source,
 			Example:       request.Example,
 			TagIds:        request.TagIds,
 			AuthorID:      user.ID,
-			Lang:          translation.Lang(request.Lang),
+			LangID:        request.LangID,
 		})
 
 		if err != nil {
@@ -67,7 +66,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			PageSize: pageSize,
 			Page:     page,
 			TagIds:   c.QueryArray("tagId"),
-			Lang:     c.Query("lang"),
+			LangID:   c.Query("langId"),
 		})
 
 		if err != nil {
@@ -106,7 +105,7 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			Example:       request.Example,
 			TagIds:        request.TagIds,
 			AuthorID:      user.ID,
-			Lang:          translation.Lang(request.Lang),
+			LangID:        request.LangID,
 		}); err != nil {
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
@@ -196,6 +195,9 @@ func (s *HTTPServer) translationViewToResponse(view query.TranslationView) trans
 		Source:        view.Source,
 		Example:       view.Example,
 		Tags:          tags,
-		Lang:          view.Lang,
+		Lang: langResponse{
+			ID:   view.Lang.ID,
+			Name: view.Lang.Name,
+		},
 	}
 }

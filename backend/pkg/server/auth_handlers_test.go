@@ -16,7 +16,7 @@ const authAPI = "/v1/api/auth"
 func TestServer_SighIn(t *testing.T) {
 	s := initTestServer()
 
-	request := SignInRequest{
+	request := signInRequest{
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,
 	}
@@ -61,7 +61,7 @@ func TestServer_Refresh(t *testing.T) {
 }
 
 func getRefreshToken(s *HTTPServer) string {
-	request := SignInRequest{
+	request := signInRequest{
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,
 	}
