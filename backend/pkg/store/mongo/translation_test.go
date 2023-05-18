@@ -86,9 +86,13 @@ func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
 		Target:        "translation",
 		Source:        "text",
 		Example:       "example",
+		LangID:        "EN",
 	}
 
-	translationRepo := &TranslationRepo{}
+	langRepo := query.MockLangViewRepository{}
+	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{ID: "EN"}, nil)
+
+	translationRepo := &TranslationRepo{langRepo: &langRepo}
 
 	view, err := translationRepo.fromModelToView(model)
 	assert.Nil(t, err)
@@ -98,19 +102,25 @@ func TestTranslationRepo_fromModelToView_tagsNotSet(t *testing.T) {
 	assert.Equal(t, model.Transcription, view.Transcription)
 	assert.Equal(t, model.Source, view.Source)
 	assert.Equal(t, model.Example, view.Example)
+	assert.Equal(t, model.LangID, view.Lang.ID)
 }
 
 func TestTranslationRepo_fromModelToView_errorOnGetViews(t *testing.T) {
 	model := TranslationModel{
 		AuthorID: "testAuthor",
 		TagIDs:   []string{"tag1", "tag2"},
+		LangID:   "EN",
 	}
+
+	langRepo := query.MockLangViewRepository{}
+	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{ID: "EN"}, nil)
 
 	tagRepo := query.MockTagViewRepository{}
 	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return(nil, fmt.Errorf("dbError"))
 
 	translationRepo := &TranslationRepo{
-		tagRepo: &tagRepo,
+		tagRepo:  &tagRepo,
+		langRepo: &langRepo,
 	}
 
 	_, err := translationRepo.fromModelToView(model)
@@ -121,13 +131,18 @@ func TestTranslationRepo_fromModelToView_errorOnTagViewsMiscount(t *testing.T) {
 	model := TranslationModel{
 		AuthorID: "testAuthor",
 		TagIDs:   []string{"tag1", "tag2"},
+		LangID:   "EN",
 	}
+
+	langRepo := query.MockLangViewRepository{}
+	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{ID: "EN"}, nil)
 
 	tagRepo := query.MockTagViewRepository{}
 	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return([]query.TagView{{Tag: "tag1"}}, nil)
 
 	translationRepo := &TranslationRepo{
-		tagRepo: &tagRepo,
+		tagRepo:  &tagRepo,
+		langRepo: &langRepo,
 	}
 
 	_, err := translationRepo.fromModelToView(model)

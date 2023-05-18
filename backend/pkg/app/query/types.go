@@ -44,6 +44,7 @@ func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richT
 	v.Transcription = reachSntz.SanitizeAndEscape(v.Transcription)
 	v.Target = reachSntz.Sanitize(v.Target)
 	v.Example = reachSntz.Sanitize(v.Example)
+	v.Lang.sanitize(strictSntz)
 
 	for i := range v.Tags {
 		v.Tags[i].sanitize(strictSntz)

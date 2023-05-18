@@ -281,6 +281,13 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 		Example:       model.Example,
 	}
 
+	langView, err := r.langRepo.GetView(model.LangID, model.AuthorID)
+	if err != nil {
+		return query.TranslationView{}, err
+	}
+
+	view.Lang = langView
+
 	if model.TagIDs == nil {
 		return view, nil
 	}
@@ -296,11 +303,5 @@ func (r *TranslationRepo) fromModelToView(model TranslationModel) (query.Transla
 
 	view.Tags = tagViews
 
-	langView, err := r.langRepo.GetView(model.LangID, model.AuthorID)
-	if err != nil {
-		return query.TranslationView{}, err
-	}
-
-	view.Lang = langView
 	return view, nil
 }

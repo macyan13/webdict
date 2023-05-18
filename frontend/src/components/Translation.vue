@@ -81,6 +81,8 @@
                 :options="langOptions"
                 v-model="lang"
                 :multiple="false"
+                label="name"
+                track-by="id"
                 deselectLabel=""
                 placeholder="Pick a language"
                 style="width: 15%"
@@ -228,6 +230,7 @@ export default {
     loadData() {
       TranslationService.get(this.id)
           .then((translation) => {
+            console.log(translation)
             this.source = translation.source;
             this.transcription = translation.transcription;
             this.target = translation.target;
@@ -271,6 +274,7 @@ export default {
       return true;
     },
     submitForm() {
+      this.hasError = false;
       if (!this.validate()) {
         return;
       }
@@ -278,7 +282,7 @@ export default {
       this.showEditSpinner = true;
       let method = this.id ? TranslationService.update : TranslationService.create;
       let tagIds = this.tags.map((tag) => tag.id);
-      method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang))
+      method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang.id))
           .then((data) => {
             // this.$store.dispatch('tag/clear');
             // router.push({name: 'Home'});

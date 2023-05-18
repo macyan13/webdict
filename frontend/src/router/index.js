@@ -55,6 +55,30 @@ const routes = [
     }
   },
   {
+    path: '/newLang',
+    name: 'NewLang',
+    component: () => import('@/views/NewLang.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/editLang/:id',
+    name: 'EditLang',
+    component: () => import('@/views/EditLang.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/langs',
+    name: 'Langs',
+    component: () => import('@/views/Langs.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/newTranslation',
     name: 'NewTranslation',
     component: () => import('@/views/NewTranslation.vue'),
