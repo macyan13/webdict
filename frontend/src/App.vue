@@ -2,9 +2,11 @@
   <div id="app">
     <div id="nav">
       <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/">Home</router-link> | </span>
-      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTranslation">Create Translation</router-link> | </span>
-      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTag">Create Tag</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTranslation">Add Translation</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newTag">Add Tag</router-link> | </span>
       <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/tags">Tags</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/newLang">Add Language</router-link> | </span>
+      <span v-if="this.$store.getters['auth/isLoggedIn']"><router-link to="/langs">Languages</router-link> | </span>
       <router-link to="/about">About</router-link> |
       <router-link v-if="!currentUser" to="/login">Login</router-link>
       <a to="" v-if="this.$store.getters['auth/isLoggedIn']" href @click.prevent="logOut">Logout</a>

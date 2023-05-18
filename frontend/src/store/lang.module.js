@@ -21,10 +21,17 @@ export default {
                 }
             );
         },
+        clear({commit}) {
+            commit('cleanLangs');
+            return Promise.resolve();
+        }
     },
     mutations: {
         allLangSuccess(state, langs) {
             state.langs = langs;
+        },
+        cleanLangs(state) {
+            state.langs = [];
         },
     },
 };
