@@ -6,6 +6,8 @@
             id="name-group"
             label="Name:"
             label-for="lang-input"
+            :state="name ? true : false"
+            invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
             <b-form-input
