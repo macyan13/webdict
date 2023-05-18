@@ -6,15 +6,17 @@
             id="source-group"
             label="Source text:"
             label-for="source-input"
+            :state="source ? true : false"
+            invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
-            <b-form-input
-                :required=true
-                id="source-input"
-                v-model="source"
-                placeholder="Enter source text..."
-                class="w-25"
-            ></b-form-input>
+              <b-form-input
+                  :required=true
+                  id="source-input"
+                  v-model="source"
+                  placeholder="Enter source text..."
+                  class="w-25"
+              ></b-form-input>
           </div>
         </b-form-group>
 
@@ -37,6 +39,8 @@
             id="target-group"
             label="Target text:"
             label-for="target-input"
+            :state="target ? true : false"
+            invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
             <b-form-input
@@ -73,6 +77,8 @@
             id="lang-group"
             label="Lang:"
             label-for="lang-input"
+            :state="lang ? true : false"
+            invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
             <VueMultiselect

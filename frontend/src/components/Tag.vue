@@ -6,6 +6,8 @@
             id="tag-group"
             label="Tag:"
             label-for="tag-input"
+            :state="tag ? true : false"
+            invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
             <b-form-input
