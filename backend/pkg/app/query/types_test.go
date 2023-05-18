@@ -44,6 +44,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 		Translation   string
 		Example       string
 		Tag           string
+		LangView      LangView
 	}
 	tests := []struct {
 		name            string
@@ -58,6 +59,10 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Translation:   "testTranslation",
 				Example:       "testExample",
 				Tag:           "testTag",
+				LangView: LangView{
+					ID:   "test",
+					Name: "English",
+				},
 			},
 			fields{
 				Text:          "testText",
@@ -65,6 +70,10 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Translation:   "testTranslation",
 				Example:       "testExample",
 				Tag:           "testTag",
+				LangView: LangView{
+					ID:   "test",
+					Name: "English",
+				},
 			},
 		},
 		{
@@ -75,6 +84,10 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Translation:   `<a onblur="alert(secret)" href="http://www.test.com">Target</a>`,
 				Example:       `<a onblur="alert(secret)" href="http://www.test.com">Example</a>`,
 				Tag:           `<a onblur="alert(secret)" href="http://www.test.com">Tag</a>`,
+				LangView: LangView{
+					ID:   "langID",
+					Name: `<a onblur="alert(secret)" href="http://www.test.com">English</a>`,
+				},
 			},
 			fields{
 				Text:          `&lt;a href=&#34;http://www.test.com&#34; rel=&#34;nofollow&#34;&gt;Source&lt;/a&gt;`,
@@ -82,6 +95,10 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Translation:   `<a href="http://www.test.com" rel="nofollow">Target</a>`,
 				Example:       `<a href="http://www.test.com" rel="nofollow">Example</a>`,
 				Tag:           `Tag`,
+				LangView: LangView{
+					ID:   "langID",
+					Name: "English",
+				},
 			},
 		},
 	}
@@ -97,6 +114,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Target:        tt.rawFields.Translation,
 				Example:       tt.rawFields.Example,
 				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
+				Lang:          tt.rawFields.LangView,
 			}
 			v.sanitize(strictSntz, reachSntz)
 			assert.Equal(t, id, v.ID)
@@ -105,6 +123,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 			assert.Equal(t, tt.sanitizedFields.Translation, v.Target)
 			assert.Equal(t, tt.sanitizedFields.Example, v.Example)
 			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Tag)
+			assert.Equal(t, tt.sanitizedFields.LangView, v.Lang)
 		})
 	}
 }
