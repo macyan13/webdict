@@ -70,7 +70,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			AuthorID: user.ID,
 			PageSize: pageSize,
 			Page:     page,
-			TagIds:   c.QueryArray("tagId"),
+			TagIds:   c.QueryArray("tagId[]"),
 			LangID:   c.Query("langId"),
 		})
 

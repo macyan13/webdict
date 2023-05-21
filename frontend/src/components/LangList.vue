@@ -86,6 +86,7 @@ export default {
           .finally(() => {
             this.showDeleteSpinner = false;
             this.showConfirmationModal = false;
+            this.idToDelete = null;
           });
     },
     deleteCancel() {
