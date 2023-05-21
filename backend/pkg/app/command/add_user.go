@@ -35,10 +35,6 @@ func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
 		return "", err
 	}
 
-	if err = h.validate(cmd); err != nil {
-		return "", err
-	}
-
 	u, err := user.NewUser(cmd.Name, cmd.Email, hashedPwd, cmd.Role)
 
 	if err != nil {
@@ -50,19 +46,4 @@ func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
 	}
 
 	return u.ID(), nil
-}
-
-// validate checks that there is not already created user with cmd email
-func (h AddUserHandler) validate(cmd AddUser) error {
-	exists, err := h.userRepo.Exist(cmd.Email)
-
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		return fmt.Errorf("can not create new user, a user with passed email: %s already exists", cmd.Email)
-	}
-
-	return nil
 }

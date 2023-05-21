@@ -1,9 +1,10 @@
-package server
+package server //nolint:dupl // it's not fully duplicate
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"net/http"
 )
@@ -31,8 +32,8 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc { //nolint:dupl // it's not ful
 			AuthorID: user.ID,
 		})
 
-		if err == command.ErrTagAlreadyExists {
-			c.JSON(http.StatusBadRequest, fmt.Sprintf("tag %s already exists", request.Tag))
+		if err == tag.ErrTagAlreadyExists {
+			s.badRequest(c, fmt.Errorf("tag %s already exists", request.Tag))
 			return
 		}
 
@@ -66,7 +67,7 @@ func (s *HTTPServer) GetTags() gin.HandlerFunc {
 	}
 }
 
-func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
+func (s *HTTPServer) UpdateTag() gin.HandlerFunc { //nolint:dupl // it's not fully duplicate
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request tagRequest
@@ -82,11 +83,15 @@ func (s *HTTPServer) UpdateTag() gin.HandlerFunc {
 			return
 		}
 
-		if err := s.app.Commands.UpdateTag.Handle(command.UpdateTag{
+		if err = s.app.Commands.UpdateTag.Handle(command.UpdateTag{
 			TagID:    c.Param(tagIDParam),
 			Tag:      request.Tag,
 			AuthorID: user.ID,
 		}); err != nil {
+			if err == tag.ErrTagAlreadyExists {
+				s.badRequest(c, fmt.Errorf("tag %s already exists", request.Tag))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
 			return
 		}
@@ -141,10 +146,10 @@ func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 	}
 }
 
-func (s *HTTPServer) tagViewToResponse(tag query.TagView) tagResponse {
+func (s *HTTPServer) tagViewToResponse(tg query.TagView) tagResponse {
 	return tagResponse{
-		ID:  tag.ID,
-		Tag: tag.Tag,
+		ID:  tg.ID,
+		Tag: tg.Tag,
 	}
 }
 

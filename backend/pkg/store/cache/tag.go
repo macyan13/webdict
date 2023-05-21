@@ -101,10 +101,6 @@ func (t TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 	return t.domainProxy.Get(id, authorID)
 }
 
-func (t TagRepo) ExistByTag(tg, authorID string) (bool, error) {
-	return t.domainProxy.ExistByTag(tg, authorID)
-}
-
 func (t TagRepo) Delete(id, authorID string) error {
 	if err := t.domainProxy.Delete(id, authorID); err != nil {
 		return err

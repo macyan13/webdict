@@ -21,18 +21,6 @@ func (l LangRepo) Create(ln *lang.Lang) error {
 	return nil
 }
 
-func (l LangRepo) ExistByName(name, authorID string) (bool, error) {
-	for _, ln := range l.storage {
-		if ln.AuthorID() != authorID {
-			continue
-		}
-		if ln.ToMap()["name"] == name {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 func (l LangRepo) Update(ln *lang.Lang) error {
 	l.storage[ln.ID()] = ln
 	return nil

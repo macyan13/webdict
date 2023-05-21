@@ -37,38 +37,6 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Error on checking existing tag",
-			func() fields {
-				tagRepo := tag.MockRepository{}
-				tagRepo.On("ExistByTag", "testTag", "testAuthor").Return(false, errors.New("testError"))
-				return fields{tagRepo: &tagRepo}
-			},
-			args{cmd: AddTag{
-				Tag:      "testTag",
-				AuthorID: "testAuthor",
-			}},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "testError", err.Error(), i)
-				return true
-			},
-		},
-		{
-			"Tag already exists",
-			func() fields {
-				tagRepo := tag.MockRepository{}
-				tagRepo.On("ExistByTag", "testTag", "testAuthor").Return(true, nil)
-				return fields{tagRepo: &tagRepo}
-			},
-			args{cmd: AddTag{
-				Tag:      "testTag",
-				AuthorID: "testAuthor",
-			}},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag already exists", err.Error(), i)
-				return true
-			},
-		},
-		{
 			"Error on tag saving",
 			func() fields {
 				tagRepo := tag.MockRepository{}
@@ -101,7 +69,6 @@ func TestAddTagHandler_Handle_PositiveCase(t *testing.T) {
 	tg := "testTag"
 	authorID := "testAuthor"
 	tagRepo := tag.MockRepository{}
-	tagRepo.On("ExistByTag", tg, authorID).Return(false, nil)
 	tagRepo.On("Create", mock.AnythingOfType("*tag.Tag")).Return(nil)
 
 	handler := NewAddTagHandler(&tagRepo)
@@ -113,7 +80,7 @@ func TestAddTagHandler_Handle_PositiveCase(t *testing.T) {
 	id, err := handler.Handle(cmd)
 	assert.Nil(t, err)
 
-	createdTag := tagRepo.Calls[1].Arguments[0].(*tag.Tag)
+	createdTag := tagRepo.Calls[0].Arguments[0].(*tag.Tag)
 	data := createdTag.ToMap()
 
 	assert.Equal(t, createdTag.ID(), id)

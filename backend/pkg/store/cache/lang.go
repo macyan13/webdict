@@ -35,10 +35,6 @@ func (l LangRepo) Create(ln *lang.Lang) error {
 	return nil
 }
 
-func (l LangRepo) ExistByName(name, authorID string) (bool, error) {
-	return l.domainProxy.ExistByName(name, authorID)
-}
-
 func (l LangRepo) Update(ln *lang.Lang) error {
 	if err := l.domainProxy.Update(ln); err != nil {
 		return err

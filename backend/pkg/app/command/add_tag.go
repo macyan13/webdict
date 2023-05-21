@@ -1,11 +1,8 @@
 package command //nolint:dupl // it's not fully duplicate
 
 import (
-	"errors"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
 )
-
-var ErrTagAlreadyExists = errors.New("tag already exists")
 
 // AddTag create new tag cmd
 type AddTag struct {
@@ -31,28 +28,9 @@ func (h AddTagHandler) Handle(cmd AddTag) (string, error) {
 		return "", err
 	}
 
-	if err := h.validate(cmd); err != nil {
-		return "", err
-	}
-
-	if err := h.tagRepo.Create(tg); err != nil {
+	if err = h.tagRepo.Create(tg); err != nil {
 		return "", err
 	}
 
 	return tg.ID(), nil
-}
-
-// Validate checks that there is no such already created tag for the author
-func (h AddTagHandler) validate(cmd AddTag) error {
-	exist, err := h.tagRepo.ExistByTag(cmd.Tag, cmd.AuthorID)
-
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		return ErrTagAlreadyExists
-	}
-
-	return nil
 }

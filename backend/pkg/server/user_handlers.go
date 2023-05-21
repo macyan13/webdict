@@ -41,6 +41,10 @@ func (s *HTTPServer) CreateUser() gin.HandlerFunc {
 		})
 
 		if err != nil {
+			if err == user.ErrEmailAlreadyExists {
+				s.badRequest(c, fmt.Errorf("user with email %s already exists", request.Email))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not create new user: %v", err))
 			return
 		}
@@ -116,7 +120,7 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 			return
 		}
 
-		if err := s.app.Commands.UpdateUser.Handle(command.UpdateUser{
+		if err = s.app.Commands.UpdateUser.Handle(command.UpdateUser{
 			ID:         c.Param(userIDParam),
 			Name:       request.Name,
 			Email:      request.Email,
@@ -124,6 +128,10 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 			Role:       user.Role(request.Role),
 			IsAdminCMD: usr.IsAdmin(),
 		}); err != nil {
+			if err == user.ErrEmailAlreadyExists {
+				s.badRequest(c, fmt.Errorf("user with email %s already exists", request.Email))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
 			return
 		}

@@ -50,6 +50,7 @@ func (r *LangRepo) initIndexes() error {
 				{Key: "name", Value: 1},
 				{Key: "author_id", Value: 1},
 			},
+			Options: options.Index().SetUnique(true),
 		},
 	}
 
@@ -72,7 +73,7 @@ func (r *LangRepo) Create(l *lang.Lang) error {
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, lang.ErrLangAlreadyExists)
 	}
 
 	return nil
@@ -90,7 +91,7 @@ func (r *LangRepo) Update(l *lang.Lang) error {
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, lang.ErrLangAlreadyExists)
 	}
 
 	if result.MatchedCount != 1 {
@@ -138,19 +139,6 @@ func (r *LangRepo) Delete(id, authorID string) error {
 	}
 
 	return nil
-}
-
-func (r *LangRepo) ExistByName(name, authorID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "name", Value: name}, {Key: "author_id", Value: authorID}})
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
 }
 
 func (r *LangRepo) Exist(id, authorID string) (bool, error) {

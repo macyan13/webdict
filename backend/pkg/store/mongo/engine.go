@@ -36,3 +36,11 @@ func InitDatabase(ctx context.Context, opts Opts) (*mongo.Database, error) {
 
 	return client.Database(opts.Database), nil
 }
+
+func replaceOnDuplicateKeyError(original, replace error) error {
+	if mongo.IsDuplicateKeyError(original) {
+		return replace
+	}
+
+	return original
+}

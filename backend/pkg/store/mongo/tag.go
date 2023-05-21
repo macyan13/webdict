@@ -38,6 +38,10 @@ func NewTagRepo(db *mongo.Database) (*TagRepo, error) {
 func (r *TagRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
+			Keys:    bson.D{{Key: "tag", Value: 1}, {Key: "author_id", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
 			Keys: bson.D{
 				{Key: "author_id", Value: 1},
 				{Key: "created_at", Value: -1},
@@ -65,7 +69,7 @@ func (r *TagRepo) Create(t *tag.Tag) error {
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, tag.ErrTagAlreadyExists)
 	}
 
 	return nil
@@ -84,7 +88,7 @@ func (r *TagRepo) Update(t *tag.Tag) error {
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, tag.ErrTagAlreadyExists)
 	}
 
 	if result.MatchedCount != 1 {
@@ -149,19 +153,6 @@ func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	}
 
 	return int(count) == len(ids), nil
-}
-
-func (r *TagRepo) ExistByTag(tg, authorID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag", Value: tg}, {Key: "author_id", Value: authorID}})
-
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
 }
 
 // GetAllViews returns all existing tag views for passed authorId

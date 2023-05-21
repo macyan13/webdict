@@ -23,27 +23,6 @@ func (_m *MockRepository) Create(user *User) error {
 	return r0
 }
 
-// Exist provides a mock function with given fields: email
-func (_m *MockRepository) Exist(email string) (bool, error) {
-	ret := _m.Called(email)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(email)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(email)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Get provides a mock function with given fields: id
 func (_m *MockRepository) Get(id string) (*User, error) {
 	ret := _m.Called(id)

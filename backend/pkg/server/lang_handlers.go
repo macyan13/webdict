@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/lang"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"net/http"
 )
@@ -31,8 +32,8 @@ func (s *HTTPServer) CreateLang() gin.HandlerFunc { //nolint:dupl // it's not fu
 			AuthorID: user.ID,
 		})
 
-		if err == command.ErrLangAlreadyExists {
-			c.JSON(http.StatusBadRequest, fmt.Sprintf("lang %s already exists", request.Name))
+		if err == lang.ErrLangAlreadyExists {
+			s.badRequest(c, fmt.Errorf("lang %s already exists", request.Name))
 			return
 		}
 
@@ -45,7 +46,7 @@ func (s *HTTPServer) CreateLang() gin.HandlerFunc { //nolint:dupl // it's not fu
 	}
 }
 
-func (s *HTTPServer) UpdateLang() gin.HandlerFunc {
+func (s *HTTPServer) UpdateLang() gin.HandlerFunc { //nolint:dupl // it's not fully duplicate
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		var request langRequest
@@ -61,11 +62,15 @@ func (s *HTTPServer) UpdateLang() gin.HandlerFunc {
 			return
 		}
 
-		if err := s.app.Commands.UpdateLang.Handle(command.UpdateLang{
+		if err = s.app.Commands.UpdateLang.Handle(command.UpdateLang{
 			ID:       c.Param(langIDParam),
 			Name:     request.Name,
 			AuthorID: user.ID,
 		}); err != nil {
+			if err == lang.ErrLangAlreadyExists {
+				s.badRequest(c, fmt.Errorf("lang %s already exists", request.Name))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not Update Existing lang: %v", err))
 			return
 		}

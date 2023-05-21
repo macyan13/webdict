@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/lang"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/tag"
-	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 )
 
 type validator struct {
-	tagRepo         tag.Repository
-	langRepo        lang.Repository
-	translationRepo translation.Repository
+	tagRepo  tag.Repository
+	langRepo lang.Repository
 }
 
 type translationData struct {
@@ -21,11 +19,10 @@ type translationData struct {
 	Source   string
 }
 
-func newValidator(tagRepo tag.Repository, langRepo lang.Repository, translationRepo translation.Repository) validator {
+func newValidator(tagRepo tag.Repository, langRepo lang.Repository) validator {
 	return validator{
-		tagRepo:         tagRepo,
-		langRepo:        langRepo,
-		translationRepo: translationRepo,
+		tagRepo:  tagRepo,
+		langRepo: langRepo,
 	}
 }
 
@@ -34,7 +31,6 @@ func (v validator) validate(data translationData) error {
 
 	err = errors.Join(err, v.validateTags(data))
 	err = errors.Join(err, v.validateLang(data))
-	err = errors.Join(err, v.validateSource(data))
 
 	return err
 }
@@ -64,19 +60,6 @@ func (v validator) validateLang(data translationData) error {
 
 	if !exist {
 		return fmt.Errorf("lang with id: %s is not found", data.LangID)
-	}
-
-	return nil
-}
-
-func (v validator) validateSource(data translationData) error {
-	exist, err := v.translationRepo.ExistBySource(data.Source, data.AuthorID, data.LangID)
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		return fmt.Errorf("translation with source: %s already created", data.Source)
 	}
 
 	return nil

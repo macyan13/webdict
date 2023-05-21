@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -42,6 +43,7 @@ func (r *UserRepo) initIndexes() error {
 			Keys: bson.D{
 				{Key: "email", Value: 1},
 			},
+			Options: options.Index().SetUnique(true),
 		},
 	}
 
@@ -54,21 +56,6 @@ func (r *UserRepo) initIndexes() error {
 	return nil
 }
 
-// Exist checks if user with the email exists
-func (r *UserRepo) Exist(email string) (bool, error) {
-	filter := bson.D{{Key: "email", Value: email}}
-
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
-	count, err := r.collection.CountDocuments(ctx, filter)
-	if err != nil {
-		return false, err
-	}
-
-	return count == 1, nil
-}
-
 func (r *UserRepo) Create(usr *user.User) error {
 	model, err := r.fromDomainToModel(usr)
 	if err != nil {
@@ -79,7 +66,7 @@ func (r *UserRepo) Create(usr *user.User) error {
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, user.ErrEmailAlreadyExists)
 	}
 
 	return nil
@@ -136,7 +123,7 @@ func (r *UserRepo) Update(usr *user.User) error {
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, user.ErrEmailAlreadyExists)
 	}
 
 	if result.MatchedCount != 1 {
