@@ -32,6 +32,24 @@ client.test("Request executed successfully", function () {
 client.global.set("user_id", response.body.id)
  %}
 
+### Crete User - Nagative case, can not crete new user with the same email
+POST {{host}}/v1/api/users
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+{
+  "name": "test1",
+  "email": "{{userEmail}}",
+  "password": "testPasswd",
+  "role": 2
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 400, "Response status is not 400")
+    })
+%}
+
 ### Update User
 PUT {{host}}/v1/api/users/{{user_id}}
 Content-Type: application/json
@@ -110,6 +128,20 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     client.global.set("lang_id", response.body.id)
 %}
 
+### Crete Lang -  Nagative case, can not crete new lane with the same name
+POST {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "DE"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 400, "Response status is not 400")
+    })
+%}
 
 ### Get lang by ID
 GET {{host}}/v1/api/langs/{{lang_id}}
@@ -217,6 +249,21 @@ client.test("Request executed successfully", function () {
 })
 client.global.set("tag1_id", response.body.id)
  %}
+
+### Crete tag - Nagative case, can not crete new tag with the same tag
+POST {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "tag": "test"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 400, "Response status is not 400")
+    })
+%}
 
 ### Error on create already existing tag
 # Frontend app should receive 400 error code to be able to show for user error message
@@ -336,6 +383,25 @@ client.test("Request executed successfully", function () {
 })
 client.global.set("translation1_id", response.body.id)
  %}
+
+### Create Translation - Nagative case, can not crete new translation with the same source
+POST {{host}}/v1/api/translations
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "source": "test",
+  "transcription": "test",
+  "target": "test",
+  "example": "test",
+  "lang_id": "{{lang_id}}"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 400, "Response status is not 400")
+    })
+%}
 
 ### Update translation
 PUT {{host}}/v1/api/translations/{{translation1_id}}

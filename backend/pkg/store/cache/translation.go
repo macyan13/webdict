@@ -60,10 +60,6 @@ func (t TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
 	return t.domainProxy.ExistByLang(langID, authorID)
 }
 
-func (t TranslationRepo) ExistBySource(source, authorID, langID string) (bool, error) {
-	return t.domainProxy.ExistBySource(source, authorID, langID)
-}
-
 func (t TranslationRepo) Delete(id, authorID string) error {
 	record, err := t.domainProxy.Get(id, authorID)
 

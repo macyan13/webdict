@@ -16,16 +16,6 @@ func NewUserRepository() *UserRepo {
 	}
 }
 
-func (u *UserRepo) Exist(email string) (bool, error) {
-	_, err := u.GetByEmail(email)
-
-	if err != nil {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 func (u *UserRepo) Create(usr *user.User) error {
 	u.storage[usr.ID()] = usr
 	return nil

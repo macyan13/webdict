@@ -65,61 +65,12 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"User repo returns error on validation",
-			func() fields {
-				cipher := MockCipher{}
-				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
-				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "test@email.com").Return(false, errors.New("testErr"))
-				return fields{
-					userRepo: &userRepo,
-					cipher:   &cipher,
-				}
-			},
-			args{cmd: AddUser{
-				Name:     "testName",
-				Email:    "test@email.com",
-				Password: "testPwd",
-				Role:     user.Admin,
-			}},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "testErr", err.Error(), i)
-				return true
-			},
-		},
-		{
-			"User with such email already exist",
-			func() fields {
-				cipher := MockCipher{}
-				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
-				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "test@email.com").Return(true, nil)
-				return fields{
-					userRepo: &userRepo,
-					cipher:   &cipher,
-				}
-			},
-			args{cmd: AddUser{
-				Name:     "testName",
-				Email:    "test@email.com",
-				Password: "testPwd",
-				Role:     user.Admin,
-			}},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not create new user, a user with passed email: test@email.com already exists", err.Error(), i)
-				return true
-			},
-		},
-		{
 			"Error on user creation",
 			func() fields {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("hashedPasswd", nil)
-				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "test@email.com").Return(false, nil)
 				return fields{
-					userRepo: &userRepo,
-					cipher:   &cipher,
+					cipher: &cipher,
 				}
 			},
 			args{cmd: AddUser{
@@ -139,7 +90,6 @@ func TestAddUserHandler_Handle_NegativeCases(t *testing.T) {
 				cipher := MockCipher{}
 				cipher.On("GenerateHash", "testPwd").Return("hashedPwd", nil)
 				userRepo := user.MockRepository{}
-				userRepo.On("Exist", "test@email.com").Return(false, nil)
 				userRepo.On("Create", mock.AnythingOfType("*user.User")).Return(errors.New("testErr"))
 				return fields{
 					userRepo: &userRepo,
@@ -178,7 +128,6 @@ func TestAddUserHandler_Handle_PositiveCase(t *testing.T) {
 	cipher := MockCipher{}
 	cipher.On("GenerateHash", pwd).Return(hashedPwd, nil)
 	userRepo := user.MockRepository{}
-	userRepo.On("Exist", email).Return(false, nil)
 	userRepo.On("Create", mock.AnythingOfType("*user.User")).Return(nil)
 
 	cmd := AddUser{
@@ -193,7 +142,7 @@ func TestAddUserHandler_Handle_PositiveCase(t *testing.T) {
 	id, err := handler.Handle(cmd)
 	assert.Nil(t, err)
 
-	createdUser := userRepo.Calls[1].Arguments[0].(*user.User)
+	createdUser := userRepo.Calls[0].Arguments[0].(*user.User)
 	data := createdUser.ToMap()
 
 	assert.Equal(t, createdUser.ID(), id)

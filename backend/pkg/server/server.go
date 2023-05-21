@@ -169,5 +169,5 @@ func (s *HTTPServer) unauthorized(c *gin.Context, err error) {
 
 func (s *HTTPServer) badRequest(c *gin.Context, err error) {
 	log.Printf("[Error] Can not handle request - %v", err)
-	c.JSON(http.StatusBadRequest, nil)
+	c.JSON(http.StatusBadRequest, err.Error())
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"net/http"
 	"strconv"
@@ -37,6 +38,10 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 		})
 
 		if err != nil {
+			if err == translation.ErrSourceAlreadyExists {
+				s.badRequest(c, fmt.Errorf("translation with source %s already exists", request.Source))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not create new translation: %v", err))
 			return
 		}
@@ -97,7 +102,7 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
+		if err = s.app.Commands.UpdateTranslation.Handle(command.UpdateTranslation{
 			ID:            c.Param(translationIDParam),
 			Target:        request.Target,
 			Transcription: request.Transcription,
@@ -107,6 +112,10 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			AuthorID:      user.ID,
 			LangID:        request.LangID,
 		}); err != nil {
+			if err == translation.ErrSourceAlreadyExists {
+				s.badRequest(c, fmt.Errorf("translation with source %s already exists", request.Source))
+				return
+			}
 			s.badRequest(c, fmt.Errorf("can not Update Existing translation: %v", err))
 			return
 		}
@@ -151,7 +160,7 @@ func (s *HTTPServer) DeleteTranslationByID() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if err := s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
+		if err = s.app.Commands.DeleteTranslation.Handle(command.DeleteTranslation{
 			ID:       c.Param(translationIDParam),
 			AuthorID: user.ID,
 		}); err != nil {

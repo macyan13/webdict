@@ -27,7 +27,7 @@ type UpdateTranslationHandler struct {
 func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo tag.Repository, langRepo lang.Repository) UpdateTranslationHandler {
 	return UpdateTranslationHandler{
 		translationRepo: translationRep,
-		validator:       newValidator(tagRepo, langRepo, translationRep),
+		validator:       newValidator(tagRepo, langRepo),
 	}
 }
 

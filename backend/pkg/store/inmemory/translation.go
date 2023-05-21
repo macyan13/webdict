@@ -53,20 +53,6 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 	return nil
 }
 
-func (r *TranslationRepo) ExistBySource(source, authorID, langID string) (bool, error) {
-	for _, t := range r.storage {
-		if t.AuthorID() != authorID || t.LangID() != langID {
-			continue
-		}
-
-		if t.ToMap()["source"] == source {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
 	for _, t := range r.storage {
 		if t.AuthorID() != authorID || t.LangID() != langID {

@@ -47,6 +47,10 @@ func NewTranslationRepo(db *mongo.Database, tagRepo query.TagViewRepository, lan
 func (r *TranslationRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
+			Keys:    bson.D{{Key: "source", Value: 1}, {Key: "lang_id", Value: 1}, {Key: "author_id", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
 			Keys: bson.D{
 				{Key: "lang_id", Value: 1},
 				{Key: "author_id", Value: 1},
@@ -82,7 +86,7 @@ func (r *TranslationRepo) Create(t *translation.Translation) error {
 	defer cancel()
 
 	if _, err = r.collection.InsertOne(ctx, model); err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, translation.ErrSourceAlreadyExists)
 	}
 
 	return nil
@@ -101,7 +105,7 @@ func (r *TranslationRepo) Update(t *translation.Translation) error {
 	result, err := r.collection.UpdateOne(ctx, bson.D{{Key: "_id", Value: model.ID}}, bson.M{"$set": model})
 
 	if err != nil {
-		return err
+		return replaceOnDuplicateKeyError(err, translation.ErrSourceAlreadyExists)
 	}
 
 	if result.MatchedCount != 1 {
@@ -164,15 +168,6 @@ func (r *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
 	defer cancel()
 
 	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "lang_id", Value: langID}, {Key: "author_id", Value: authorID}})
-
-	return count > 0, err
-}
-
-func (r *TranslationRepo) ExistBySource(source, authorID, langID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
-	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "source", Value: source}, {Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}})
 
 	return count > 0, err
 }

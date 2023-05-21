@@ -62,30 +62,6 @@ func (_m *MockRepository) ExistByLang(langID string, authorID string) (bool, err
 	return r0, r1
 }
 
-// ExistBySource provides a mock function with given fields: source, authorID, langID
-func (_m *MockRepository) ExistBySource(source string, authorID string, langID string) (bool, error) {
-	ret := _m.Called(source, authorID, langID)
-
-	var r0 bool
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string) (bool, error)); ok {
-		return rf(source, authorID, langID)
-	}
-	if rf, ok := ret.Get(0).(func(string, string, string) bool); ok {
-		r0 = rf(source, authorID, langID)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(source, authorID, langID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ExistByTag provides a mock function with given fields: tagID, authorID
 func (_m *MockRepository) ExistByTag(tagID string, authorID string) (bool, error) {
 	ret := _m.Called(tagID, authorID)
