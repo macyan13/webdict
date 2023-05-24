@@ -81,7 +81,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, lastTranslationsResponse{
 			Translations: s.translationViewsToResponse(lastViews.Views),
-			TotalPages:   lastViews.TotalPages,
+			TotalRecords: lastViews.TotalRecords,
 		})
 	}
 }

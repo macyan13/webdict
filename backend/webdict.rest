@@ -492,7 +492,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -502,8 +502,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     })
     client.test("Response body is correct", function () {
         client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
-        client.assert(response.body.hasOwnProperty("total_pages"), "Translation created_at is not present")
-        client.assert(response.body.total_pages === 2, "amount of pages is not correct")
+        client.assert(response.body.hasOwnProperty("total_records"), "Translation created_at is not present")
+        client.assert(response.body.total_records === 2, "amount of records is not correct")
         client.assert(response.body.translations[0].source === "test2", "Ordering of last translations is not correct")
         client.assert(response.body.translations[0].transcription === "test2", "Ordering of last translations is not correct")
         client.assert(response.body.translations[0].target === "test2", "Ordering of last translations is not correct")
@@ -544,7 +544,7 @@ client.test("Request executed successfully", function () {
  %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId={{tag1_id}}&tagId={{tag2_id}}&langId={{lang_id}}
+GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -554,8 +554,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     })
     client.test("Response body is correct", function () {
         client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
-        client.assert(response.body.hasOwnProperty("total_pages"), "Translation created_at is not present")
-        client.assert(response.body.total_pages === 0, "Amount of pages is not correct")
+        client.assert(response.body.hasOwnProperty("total_records"), "Translation created_at is not present")
+        client.assert(response.body.total_records === 0, "Amount of pages is not correct")
         client.assert(response.body.translations.length === 0, "Amount of translations is not correct")
     })
 %}

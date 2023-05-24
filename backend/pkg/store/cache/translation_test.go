@@ -485,7 +485,7 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Author cache is set, requested page is missed",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalPages: 5}, nil)
+				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalRecords: 5}, nil)
 				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
 				pageCache.Set("authorID-EN", map[string]query.LastViews{"1": {}})
 				return fields{
@@ -494,7 +494,7 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{TotalPages: 5},
+			query.LastViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false
@@ -511,14 +511,14 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Cache is not set",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalPages: 5}, nil)
+				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalRecords: 5}, nil)
 				return fields{
 					queryProxy: &repo,
 					pageCache:  cache.NewContext[string, map[string]query.LastViews](context.TODO()),
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{TotalPages: 5},
+			query.LastViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false
@@ -558,13 +558,13 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Page is set",
 			func() fields {
 				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"10-2-tag1-tag2": {TotalPages: 5}})
+				pageCache.Set("authorID-EN", map[string]query.LastViews{"10-2-tag1-tag2": {TotalRecords: 5}})
 				return fields{
 					pageCache: pageCache,
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag2", "tag1"}},
-			query.LastViews{TotalPages: 5},
+			query.LastViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false

@@ -17,7 +17,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="translation in translations" :key="translation.id">
+          <tr v-for="translation in translations" :key="translation.id" :id="translation.id">
             <td>{{ translation.source }}</td>
             <td>{{ translation.transcription }}</td>
             <td>{{ translation.target }}</td>
@@ -28,12 +28,16 @@
               <button class="btn btn-sm btn-primary" @click="editTranslation(translation.id)">Edit</button>
               <button class="btn btn-sm btn-danger" @click="confirmDelete(translation.id)">Delete</button>
             </td>
+            <b-popover :target="translation.id" triggers="hover" placement="top">
+              <template #title>Usage example</template>
+              {{translation.example}}
+            </b-popover>
           </tr>
           </tbody>
         </table>
         <b-pagination
             v-model="currentPage"
-            :total-rows="pageSize * totalPages"
+            :total-rows="totalRecords"
             :per-page="pageSize"
             last-number
             align="center"
@@ -42,11 +46,9 @@
       </div>
 
       <div class="col-md-2">
-        <!-- Language input -->
         <b-form-group
             id="lang-group"
             label="Language:"
-            label-for="lang-input"
             :state="langOptions.length > 0 ? true : false"
             invalid-feedback="Please create at least one language"
         >
@@ -65,11 +67,9 @@
           </div>
         </b-form-group>
 
-        <!-- Tags input -->
         <b-form-group
             id="tags-group"
             label="Tags:"
-            label-for="tags-input"
         >
           <div style="display: flex; justify-content: center;">
             <VueMultiselect
@@ -83,6 +83,14 @@
                 placeholder="Pick a tag"
             ></VueMultiselect>
           </div>
+        </b-form-group>
+
+        <b-form-group
+            id="page-size-group"
+            label="Translation per page:"
+            label-for="page-input"
+        >
+          <b-form-select v-model="pageSize" :options="pageSizeOptions"></b-form-select>
         </b-form-group>
         <b-button variant="primary" class="mr-2" @click="search">
           Search
@@ -123,27 +131,19 @@ export default {
     return {
       lang: null,
       langOptions: [],
+      translations: [],
       tags: [],
       tagOptions: [],
       currentPage: 1,
       pageSize: 20,
-      totalPages: null,
+      totalRecords: null,
       hasError: false,
       errorMessage: '',
       showLoadSpinner: false,
       showConfirmationModal: false,
       showDeleteSpinner: false,
       idToDelete: null,
-      translationResult: '',
-      translations: [
-        {
-          id: 25,
-          source: "we",
-          transcription: '[we]',
-          target: 'мы',
-          tags: [{id: 1, tag: "business"}, {id: 2, tag: "php"}]
-        }
-      ]
+      pageSizeOptions: [20, 30, 50, 100]
     };
   },
   mounted() {
@@ -218,7 +218,7 @@ export default {
       TranslationService.search(new SearchParams(tagIds, this.lang.id, this.currentPage, this.pageSize))
           .then(searchResult => {
             this.translations = searchResult.translations;
-            this.totalPages = searchResult.total_pages;
+            this.totalRecords = searchResult.total_records;
             this.hasError = false;
           })
           .catch((error) => {

@@ -44,7 +44,7 @@ type translationResponse struct {
 
 type lastTranslationsResponse struct {
 	Translations []translationResponse `json:"translations"`
-	TotalPages   int                   `json:"total_pages"`
+	TotalRecords int                   `json:"total_records"`
 }
 
 type tagResponse struct {

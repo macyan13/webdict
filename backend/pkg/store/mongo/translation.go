@@ -239,8 +239,8 @@ func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page i
 	}
 
 	return query.LastViews{
-		Views:      views,
-		TotalPages: totalPages,
+		Views:        views,
+		TotalRecords: int(totalDocuments),
 	}, nil
 }
 
