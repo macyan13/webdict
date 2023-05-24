@@ -41,6 +41,32 @@ class TranslationService {
                 });
         });
     }
+    delete(id) {
+        return new Promise((resolve, reject) => {
+            axios
+                .delete('/v1/api/translations/' + id, {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
+    search(SearchParams) {
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/v1/api/translations/last', {headers: authHeader(), params: SearchParams})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
 }
 
 export default new TranslationService();

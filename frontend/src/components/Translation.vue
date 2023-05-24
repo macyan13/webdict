@@ -75,7 +75,7 @@
 
         <b-form-group
             id="lang-group"
-            label="Lang:"
+            label="Language:"
             label-for="lang-input"
             :state="lang ? true : false"
             invalid-feedback="required"
@@ -236,7 +236,6 @@ export default {
     loadData() {
       TranslationService.get(this.id)
           .then((translation) => {
-            console.log(translation)
             this.source = translation.source;
             this.transcription = translation.transcription;
             this.target = translation.target;
@@ -256,20 +255,19 @@ export default {
       this.showConfirmationModal = true;
     },
     deleteTranslation() {
-      // this.showDeleteSpinner = true;
-      // TagService.delete(this.id)
-      //     .then(() => {
-      //       this.$store.dispatch('tag/clear');
-      //       router.push({name: 'Tags'});
-      //     })
-      //     .catch((error) => {
-      //       this.hasError = true;
-      //       this.errorMessage = error;
-      //     })
-      //     .finally(() => {
-      //       this.showDeleteSpinner = false;
-      //       this.showConfirmationModal = false;
-      //     });
+      this.showDeleteSpinner = true;
+      TranslationService.delete(this.id)
+          .then(() => {
+            router.push({name: 'Home'});
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showDeleteSpinner = false;
+            this.showConfirmationModal = false;
+          });
     },
     validate() {
       if (!this.lang) {

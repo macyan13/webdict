@@ -8,8 +8,8 @@ type TranslationViewRepository interface {
 }
 
 type LastViews struct {
-	Views      []TranslationView
-	TotalPages int
+	Views        []TranslationView
+	TotalRecords int
 }
 
 type TagViewRepository interface {

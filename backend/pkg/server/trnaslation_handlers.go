@@ -70,7 +70,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 			AuthorID: user.ID,
 			PageSize: pageSize,
 			Page:     page,
-			TagIds:   c.QueryArray("tagId"),
+			TagIds:   c.QueryArray("tagId[]"),
 			LangID:   c.Query("langId"),
 		})
 
@@ -81,7 +81,7 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, lastTranslationsResponse{
 			Translations: s.translationViewsToResponse(lastViews.Views),
-			TotalPages:   lastViews.TotalPages,
+			TotalRecords: lastViews.TotalRecords,
 		})
 	}
 }
