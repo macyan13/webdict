@@ -30,7 +30,7 @@
             </td>
             <b-popover :target="translation.id" triggers="hover" placement="top">
               <template #title>Usage example</template>
-              {{translation.example}}
+              <vue-markdown>{{translation.example}}</vue-markdown>
             </b-popover>
           </tr>
           </tbody>
@@ -121,11 +121,13 @@
 import VueMultiselect from 'vue-multiselect'
 import TranslationService from "@/services/translation.service";
 import SearchParams from "@/models/searchParams";
+import VueMarkdown from "vue-markdown";
 
 export default {
   name: 'translationSearch',
   components: {
-    VueMultiselect
+    VueMultiselect,
+    VueMarkdown
   },
   data() {
     return {
