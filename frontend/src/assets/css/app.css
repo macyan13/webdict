@@ -18,3 +18,8 @@
 #nav a.router-link-exact-active {
     color: #42b983;
 }
+
+/* Override  min-height: 300px; for mavon-editor */
+.markdown-editor .v-note-wrapper {
+    min-height: 250px;
+}

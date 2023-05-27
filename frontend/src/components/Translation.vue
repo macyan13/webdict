@@ -74,6 +74,23 @@
         </b-form-group>
 
         <b-form-group
+            id="example-group"
+            label="Example:"
+            label-for="example-input"
+            class="markdown-editor"
+        >
+          <div style="display: flex; justify-content: center;">
+            <mavon-editor
+                v-model="example"
+                placeholder="Enter example..."
+                language="en"
+                style="width: 55%;"
+                :toolbars="markdownOption">
+            </mavon-editor>
+          </div>
+        </b-form-group>
+
+        <b-form-group
             id="lang-group"
             label="Language:"
             label-for="lang-input"
@@ -93,21 +110,6 @@
                 placeholder="Pick a language"
                 style="width: 15%"
             ></VueMultiselect>
-          </div>
-        </b-form-group>
-
-        <b-form-group
-            id="example-group"
-            label="Example:"
-            label-for="example-input"
-        >
-          <div style="display: flex; justify-content: center;">
-            <b-form-textarea
-                id="example-input"
-                v-model="example"
-                placeholder="Enter example..."
-                style="width: 40%"
-            ></b-form-textarea>
           </div>
         </b-form-group>
 
@@ -161,17 +163,20 @@
 </template>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style src="mavon-editor/dist/css/index.css"></style>
 
 <script>
 import TranslationService from "@/services/translation.service";
 import Translation from "@/models/translation";
 import router from "@/router";
 import VueMultiselect from 'vue-multiselect'
+import { mavonEditor } from 'mavon-editor'
 
 export default {
   name: 'Translation',
   components: {
-    VueMultiselect
+    VueMultiselect,
+    mavonEditor
   },
   props: {
     id: {
@@ -198,6 +203,25 @@ export default {
       createdAtFormatted: null,
       hasError: false,
       errorMessage: '',
+      markdownOption: {
+        bold: true,
+        italic: true,
+        header: true,
+        underline: true,
+        strikethrough: true,
+        mark: true,
+        quote: true,
+        ol: true,
+        ul: true,
+        table: true,
+        undo: true,
+        redo: true,
+        trash: true,
+        navigation: true,
+        subfield: true,
+        preview: true,
+        help: true,
+      }
     }
   },
   mounted() {
