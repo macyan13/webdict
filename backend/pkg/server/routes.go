@@ -41,5 +41,9 @@ func (s *HTTPServer) buildRoutes() {
 		langAPI.PUT(fmt.Sprintf("/:%s", langIDParam), s.UpdateLang())
 		langAPI.GET(fmt.Sprintf("/:%s", langIDParam), s.GetLangByID())
 		langAPI.DELETE(fmt.Sprintf("/:%s", langIDParam), s.DeleteLangByID())
+
+		profileAPI := v1.Group("/profile", s.authHandler.Middleware())
+		profileAPI.GET("", s.GetProfile())
+		profileAPI.PUT("", s.UpdateProfile())
 	}
 }

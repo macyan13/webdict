@@ -64,6 +64,7 @@ func (s *HTTPServer) Refresh() gin.HandlerFunc {
 				log.Printf("[Error] Can not handle Refresh token request: %v", err)
 			}
 			c.JSON(http.StatusUnauthorized, nil)
+			return
 		}
 
 		c.JSON(http.StatusOK, AuthTokenResponse{

@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 )
 
@@ -25,10 +24,6 @@ func NewAddUserHandler(userRepo user.Repository, cipher Cipher) AddUserHandler {
 
 // Handle performs user creation cmd
 func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
-	if !cmd.Role.Valid() {
-		return "", fmt.Errorf("attempt to create user with invalid role: %d", cmd.Role)
-	}
-
 	hashedPwd, err := h.cipher.GenerateHash(cmd.Password)
 
 	if err != nil {
@@ -41,7 +36,7 @@ func (h AddUserHandler) Handle(cmd AddUser) (string, error) {
 		return "", err
 	}
 
-	if err := h.userRepo.Create(u); err != nil {
+	if err = h.userRepo.Create(u); err != nil {
 		return "", err
 	}
 

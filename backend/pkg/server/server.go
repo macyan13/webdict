@@ -69,7 +69,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	userRepo, err := mongo.NewUserRepo(dbConnect)
+	userRepo, err := mongo.NewUserRepo(dbConnect, cachedLangRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -86,10 +86,11 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, cachedTranslationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
-		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher, cachedLangRepo),
 		AddLang:           command.NewAddLangHandler(cachedLangRepo),
 		UpdateLang:        command.NewUpdateLangHandler(cachedLangRepo),
 		DeleteLang:        command.NewDeleteLangHandler(cachedLangRepo, cachedTranslationRepo),
+		UpdateProfile:     command.NewUpdateProfileHandler(userRepo, cipher, cachedLangRepo),
 	}
 
 	queries := app.Queries{

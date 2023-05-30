@@ -9,21 +9,23 @@ import (
 )
 
 type User struct {
-	id       string
-	name     string
-	email    string
-	password string
-	role     Role
+	id            string
+	name          string
+	email         string
+	password      string
+	role          Role
+	defaultLangID string
 }
 
 type Role int
 
 const (
+	NotSet Role = 0
 	Admin  Role = 1
 	Author Role = 2
 )
 
-func (r Role) Valid() bool {
+func (r Role) valid() bool {
 	return r >= Admin && r <= Author
 }
 
@@ -59,35 +61,34 @@ func (u *User) Role() Role {
 	return u.role
 }
 
-func (u *User) ApplyChanges(name, email, passwd string, role Role) error {
+func (u *User) ApplyChanges(name, email, passwd string, role Role, defaultLangID string) error {
 	updated := *u
-	updated.applyChanges(name, email, passwd, role)
+	updated.applyChanges(name, email, passwd, role, defaultLangID)
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	u.applyChanges(name, email, passwd, role)
+	u.applyChanges(name, email, passwd, role, defaultLangID)
 	return nil
 }
 
-func (u *User) applyChanges(name, email, passwd string, role Role) {
+func (u *User) applyChanges(name, email, passwd string, role Role, defaultLangID string) {
 	u.name = name
 	u.email = email
 	u.role = role
-
-	if passwd != "" {
-		u.password = passwd
-	}
+	u.defaultLangID = defaultLangID
+	u.password = passwd
 }
 
 func (u *User) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"id":       u.id,
-		"name":     u.name,
-		"email":    u.email,
-		"password": u.password,
-		"role":     int(u.role),
+		"id":            u.id,
+		"name":          u.name,
+		"email":         u.email,
+		"password":      u.password,
+		"role":          int(u.role),
+		"defaultLangID": u.defaultLangID,
 	}
 }
 
@@ -97,13 +98,15 @@ func UnmarshalFromDB(
 	email string,
 	password string,
 	role int,
+	defaultLangID string,
 ) *User {
 	return &User{
-		id:       id,
-		name:     name,
-		email:    email,
-		password: password,
-		role:     Role(role),
+		id:            id,
+		name:          name,
+		email:         email,
+		password:      password,
+		role:          Role(role),
+		defaultLangID: defaultLangID,
 	}
 }
 
@@ -126,6 +129,10 @@ func (u *User) validate() error {
 	// it should never happen as domain receives passwd as hash from cipher
 	if len(u.password) < 8 {
 		err = errors.Join(errors.New("password must contain at least 8 character"), err)
+	}
+
+	if !u.role.valid() {
+		err = errors.Join(fmt.Errorf("invalid user role passed - %d", u.role), err)
 	}
 
 	return err

@@ -41,10 +41,11 @@ func initTestServer() *HTTPServer {
 		UpdateTag:         command.NewUpdateTagHandler(tagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
-		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher, langRepo),
 		AddLang:           command.NewAddLangHandler(langRepo),
 		UpdateLang:        command.NewUpdateLangHandler(langRepo),
 		DeleteLang:        command.NewDeleteLangHandler(langRepo, translationRepo),
+		UpdateProfile:     command.NewUpdateProfileHandler(userRepo, cipher, langRepo),
 	}
 
 	queries := app.Queries{

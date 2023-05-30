@@ -72,6 +72,19 @@ func TestNewUser(t *testing.T) {
 			},
 		},
 		{
+			"Invalid Role",
+			args{
+				"tes",
+				"test.test.com",
+				"1234567",
+				Role(0),
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.True(t, strings.Contains(err.Error(), "invalid user role passed - 0"), i)
+				return true
+			},
+		},
+		{
 			"Multiple errors",
 			args{
 				"tes",
@@ -115,17 +128,18 @@ func TestNewUser(t *testing.T) {
 
 func TestUnmarshalFromDB(t *testing.T) {
 	user := User{
-		id:       "testId",
-		name:     "testName",
-		email:    "testEmail",
-		password: "testPassword",
-		role:     0,
+		id:            "testId",
+		name:          "testName",
+		email:         "testEmail",
+		password:      "testPassword",
+		role:          0,
+		defaultLangID: "testLang",
 	}
 
-	assert.Equal(t, &user, UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role)))
+	assert.Equal(t, &user, UnmarshalFromDB(user.id, user.name, user.email, user.password, int(user.role), user.defaultLangID))
 }
 
-func TestRole_Valid(t *testing.T) {
+func TestRole_valid(t *testing.T) {
 	tests := []struct {
 		name string
 		r    Role
@@ -149,7 +163,7 @@ func TestRole_Valid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.r.Valid(), "Valid()")
+			assert.Equalf(t, tt.want, tt.r.valid(), "valid()")
 		})
 	}
 }
@@ -162,10 +176,11 @@ func TestUser_ApplyChanges(t *testing.T) {
 		role     Role
 	}
 	type args struct {
-		name   string
-		email  string
-		passwd string
-		role   Role
+		name          string
+		email         string
+		passwd        string
+		role          Role
+		defaultLangID string
 	}
 	tests := []struct {
 		name   string
@@ -196,7 +211,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 			},
 		},
 		{
-			"Applied changes, passwd was not changed",
+			"Applied changes",
 			fields{
 				name:     "testName",
 				email:    "test@mail.com",
@@ -204,32 +219,11 @@ func TestUser_ApplyChanges(t *testing.T) {
 				role:     Admin,
 			},
 			args{
-				name:   "name",
-				email:  "updated@email.com",
-				passwd: "",
-				role:   Author,
-			},
-			func(t assert.TestingT, err error, usr *User, details string) {
-				assert.Nil(t, err, details)
-				assert.Equal(t, "name", usr.name)
-				assert.Equal(t, "updated@email.com", usr.email)
-				assert.Equal(t, "testPasswd", usr.password)
-				assert.Equal(t, Author, usr.role)
-			},
-		},
-		{
-			"Applied changes, passwd was changed",
-			fields{
-				name:     "testName",
-				email:    "test@mail.com",
-				password: "testPasswd",
-				role:     Admin,
-			},
-			args{
-				name:   "name",
-				email:  "updated@email.com",
-				passwd: "updatedPasswd",
-				role:   Author,
+				name:          "name",
+				email:         "updated@email.com",
+				passwd:        "updatedPasswd",
+				role:          Author,
+				defaultLangID: "langID",
 			},
 			func(t assert.TestingT, err error, usr *User, details string) {
 				assert.Nil(t, err, details)
@@ -237,6 +231,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				assert.Equal(t, "updated@email.com", usr.email)
 				assert.Equal(t, "updatedPasswd", usr.password)
 				assert.Equal(t, Author, usr.role)
+				assert.Equal(t, "langID", usr.defaultLangID)
 			},
 		},
 	}
@@ -248,7 +243,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				password: tt.fields.password,
 				role:     tt.fields.role,
 			}
-			tt.wantFn(t, u.ApplyChanges(tt.args.name, tt.args.email, tt.args.passwd, tt.args.role), u, fmt.Sprintf("ApplyChanges(%v, %v, %v, %v)", tt.args.name, tt.args.email, tt.args.passwd, tt.args.role))
+			tt.wantFn(t, u.ApplyChanges(tt.args.name, tt.args.email, tt.args.passwd, tt.args.role, tt.args.defaultLangID), u, fmt.Sprintf("ApplyChanges(%v, %v, %v, %v, %v)", tt.args.name, tt.args.email, tt.args.passwd, tt.args.role, tt.args.defaultLangID))
 		})
 	}
 }

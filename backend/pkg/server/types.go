@@ -22,6 +22,23 @@ type userRequest struct {
 	Role     int    `json:"role"`
 }
 
+type updateUserRequest struct {
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+	Role            int    `json:"role"`
+	DefaultLangID   string `json:"default_lang_id"`
+}
+
+type updateProfileRequest struct {
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+	DefaultLangID   string `json:"default_lang_id"`
+}
+
 type langRequest struct {
 	Name string `json:"name"`
 }
@@ -58,10 +75,11 @@ type langResponse struct {
 }
 
 type userResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Role  int    `json:"role"`
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Email       string       `json:"email"`
+	Role        int          `json:"role"`
+	DefaultLang langResponse `json:"default_lang"`
 }
 
 type idResponse struct {

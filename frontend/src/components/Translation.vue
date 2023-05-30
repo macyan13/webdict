@@ -248,9 +248,22 @@ export default {
     },
     fetchLangs() {
       this.$store.dispatch('lang/fetchAll')
-          .then((langs) =>{
+          .then((langs) => {
             this.langOptions = langs
-            this.lang = langs.length > 0 ? langs[0] : null;
+            if (langs.length > 0) {
+              this.$store.dispatch('profile/fetchProfile')
+                  .then((profile) => {
+                    if (profile.default_lang && profile.default_lang.id) {
+                      this.lang = profile.default_lang;
+                    } else {
+                      this.lang = langs[0];
+                    }
+                  })
+                  .catch((error) => {
+                    this.hasError = true;
+                    this.errorMessage = "Can not get user data from server: " + error;
+                  });
+            }
           })
           .catch(() => {
             this.hasError = true

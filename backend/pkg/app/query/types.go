@@ -70,13 +70,15 @@ func (v *LangView) sanitize(sanitizer *strictSanitizer) {
 }
 
 type UserView struct {
-	ID    string
-	Name  string
-	Email string
-	Role  int
+	ID          string
+	Name        string
+	Email       string
+	Role        int
+	DefaultLang LangView
 }
 
 func (v *UserView) sanitize(sanitizer *strictSanitizer) {
 	v.Name = sanitizer.Sanitize(v.Name)
 	v.Email = sanitizer.Sanitize(v.Email)
+	v.DefaultLang.sanitize(sanitizer)
 }

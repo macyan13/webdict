@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const USER_LOCAL_STORAGE_KEY = 'user';
+const AUTH_CONTEXT_LOCAL_STORAGE_KEY = 'auth_context';
 
 class AuthService {
     login(user) {
@@ -13,7 +13,7 @@ class AuthService {
             )
             .then(response => {
                 if (response.data.accessToken) {
-                    localStorage.setItem(USER_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
+                    localStorage.setItem(AUTH_CONTEXT_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
                 }
                 return response.data;
             });
@@ -25,7 +25,7 @@ class AuthService {
                 .post(this.getRefreshUrl(), {}, {withCredentials: true})
                 .then(response => {
                     if (response.data && response.data.accessToken) {
-                        localStorage.setItem(USER_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
+                        localStorage.setItem(AUTH_CONTEXT_LOCAL_STORAGE_KEY, JSON.stringify(response.data));
                     }
                     resolve(response.data);
                 })
@@ -37,19 +37,11 @@ class AuthService {
     }
 
     logout() {
-        localStorage.removeItem(USER_LOCAL_STORAGE_KEY);
+        localStorage.removeItem(AUTH_CONTEXT_LOCAL_STORAGE_KEY);
     }
 
-    // register(user) {
-    //     return axios.post('/v1/api/auth/signup', {
-    //         username: user.username,
-    //         email: user.email,
-    //         password: user.password
-    //     });
-    // }
-
-    getUser() {
-        return JSON.parse(localStorage.getItem(USER_LOCAL_STORAGE_KEY));
+    getAuthContext() {
+        return JSON.parse(localStorage.getItem(AUTH_CONTEXT_LOCAL_STORAGE_KEY));
     }
 
     getRefreshUrl() {

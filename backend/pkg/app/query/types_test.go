@@ -23,14 +23,14 @@ func TestTagView_sanitize(t *testing.T) {
 		},
 	}
 	id := "<must_not_change>"
-	sanitizer := newStrictSanitizer()
+	sntz := newStrictSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &TagView{
 				ID:  id,
 				Tag: tt.rawTag,
 			}
-			v.sanitize(sanitizer)
+			v.sanitize(sntz)
 			assert.Equal(t, tt.sanitizedTag, v.Tag)
 			assert.Equal(t, id, v.ID)
 		})
@@ -124,6 +124,98 @@ func TestTranslationView_sanitize(t *testing.T) {
 			assert.Equal(t, tt.sanitizedFields.Example, v.Example)
 			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Tag)
 			assert.Equal(t, tt.sanitizedFields.LangView, v.Lang)
+		})
+	}
+}
+
+func TestUserView_sanitize(t *testing.T) {
+	type fields struct {
+		Name     string
+		Email    string
+		LangName string
+	}
+	tests := []struct {
+		name            string
+		rawFields       fields
+		sanitizedFields fields
+	}{
+		{
+			"User without malicious content",
+			fields{
+				Name:     "name",
+				Email:    "test@email.com",
+				LangName: "EN",
+			},
+			fields{
+				Name:     "name",
+				Email:    "test@email.com",
+				LangName: "EN",
+			},
+		},
+		{
+			"User with malicious content",
+			fields{
+				Name:     `<a onblur="alert(secret)" href="http://www.test.com">testName</a>`,
+				Email:    `<a onblur="alert(secret)" href="http://www.test.com">test@email.com</a>`,
+				LangName: `<a onblur="alert(secret)" href="http://www.test.com">EN</a>`,
+			},
+			fields{
+				Name:     "testName",
+				Email:    "test@email.com",
+				LangName: "EN",
+			},
+		},
+	}
+	id := "<must_not_change>"
+	role := 5
+	strictSntz := newStrictSanitizer()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &UserView{
+				ID:          id,
+				Name:        tt.rawFields.Name,
+				Email:       tt.rawFields.Email,
+				Role:        role,
+				DefaultLang: LangView{Name: tt.rawFields.LangName},
+			}
+			v.sanitize(strictSntz)
+			assert.Equal(t, id, v.ID)
+			assert.Equal(t, role, v.Role)
+			assert.Equal(t, tt.sanitizedFields.Name, v.Name)
+			assert.Equal(t, tt.sanitizedFields.Email, v.Email)
+			assert.Equal(t, tt.sanitizedFields.LangName, v.DefaultLang.Name)
+		})
+	}
+}
+
+func TestLangView_sanitize(t *testing.T) {
+	tests := []struct {
+		name          string
+		rawLang       string
+		sanitizedLang string
+	}{
+		{
+			"Name without malicious content",
+			"EN",
+			"EN",
+		},
+		{
+			"Name with malicious content",
+			`<a onblur="alert(secret)" href="http://www.test.com">EN</a>`,
+			`EN`,
+		},
+	}
+	id := "<must_not_change>"
+	sntz := newStrictSanitizer()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &LangView{
+				ID:   id,
+				Name: tt.rawLang,
+			}
+			v.sanitize(sntz)
+			assert.Equal(t, tt.sanitizedLang, v.Name)
+			assert.Equal(t, id, v.ID)
 		})
 	}
 }

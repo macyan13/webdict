@@ -25,6 +25,8 @@ type Commands struct {
 	AddLang    command.AddLangHandler
 	UpdateLang command.UpdateLangHandler
 	DeleteLang command.DeleteLangHandler
+
+	UpdateProfile command.UpdateProfileHandler
 }
 
 type Queries struct {
