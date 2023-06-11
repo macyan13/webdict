@@ -15,20 +15,22 @@ import (
 // UserRepo Mongo DB implementation for domain user entity
 type UserRepo struct {
 	collection *mongo.Collection
+	langRepo   query.LangViewRepository
 }
 
 // UserModel represents mongo user document
 type UserModel struct {
-	ID       string `bson:"_id"`
-	Name     string `bson:"name"`
-	Email    string `bson:"email"`
-	Password string `bson:"password"`
-	Role     int    `bson:"role"`
+	ID            string `bson:"_id"`
+	Name          string `bson:"name"`
+	Email         string `bson:"email"`
+	Password      string `bson:"password"`
+	Role          int    `bson:"role"`
+	DefaultLangID string `bson:"default_lang_id"`
 }
 
 // NewUserRepo creates new UserRepo
-func NewUserRepo(db *mongo.Database) (*UserRepo, error) {
-	u := UserRepo{collection: db.Collection("users")}
+func NewUserRepo(db *mongo.Database, langRepo query.LangViewRepository) (*UserRepo, error) {
+	u := UserRepo{collection: db.Collection("users"), langRepo: langRepo}
 
 	if err := u.initIndexes(); err != nil {
 		return nil, err
@@ -150,7 +152,11 @@ func (r *UserRepo) GetAllViews() ([]query.UserView, error) {
 
 	views := make([]query.UserView, 0, len(models))
 	for _, model := range models {
-		views = append(views, r.fromModelToView(model))
+		view, err2 := r.fromModelToView(model)
+		if err2 != nil {
+			return nil, err2
+		}
+		views = append(views, view)
 	}
 
 	return views, nil
@@ -167,7 +173,7 @@ func (r *UserRepo) GetView(id string) (query.UserView, error) {
 		return query.UserView{}, err
 	}
 
-	return r.fromModelToView(record), nil
+	return r.fromModelToView(record)
 }
 
 // fromDomainToModel converts domain user to mongo model
@@ -178,13 +184,25 @@ func (r *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
 }
 
 // fromModelToView converts mongo model to user View
-func (r *UserRepo) fromModelToView(model UserModel) query.UserView {
-	return query.UserView{
-		ID:    model.ID,
-		Name:  model.Name,
-		Email: model.Email,
-		Role:  model.Role,
+func (r *UserRepo) fromModelToView(model UserModel) (query.UserView, error) {
+	view := query.UserView{
+		ID:          model.ID,
+		Name:        model.Name,
+		Email:       model.Email,
+		Role:        model.Role,
+		DefaultLang: query.LangView{},
 	}
+
+	if model.DefaultLangID != "" {
+		langView, err := r.langRepo.GetView(model.DefaultLangID, model.ID)
+
+		if err != nil {
+			return query.UserView{}, err
+		}
+		view.DefaultLang = langView
+	}
+
+	return view, nil
 }
 
 // fromModelToDomain converts mongo model to user entity
@@ -195,5 +213,6 @@ func (r *UserRepo) fromModelToDomain(model UserModel) *user.User {
 		model.Email,
 		model.Password,
 		model.Role,
+		model.DefaultLangID,
 	)
 }

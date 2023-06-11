@@ -20,7 +20,7 @@ Authorization: {{admin_auth_type}} {{admin_auth_token}}
 {
   "name": "test",
   "email": "{{userEmail}}",
-  "password": "testPasswd",
+  "password": "password before update",
   "role": 2
 }
 
@@ -58,7 +58,8 @@ Authorization: {{admin_auth_type}} {{admin_auth_token}}
 {
   "name": "John Do",
   "email": "{{userEmail}}",
-  "password": "{{userPassword}}",
+  "current_password": "password before update",
+  "new_password": "{{userPassword}}",
   "role": 2
 }
 
@@ -126,6 +127,39 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.body.hasOwnProperty("id"), "ID is present")
     })
     client.global.set("lang_id", response.body.id)
+%}
+
+### Update Profile with the default lang
+PUT {{host}}/v1/api/profile
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "John Dorry",
+  "email": "{{userEmail}}",
+  "default_lang_id": "{{lang_id}}"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+%}
+
+### Get current profile
+GET {{host}}/v1/api/profile
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.hasOwnProperty("id"), "User ID is not present")
+        client.assert(response.body.default_lang.name === "DE", "lang name from get profile is not correct")
+        client.assert(response.body.name === "John Dorry", "name from get profile is not correct")
+    })
 %}
 
 ### Crete Lang -  Nagative case, can not crete new lane with the same name

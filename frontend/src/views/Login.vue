@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import User from '../models/user';
+import AuthParams from '../models/authParams';
 
 export default {
   name: 'login',
@@ -47,8 +47,8 @@ export default {
       return this.$store.getters['auth/isLoggedIn']
     },
     callLogin() {
-      let user = new User(this.email, this.password)
-      this.$store.dispatch('auth/login', user)
+      let authParams = new AuthParams(this.email, this.password)
+      this.$store.dispatch('auth/login', authParams)
           .then(() => this.$router.push({name: 'Home'}))
           .catch(error => {
             this.loginError = true

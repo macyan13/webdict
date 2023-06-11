@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"github.com/macyan13/webdict/backend/pkg/app/domain/lang"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,6 +15,7 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 	type fields struct {
 		userRepo user.Repository
 		cipher   Cipher
+		langRepo lang.Repository
 	}
 	type args struct {
 		cmd UpdateUser
@@ -24,22 +26,6 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 		args     args
 		wantErr  assert.ErrorAssertionFunc
 	}{
-		{
-			"Invalid CMD user role",
-			func() fields {
-				return fields{
-					userRepo: &user.MockRepository{},
-					cipher:   &MockCipher{},
-				}
-			},
-			args{
-				cmd: UpdateUser{Role: user.Role(5)},
-			},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not update user, invalid role passed - 5", err.Error(), i)
-				return true
-			},
-		},
 		{
 			"Can not get user from DB",
 			func() fields {
@@ -59,20 +45,22 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Can not check if new email is free",
+			"Validate - Error on getting Lang from DB",
 			func() fields {
 				usrRepo := user.MockRepository{}
 				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
 				assert.Nil(t, err)
 				usrRepo.On("Get", "testID").Return(usr, nil)
-				usrRepo.On("GetByEmail", "updated@test.com").Return(nil, errors.New("testErr"))
+				langRepo := lang.MockRepository{}
+				langRepo.On("Get", "testLangID", "testID").Return(nil, errors.New("testErr"))
 				return fields{
 					userRepo: &usrRepo,
 					cipher:   &MockCipher{},
+					langRepo: &langRepo,
 				}
 			},
 			args{
-				cmd: UpdateUser{Role: user.Admin, ID: "testID", Email: "updated@test.com"},
+				cmd: UpdateUser{Role: user.Author, ID: "testID", CurrentPassword: "passwd", NewPassword: "newPasswd", Email: "test@test.com", DefaultLangID: "testLangID"},
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error(), i)
@@ -80,23 +68,47 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 			},
 		},
 		{
-			"Email is not free",
+			"Current passwd hash and user hash are not equal",
 			func() fields {
 				usrRepo := user.MockRepository{}
 				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
 				assert.Nil(t, err)
 				usrRepo.On("Get", "testID").Return(usr, nil)
-				usrRepo.On("GetByEmail", "updated@test.com").Return(nil, nil)
+				cipher := MockCipher{}
+				cipher.On("ComparePasswords", "testPasswd", "passwd").Return(false)
 				return fields{
 					userRepo: &usrRepo,
-					cipher:   &MockCipher{},
+					cipher:   &cipher,
 				}
 			},
 			args{
-				cmd: UpdateUser{Role: user.Admin, ID: "testID", Email: "updated@test.com"},
+				cmd: UpdateUser{Role: user.Author, ID: "testID", CurrentPassword: "passwd", NewPassword: "test", Email: "test@test.com"},
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "email updated@test.com already in use", err.Error(), i)
+				assert.Equal(t, "current password is not valid", err.Error(), i)
+				return true
+			},
+		},
+		{
+			"Error on new passwd generation",
+			func() fields {
+				usrRepo := user.MockRepository{}
+				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
+				assert.Nil(t, err)
+				usrRepo.On("Get", "testID").Return(usr, nil)
+				cipher := MockCipher{}
+				cipher.On("ComparePasswords", "testPasswd", "passwd").Return(true)
+				cipher.On("GenerateHash", "newPasswd").Return("", errors.New("testErr"))
+				return fields{
+					userRepo: &usrRepo,
+					cipher:   &cipher,
+				}
+			},
+			args{
+				cmd: UpdateUser{Role: user.Author, ID: "testID", CurrentPassword: "passwd", NewPassword: "newPasswd", Email: "test@test.com"},
+			},
+			func(t assert.TestingT, err error, i ...interface{}) bool {
+				assert.Equal(t, "testErr", err.Error(), i)
 				return true
 			},
 		},
@@ -116,29 +128,7 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 				cmd: UpdateUser{Role: user.Admin, ID: "testID", Email: "test@test.com"},
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "can not update user, attempt to change the role from not admin cmd", err.Error(), i)
-				return true
-			},
-		},
-		{
-			"Error on passwd generation on not empty passwd",
-			func() fields {
-				usrRepo := user.MockRepository{}
-				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
-				assert.Nil(t, err)
-				usrRepo.On("Get", "testID").Return(usr, nil)
-				cipher := MockCipher{}
-				cipher.On("GenerateHash", "passwd").Return("", errors.New("testErr"))
-				return fields{
-					userRepo: &usrRepo,
-					cipher:   &cipher,
-				}
-			},
-			args{
-				cmd: UpdateUser{Role: user.Author, ID: "testID", Password: "passwd", Email: "test@test.com"},
-			},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "testErr", err.Error(), i)
+				assert.Equal(t, "attempt to change the role from not admin cmd", err.Error(), i)
 				return true
 			},
 		},
@@ -149,7 +139,6 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
 				assert.Nil(t, err)
 				usrRepo.On("Get", "testID").Return(usr, nil)
-				usrRepo.On("GetByEmail", "notValid").Return(nil, user.ErrNotFound)
 				return fields{
 					userRepo: &usrRepo,
 					cipher:   &MockCipher{},
@@ -158,10 +147,7 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 			args{
 				cmd: UpdateUser{Role: user.Author, ID: "testID", Email: "notValid"},
 			},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "email is not valid"), i)
-				return true
-			},
+			assert.Error,
 		},
 		{
 			"Error on changes saving",
@@ -190,6 +176,7 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 			h := UpdateUserHandler{
 				userRepo: tt.fieldsFn().userRepo,
 				cipher:   tt.fieldsFn().cipher,
+				langRepo: tt.fieldsFn().langRepo,
 			}
 			tt.wantErr(t, h.Handle(tt.args.cmd), fmt.Sprintf("Handle(%v)", tt.args.cmd))
 		})
@@ -197,97 +184,121 @@ func TestUpdateUserHandler_Handle_NegativeCases(t *testing.T) {
 }
 
 func TestUpdateUserHandler_Handle_PositiveCases(t *testing.T) {
+	currentPasswdHash := "testPasswd"
 	usrRepo := user.MockRepository{}
-	usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
+	usr, err := user.NewUser("test", "test@test.com", currentPasswdHash, user.Author)
 	assert.Nil(t, err)
 	usrRepo.On("Get", "testID").Return(usr, nil)
 	usrRepo.On("Update", mock.AnythingOfType("*user.User")).Return(nil)
 
 	newPasswd := "passwd"
 	newHash := "validPasswdHash"
+	currentPasswd := "currentPasswd"
+	ID := "testID"
 	cipher := MockCipher{}
+	cipher.On("ComparePasswords", currentPasswdHash, currentPasswd).Return(true)
 	cipher.On("GenerateHash", newPasswd).Return(newHash, nil)
 
-	newEmail := "new@email.com"
-	usrRepo.On("GetByEmail", newEmail).Return(nil, user.ErrNotFound)
+	langRepo := lang.MockRepository{}
+	ln, err := lang.NewLang("EN", ID)
+	assert.Nil(t, err)
+	langRepo.On("Get", ln.ID(), ID).Return(ln, nil)
 
 	newRole := user.Admin
 	cmd := UpdateUser{
-		ID:         "testID",
-		Name:       "newName",
-		Email:      "new@email.com",
-		Password:   newPasswd,
-		Role:       newRole,
-		IsAdminCMD: true,
+		ID:              ID,
+		Name:            "newName",
+		Email:           "new@email.com",
+		CurrentPassword: currentPasswd,
+		NewPassword:     newPasswd,
+		Role:            newRole,
+		IsAdminCMD:      true,
+		DefaultLangID:   ln.ID(),
 	}
 
-	handler := NewUpdateUserHandler(&usrRepo, &cipher)
+	handler := NewUpdateUserHandler(&usrRepo, &cipher, &langRepo)
 	assert.Nil(t, handler.Handle(cmd))
 
-	updatedUsr := usrRepo.Calls[2].Arguments[0].(*user.User)
+	updatedUsr := usrRepo.Calls[1].Arguments[0].(*user.User)
 	data := updatedUsr.ToMap()
 
 	assert.Equal(t, cmd.Name, data["name"])
 	assert.Equal(t, cmd.Email, data["email"])
 	assert.Equal(t, newHash, data["password"])
 	assert.Equal(t, int(cmd.Role), data["role"])
+	assert.Equal(t, ln.ID(), data["defaultLangID"])
 }
 
-func TestUpdateUserHandler_emailFree(t *testing.T) {
-	type fields struct {
-		userRepo user.Repository
-	}
+func TestUpdateUserHandler_processRole(t *testing.T) {
 	type args struct {
 		cmd UpdateUser
+		usr *user.User
 	}
 	tests := []struct {
-		name     string
-		fieldsFn func() fields
-		args     args
-		want     bool
-		wantErr  assert.ErrorAssertionFunc
+		name    string
+		argsFn  func() args
+		want    user.Role
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			"Error on DB query",
-			func() fields {
-				repo := user.MockRepository{}
-				repo.On("GetByEmail", "test@email.com").Return(nil, errors.New("testErr"))
-				return fields{userRepo: &repo}
+			"Admin command",
+			func() args {
+				return args{
+					cmd: UpdateUser{Role: user.Admin, IsAdminCMD: true},
+					usr: nil,
+				}
 			},
-			args{cmd: UpdateUser{Email: "test@email.com"}},
-			false,
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, err.Error(), "testErr", i)
-				return true
-			},
+			user.Admin,
+			assert.NoError,
 		},
 		{
-			"User not found - email is free",
-			func() fields {
-				repo := user.MockRepository{}
-				repo.On("GetByEmail", "test@email.com").Return(nil, user.ErrNotFound)
-				return fields{userRepo: &repo}
+			"Not admin command, roles are different",
+			func() args {
+				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
+				assert.Nil(t, err)
+				return args{
+					cmd: UpdateUser{Role: user.Admin},
+					usr: usr,
+				}
 			},
-			args{cmd: UpdateUser{Email: "test@email.com"}},
-			true,
-			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Nil(t, err, i)
-				return true
+			0,
+			assert.Error,
+		},
+		{
+			"Not admin command, role is not set, return user role",
+			func() args {
+				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
+				assert.Nil(t, err)
+				return args{
+					cmd: UpdateUser{Role: user.NotSet},
+					usr: usr,
+				}
 			},
+			user.Author,
+			assert.NoError,
+		},
+		{
+			"Not admin command, role is set, return user role",
+			func() args {
+				usr, err := user.NewUser("test", "test@test.com", "testPasswd", user.Author)
+				assert.Nil(t, err)
+				return args{
+					cmd: UpdateUser{Role: user.Author},
+					usr: usr,
+				}
+			},
+			user.Author,
+			assert.NoError,
 		},
 	}
-	cipher := MockCipher{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := UpdateUserHandler{
-				userRepo: tt.fieldsFn().userRepo,
-				cipher:   &cipher,
-			}
-			got, err := h.emailFree(tt.args.cmd)
-			if !tt.wantErr(t, err, fmt.Sprintf("emailFree(%v)", tt.args.cmd)) {
+			h := UpdateUserHandler{}
+			got, err := h.processRole(tt.argsFn().cmd, tt.argsFn().usr)
+			if !tt.wantErr(t, err, fmt.Sprintf("processRole(%v, %v)", tt.argsFn().cmd, tt.argsFn().usr)) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "emailFree(%v)", tt.args.cmd)
+			assert.Equalf(t, tt.want, got, "processRole(%v, %v)", tt.argsFn().cmd, tt.argsFn().usr)
 		})
 	}
 }

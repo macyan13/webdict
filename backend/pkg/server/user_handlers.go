@@ -75,7 +75,7 @@ func (s *HTTPServer) GetUsers() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, s.userViewsToResponse(users))
+		c.JSON(http.StatusOK, s.userViewsToResponses(users))
 	}
 }
 
@@ -88,12 +88,13 @@ func (s *HTTPServer) GetUserByID() gin.HandlerFunc {
 			s.unauthorized(c, err)
 		}
 
-		if !usr.IsAdmin() {
+		requestedUsrID := c.Param(userIDParam)
+		if !usr.IsAdmin() && usr.ID != requestedUsrID {
 			s.unauthorized(c, errors.New("authorized user don't have permissions for the action"))
 			return
 		}
 
-		view, err := s.app.Queries.SingleUser.Handle(query.SingleUser{ID: c.Param(userIDParam)})
+		view, err := s.app.Queries.SingleUser.Handle(query.SingleUser{ID: requestedUsrID})
 
 		if err != nil {
 			s.badRequest(c, fmt.Errorf("can not find requested user - %v", err))
@@ -107,7 +108,7 @@ func (s *HTTPServer) GetUserByID() gin.HandlerFunc {
 func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var request userRequest
+		var request updateUserRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			s.badRequest(c, fmt.Errorf("can not parse user update request: %v", err))
@@ -121,18 +122,20 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 		}
 
 		if err = s.app.Commands.UpdateUser.Handle(command.UpdateUser{
-			ID:         c.Param(userIDParam),
-			Name:       request.Name,
-			Email:      request.Email,
-			Password:   request.Password,
-			Role:       user.Role(request.Role),
-			IsAdminCMD: usr.IsAdmin(),
+			ID:              c.Param(userIDParam),
+			Name:            request.Name,
+			Email:           request.Email,
+			CurrentPassword: request.CurrentPassword,
+			NewPassword:     request.NewPassword,
+			Role:            user.Role(request.Role),
+			IsAdminCMD:      usr.IsAdmin(),
+			DefaultLangID:   request.DefaultLangID,
 		}); err != nil {
 			if err == user.ErrEmailAlreadyExists {
 				s.badRequest(c, fmt.Errorf("user with email %s already exists", request.Email))
 				return
 			}
-			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
+			s.badRequest(c, fmt.Errorf("can not update user: %v", err))
 			return
 		}
 
@@ -140,26 +143,30 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 	}
 }
 
-func (s *HTTPServer) userViewsToResponse(users []query.UserView) []userResponse {
+func (s *HTTPServer) userViewsToResponses(users []query.UserView) []userResponse {
 	responses := make([]userResponse, len(users))
 
 	for i, usr := range users {
-		responses[i] = userResponse{
-			ID:    usr.ID,
-			Name:  usr.Name,
-			Email: usr.Email,
-			Role:  usr.Role,
-		}
+		responses[i] = s.userViewToResponse(usr)
 	}
 
 	return responses
 }
 
 func (s *HTTPServer) userViewToResponse(usr query.UserView) userResponse {
-	return userResponse{
+	response := userResponse{
 		ID:    usr.ID,
 		Name:  usr.Name,
 		Email: usr.Email,
 		Role:  usr.Role,
 	}
+
+	if usr.DefaultLang.ID != "" {
+		response.DefaultLang = langResponse{
+			ID:   usr.DefaultLang.ID,
+			Name: usr.DefaultLang.Name,
+		}
+	}
+
+	return response
 }

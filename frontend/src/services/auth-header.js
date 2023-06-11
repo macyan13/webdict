@@ -1,8 +1,10 @@
-export default function authHeader() {
-    let user = JSON.parse(localStorage.getItem('user'));
+const AUTH_CONTEXT_LOCAL_STORAGE_KEY = 'auth_context';
 
-    if (user && user.accessToken && user.type) {
-        return { Authorization: user.type + ' ' + user.accessToken };
+export default function authHeader() {
+    let authContext = JSON.parse(localStorage.getItem(AUTH_CONTEXT_LOCAL_STORAGE_KEY));
+
+    if (authContext && authContext.accessToken && authContext.type) {
+        return { Authorization: authContext.type + ' ' + authContext.accessToken };
     } else {
         return {};
     }
