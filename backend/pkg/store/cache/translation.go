@@ -117,6 +117,10 @@ func (t TranslationRepo) GetLastViews(authorID, langID string, pageSize, page in
 	return views, err
 }
 
+func (t TranslationRepo) GetRandomViews(authorID, langID string, tagIds []string, limit int) (query.RandomViews, error) {
+	return t.queryProxy.GetRandomViews(authorID, langID, tagIds, limit)
+}
+
 func (t TranslationRepo) sortTagsAlphabetically(tagIds []string) []string {
 	sort.Slice(tagIds, func(i, j int) bool {
 		return tagIds[i] < tagIds[j]

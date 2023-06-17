@@ -49,14 +49,15 @@ func initTestServer() *HTTPServer {
 	}
 
 	queries := app.Queries{
-		SingleTranslation: query.NewSingleTranslationHandler(translationRepo),
-		LastTranslations:  query.NewLastTranslationsHandler(translationRepo),
-		SingleTag:         query.NewSingleTagHandler(tagRepo),
-		AllTags:           query.NewAllTagsHandler(tagRepo),
-		SingleUser:        query.NewSingleUserHandler(userRepo),
-		AllUsers:          query.NewAllUsersHandler(userRepo),
-		SingleLang:        query.NewSingleLangHandler(langRepo),
-		AllLangs:          query.NewAllLangsHandler(langRepo),
+		SingleTranslation:  query.NewSingleTranslationHandler(translationRepo),
+		LastTranslations:   query.NewLastTranslationsHandler(translationRepo),
+		RandomTranslations: query.NewRandomTranslationsHandler(translationRepo),
+		SingleTag:          query.NewSingleTagHandler(tagRepo),
+		AllTags:            query.NewAllTagsHandler(tagRepo),
+		SingleUser:         query.NewSingleUserHandler(userRepo),
+		AllUsers:           query.NewAllUsersHandler(userRepo),
+		SingleLang:         query.NewSingleLangHandler(langRepo),
+		AllLangs:           query.NewAllLangsHandler(langRepo),
 	}
 
 	application := app.Application{

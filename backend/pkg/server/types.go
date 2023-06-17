@@ -64,6 +64,10 @@ type lastTranslationsResponse struct {
 	TotalRecords int                   `json:"total_records"`
 }
 
+type randomTranslationsResponse struct {
+	Translations []translationResponse `json:"translations"`
+}
+
 type tagResponse struct {
 	ID  string `json:"id"`
 	Tag string `json:"tag"`

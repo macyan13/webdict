@@ -60,11 +60,8 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 		}
 
 		var pageSize, page int
-		requestPageSize := c.Query("pageSize")
-		pageSize, _ = strconv.Atoi(requestPageSize)
-
-		requestPage := c.Query("page")
-		page, _ = strconv.Atoi(requestPage)
+		pageSize, _ = strconv.Atoi(c.Query("pageSize"))
+		page, _ = strconv.Atoi(c.Query("page"))
 
 		lastViews, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
 			AuthorID: user.ID,
@@ -75,13 +72,42 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			s.badRequest(c, fmt.Errorf("can not return last translations, can not perform DB query - %v", err))
+			s.badRequest(c, fmt.Errorf("can not return last translations - %v", err))
 			return
 		}
 
 		c.JSON(http.StatusOK, lastTranslationsResponse{
 			Translations: s.translationViewsToResponse(lastViews.Views),
 			TotalRecords: lastViews.TotalRecords,
+		})
+	}
+}
+
+func (s *HTTPServer) GetRandomTranslations() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+
+		user, err := s.authHandler.UserFromContext(c)
+		if err != nil {
+			s.unauthorized(c, err)
+		}
+
+		limit, _ := strconv.Atoi(c.Query("limit"))
+
+		lastViews, err := s.app.Queries.RandomTranslations.Handle(query.RandomTranslations{
+			AuthorID: user.ID,
+			LangID:   c.Query("langId"),
+			TagIds:   c.QueryArray("tagId[]"),
+			Limit:    limit,
+		})
+
+		if err != nil {
+			s.badRequest(c, fmt.Errorf("can not return random translations - %v", err))
+			return
+		}
+
+		c.JSON(http.StatusOK, randomTranslationsResponse{
+			Translations: s.translationViewsToResponse(lastViews.Views),
 		})
 	}
 }

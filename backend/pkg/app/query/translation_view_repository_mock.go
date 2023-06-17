@@ -10,23 +10,47 @@ type MockTranslationViewRepository struct {
 	mock.Mock
 }
 
-// GetLastViews provides a mock function with given fields: authorID, lang, pageSize, page, tagIds
-func (_m *MockTranslationViewRepository) GetLastViews(authorID string, lang string, pageSize int, page int, tagIds []string) (LastViews, error) {
-	ret := _m.Called(authorID, lang, pageSize, page, tagIds)
+// GetLastViews provides a mock function with given fields: authorID, langID, pageSize, page, tagIds
+func (_m *MockTranslationViewRepository) GetLastViews(authorID string, langID string, pageSize int, page int, tagIds []string) (LastViews, error) {
+	ret := _m.Called(authorID, langID, pageSize, page, tagIds)
 
 	var r0 LastViews
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) (LastViews, error)); ok {
-		return rf(authorID, lang, pageSize, page, tagIds)
+		return rf(authorID, langID, pageSize, page, tagIds)
 	}
 	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) LastViews); ok {
-		r0 = rf(authorID, lang, pageSize, page, tagIds)
+		r0 = rf(authorID, langID, pageSize, page, tagIds)
 	} else {
 		r0 = ret.Get(0).(LastViews)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string, int, int, []string) error); ok {
-		r1 = rf(authorID, lang, pageSize, page, tagIds)
+		r1 = rf(authorID, langID, pageSize, page, tagIds)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRandomViews provides a mock function with given fields: authorID, langID, tagIds, limit
+func (_m *MockTranslationViewRepository) GetRandomViews(authorID string, langID string, tagIds []string, limit int) (RandomViews, error) {
+	ret := _m.Called(authorID, langID, tagIds, limit)
+
+	var r0 RandomViews
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, []string, int) (RandomViews, error)); ok {
+		return rf(authorID, langID, tagIds, limit)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, []string, int) RandomViews); ok {
+		r0 = rf(authorID, langID, tagIds, limit)
+	} else {
+		r0 = ret.Get(0).(RandomViews)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, []string, int) error); ok {
+		r1 = rf(authorID, langID, tagIds, limit)
 	} else {
 		r1 = ret.Error(1)
 	}
