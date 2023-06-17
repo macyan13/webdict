@@ -6,35 +6,7 @@
     <div class="row">
       <div class="col-md-10">
         <!-- Translation search result -->
-        <table class="table" id="search-results">
-          <thead>
-          <tr>
-            <th>Source</th>
-            <th>Transcription</th>
-            <th>Target</th>
-            <th>Tags</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="translation in translations" :key="translation.id" :id="translation.id">
-            <td>{{ translation.source }}</td>
-            <td>{{ translation.transcription }}</td>
-            <td>{{ translation.target }}</td>
-            <td>
-              <span v-for="tag in translation.tags" :key="tag.id" class="badge badge-primary">{{ tag.tag }}</span>
-            </td>
-            <td>
-              <button class="btn btn-sm btn-primary" @click="editTranslation(translation.id)">Edit</button>
-              <button class="btn btn-sm btn-danger" @click="confirmDelete(translation.id)">Delete</button>
-            </td>
-            <b-popover :target="translation.id" triggers="hover" placement="top">
-              <template #title>Usage example</template>
-              <vue-markdown>{{translation.example}}</vue-markdown>
-            </b-popover>
-          </tr>
-          </tbody>
-        </table>
+        <translation-list :translations="translations" @onDelete="refreshData"></translation-list>
         <b-pagination
             v-model="currentPage"
             :total-rows="totalRecords"
@@ -97,21 +69,30 @@
         </b-button>
       </div>
     </div>
+    <div class="mt-5">
+      <b-button block variant="info" @click="onRandomTranslationsClick">Show random translations</b-button>
+    </div>
+    <div class="row">
+      <div class="col-md-10">
+        <div v-if="showRandomTranslations && lang">
+          <translation-list :translations="randomTranslations" @onDelete="refreshData"></translation-list>
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div v-if="showRandomTranslations && lang">
+          <b-form-group
+              id="page-size-group"
+              label="Random items amount:"
+              label-for="page-input"
+          >
+            <b-form-select v-model="randomLimit" :options="randomLimitOptions"></b-form-select>
+          </b-form-group>
+          <b-button variant="primary" @click="fetchRandomTranslations">Refresh</b-button>
+        </div>
+      </div>
+    </div>
     <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
-    <b-modal v-model="showConfirmationModal" title="Delete Translation?" hide-footer hide-backdrop>
-      <p>Are you sure you want to delete this translation?</p>
-      <div class="d-flex justify-content-end">
-        <b-button variant="secondary" class="mr-2" @click="deleteCancel">
-          Cancel
-        </b-button>
-        <b-button variant="danger" @click="deleteTranslation">
-          Delete
-        </b-button>
-      </div>
-      <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
-        <b-spinner variant="danger" label="Spinning"></b-spinner>
-      </div>
-    </b-modal>
   </div>
 </template>
 
@@ -121,13 +102,14 @@
 import VueMultiselect from 'vue-multiselect'
 import TranslationService from "@/services/translation.service";
 import SearchParams from "@/models/searchParams";
-import VueMarkdown from "vue-markdown";
+import RandomParams from "@/models/randomParams";
+import TranslationList from "@/components/TranslationList.vue";
 
 export default {
   name: 'translationSearch',
   components: {
+    TranslationList,
     VueMultiselect,
-    VueMarkdown
   },
   data() {
     return {
@@ -142,10 +124,11 @@ export default {
       hasError: false,
       errorMessage: '',
       showLoadSpinner: false,
-      showConfirmationModal: false,
-      showDeleteSpinner: false,
-      idToDelete: null,
-      pageSizeOptions: [20, 30, 50, 100]
+      pageSizeOptions: [20, 30, 50, 100],
+      showRandomTranslations: false,
+      randomTranslations: [],
+      randomLimit: 10,
+      randomLimitOptions: [10, 15, 20]
     };
   },
   mounted() {
@@ -187,6 +170,46 @@ export default {
             this.errorMessage = 'Can not get languages from server :(';
           })
     },
+    refreshData() {
+      this.search();
+
+      if (this.showRandomTranslations) {
+        this.fetchRandomTranslations();
+      }
+    },
+    onRandomTranslationsClick() {
+      if (!this.showRandomTranslations) {
+        if (this.randomTranslations.length === 0) {
+          this.fetchRandomTranslations();
+        }
+        this.showRandomTranslations = true;
+        return;
+      }
+      this.showRandomTranslations = false;
+    },
+    fetchRandomTranslations() {
+      if (!this.lang) {
+        this.hasError = true;
+        this.errorMessage = 'Please select the language to get random translations';
+        return;
+      }
+
+      this.showLoadSpinner = true;
+      let tagIds = this.tags.map(x => x.id);
+
+      TranslationService.random(new RandomParams(tagIds, this.lang.id, this.randomLimit))
+          .then(searchResult => {
+            this.randomTranslations = searchResult.translations;
+            this.hasError = false;
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showLoadSpinner = false;
+          });
+    },
     fetchTags() {
       this.$store.dispatch('tag/fetchAll')
           .then((tags) => this.tagOptions = tags)
@@ -195,38 +218,11 @@ export default {
             this.errorMessage = 'Can not get tags from server :(';
           })
     },
-    editTranslation(id) {
-      this.$router.push(`/editTranslation/${id}`)
-    },
-    confirmDelete(id) {
-      this.idToDelete = id;
-      this.showConfirmationModal = true;
-    },
-    deleteCancel() {
-      this.showConfirmationModal = false;
-      this.idToDelete = null
-    },
-    deleteTranslation() {
-      this.showDeleteSpinner = true;
-      TranslationService.delete(this.idToDelete)
-          .then(() => {
-            this.search();
-          })
-          .catch((error) => {
-            this.hasError = true;
-            this.errorMessage = error;
-          })
-          .finally(() => {
-            this.showDeleteSpinner = false;
-            this.showConfirmationModal = false;
-            this.idToDelete = null;
-          });
-    },
     search() {
       if (!this.lang) {
         this.hasError = true;
         this.errorMessage = 'Please select the language to perform translation search';
-        return
+        return;
       }
 
       this.showLoadSpinner = true;

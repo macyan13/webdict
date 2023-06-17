@@ -67,6 +67,19 @@ class TranslationService {
                 });
         });
     }
+    random(randomParams) {
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/v1/api/translations/random', {headers: authHeader(), params: randomParams})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
 }
 
 export default new TranslationService();

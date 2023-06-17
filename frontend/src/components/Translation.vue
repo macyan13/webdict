@@ -2,137 +2,145 @@
   <div>
     <b-card :title="title">
       <b-form @submit.prevent="submitForm">
-        <b-form-group
-            id="source-group"
-            label="Source text:"
-            label-for="source-input"
-            :state="source ? true : false"
-            invalid-feedback="required"
-        >
-          <div style="display: flex; justify-content: center;">
-              <b-form-input
-                  :required=true
-                  id="source-input"
-                  v-model="source"
-                  placeholder="Enter source text..."
-                  class="w-25"
-              ></b-form-input>
-          </div>
-        </b-form-group>
+        <div class="row">
+          <div class="col-md-1"/>
+          <div class="col-md-7">
+            <b-form-group
+                id="source-group"
+                label="Source text:"
+                label-for="source-input"
+                :state="source ? true : false"
+                invalid-feedback="required"
+            >
+              <div style="display: flex; justify-content: center;">
+                  <b-form-input
+                      :required=true
+                      id="source-input"
+                      v-model="source"
+                      placeholder="Enter source text..."
+                      style="width: 40%;"
+                  ></b-form-input>
+              </div>
+            </b-form-group>
 
-        <b-form-group
-            id="transcription-group"
-            label="Transcription:"
-            label-for="transcription-input"
-        >
-          <div style="display: flex; justify-content: center;">
-            <b-form-input
-                class="w-25"
-                id="transcription-input"
-                v-model="transcription"
-                placeholder="Enter transcription..."
-            ></b-form-input>
-          </div>
-        </b-form-group>
+            <b-form-group
+                id="transcription-group"
+                label="Transcription:"
+                label-for="transcription-input"
+            >
+              <div style="display: flex; justify-content: center;">
+                <b-form-input
+                    style="width: 40%;"
+                    id="transcription-input"
+                    v-model="transcription"
+                    placeholder="Enter transcription..."
+                ></b-form-input>
+              </div>
+            </b-form-group>
 
-        <b-form-group
-            id="target-group"
-            label="Target text:"
-            label-for="target-input"
-            :state="target ? true : false"
-            invalid-feedback="required"
-        >
-          <div style="display: flex; justify-content: center;">
-            <b-form-input
-                :required=true
-                id="target-input"
-                v-model="target"
-                placeholder="Enter target text..."
-                class="w-25"
-            ></b-form-input>
-          </div>
-        </b-form-group>
+            <b-form-group
+                id="target-group"
+                label="Target text:"
+                label-for="target-input"
+                :state="target ? true : false"
+                invalid-feedback="required"
+            >
+              <div style="display: flex; justify-content: center;">
+                <b-form-input
+                    :required=true
+                    id="target-input"
+                    v-model="target"
+                    placeholder="Enter target text..."
+                    style="width: 40%;"
+                ></b-form-input>
+              </div>
+            </b-form-group>
 
-        <b-form-group
-            id="tags-group"
-            label="Tags:"
-            label-for="tags-input"
-        >
-          <div style="display: flex; justify-content: center;">
-            <VueMultiselect
-                :options="tagOptions"
-                v-model="tags"
-                :multiple="true"
-                :max="5"
-                :show-labels="false"
-                label="tag"
-                track-by="id"
-                placeholder="Pick a tag"
-                style="width: 25%"
-            ></VueMultiselect>
-          </div>
-        </b-form-group>
+            <b-form-group
+                id="example-group"
+                label="Example:"
+                label-for="example-input"
+                class="markdown-editor"
+            >
+              <div style="display: flex; justify-content: center;">
+                <mavon-editor
+                    v-model="example"
+                    placeholder="Enter example..."
+                    language="en"
+                    style="width: 75%;"
+                    :toolbars="markdownOption">
+                </mavon-editor>
+              </div>
+            </b-form-group>
 
-        <b-form-group
-            id="example-group"
-            label="Example:"
-            label-for="example-input"
-            class="markdown-editor"
-        >
-          <div style="display: flex; justify-content: center;">
-            <mavon-editor
-                v-model="example"
-                placeholder="Enter example..."
-                language="en"
-                style="width: 55%;"
-                :toolbars="markdownOption">
-            </mavon-editor>
-          </div>
-        </b-form-group>
 
-        <b-form-group
-            id="lang-group"
-            label="Language:"
-            label-for="lang-input"
-            :state="lang ? true : false"
-            invalid-feedback="required"
-        >
-          <div style="display: flex; justify-content: center;">
-            <VueMultiselect
-                :preselect-first="true"
-                :allow-empty="false"
-                :options="langOptions"
-                v-model="lang"
-                :multiple="false"
-                label="name"
-                track-by="id"
-                deselectLabel=""
-                placeholder="Pick a language"
-                style="width: 15%"
-            ></VueMultiselect>
+            <b-form-group
+                v-if="id"
+                id="createdAt-group"
+                label="Created:"
+                label-for="createdAt-input"
+            >
+              <div class="d-inline-flex">
+                <b-form-input
+                    :disabled="true"
+                    id="createdAt-input"
+                    v-model="createdAtFormatted"
+                    class="flex-grow-1"
+                ></b-form-input>
+              </div>
+            </b-form-group>
           </div>
-        </b-form-group>
 
-        <b-form-group
-            v-if="id"
-            id="createdAt-group"
-            label="Created:"
-            label-for="createdAt-input"
-        >
-          <div class="d-inline-flex">
-            <b-form-input
-                :disabled="true"
-                id="createdAt-input"
-                v-model="createdAtFormatted"
-                class="flex-grow-1"
-            ></b-form-input>
+          <div class="col-md-3">
+            <b-form-group
+                id="lang-group"
+                label="Language:"
+                label-for="lang-input"
+                :state="lang ? true : false"
+                invalid-feedback="required"
+            >
+              <div style="display: flex; justify-content: center;">
+                <VueMultiselect
+                    :preselect-first="true"
+                    :allow-empty="false"
+                    :options="langOptions"
+                    v-model="lang"
+                    :multiple="false"
+                    label="name"
+                    track-by="id"
+                    deselectLabel=""
+                    placeholder="Pick a language"
+                    style="width: 25%"
+                ></VueMultiselect>
+              </div>
+            </b-form-group>
+
+            <b-form-group
+                id="tags-group"
+                label="Tags:"
+                label-for="tags-input"
+            >
+              <div style="display: flex; justify-content: center;">
+                <VueMultiselect
+                    :options="tagOptions"
+                    v-model="tags"
+                    :multiple="true"
+                    :max="5"
+                    :show-labels="false"
+                    label="tag"
+                    track-by="id"
+                    placeholder="Pick a tag"
+                    style="width: 50%"
+                ></VueMultiselect>
+              </div>
+            </b-form-group>
           </div>
-        </b-form-group>
+          <div class="col-md-1"/>
+        </div>
 
         <b-button type="submit" variant="primary">
           {{ buttonLabel }}
         </b-button>
-
         <b-button v-if="id" variant="danger" @click="confirmDelete">
           Delete
         </b-button>
