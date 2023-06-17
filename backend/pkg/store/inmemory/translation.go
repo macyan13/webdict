@@ -143,6 +143,37 @@ func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page i
 	}, nil
 }
 
+func (r *TranslationRepo) GetRandomViews(authorID, langID string, tagIds []string, limit int) (query.RandomViews, error) {
+	views := make([]query.TranslationView, 0, limit)
+	found := 0
+
+	for _, v := range r.storage {
+		if found >= limit {
+			return query.RandomViews{Views: views}, nil
+		}
+		if v.AuthorID() != authorID || v.LangID() != langID {
+			continue
+		}
+
+		data := v.ToMap()
+
+		if !r.containsAll(data["tagIDs"].([]string), tagIds) {
+			continue
+		}
+
+		view, err := r.translationToView(v)
+
+		if err != nil {
+			return query.RandomViews{}, err
+		}
+
+		views = append(views, view)
+		found++
+	}
+
+	return query.RandomViews{Views: views}, nil
+}
+
 func (r *TranslationRepo) containsAll(tags, searchTags []string) bool {
 	for _, searchTag := range searchTags {
 		found := false

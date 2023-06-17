@@ -94,14 +94,15 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	}
 
 	queries := app.Queries{
-		SingleTranslation: query.NewSingleTranslationHandler(cachedTranslationRepo),
-		LastTranslations:  query.NewLastTranslationsHandler(cachedTranslationRepo),
-		SingleTag:         query.NewSingleTagHandler(cachedTagRepo),
-		AllTags:           query.NewAllTagsHandler(cachedTagRepo),
-		SingleUser:        query.NewSingleUserHandler(userRepo),
-		AllUsers:          query.NewAllUsersHandler(userRepo),
-		SingleLang:        query.NewSingleLangHandler(cachedLangRepo),
-		AllLangs:          query.NewAllLangsHandler(cachedLangRepo),
+		SingleTranslation:  query.NewSingleTranslationHandler(cachedTranslationRepo),
+		LastTranslations:   query.NewLastTranslationsHandler(cachedTranslationRepo),
+		RandomTranslations: query.NewRandomTranslationsHandler(cachedTranslationRepo),
+		SingleTag:          query.NewSingleTagHandler(cachedTagRepo),
+		AllTags:            query.NewAllTagsHandler(cachedTagRepo),
+		SingleUser:         query.NewSingleUserHandler(userRepo),
+		AllUsers:           query.NewAllUsersHandler(userRepo),
+		SingleLang:         query.NewSingleLangHandler(cachedLangRepo),
+		AllLangs:           query.NewAllLangsHandler(cachedLangRepo),
 	}
 
 	application := app.Application{

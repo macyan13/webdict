@@ -258,6 +258,50 @@ func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, e
 	return r.fromModelToView(record)
 }
 
+func (r *TranslationRepo) GetRandomViews(authorID, langID string, tagIds []string, limit int) (query.RandomViews, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}}
+	if len(tagIds) != 0 {
+		filter = append(filter, bson.E{Key: "tag_ids", Value: bson.D{{Key: "$all", Value: tagIds}}})
+	}
+
+	pipeline := []bson.D{
+		{{Key: "$match", Value: filter}},
+		{{Key: "$sample", Value: bson.M{"size": limit}}},
+	}
+	cursor, err := r.collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return query.RandomViews{}, err
+	}
+
+	var models []TranslationModel
+
+	if err = cursor.All(ctx, &models); err != nil {
+		return query.RandomViews{}, err
+	}
+
+	err = cursor.Close(ctx)
+	if err != nil {
+		return query.RandomViews{}, err
+	}
+
+	views := make([]query.TranslationView, 0, limit)
+
+	for i := range models {
+		view, err := r.fromModelToView(models[i])
+
+		if err != nil {
+			return query.RandomViews{}, err
+		}
+
+		views = append(views, view)
+	}
+
+	return query.RandomViews{Views: views}, nil
+}
+
 // fromDomainToModel converts domain translation to mongo model
 func (r *TranslationRepo) fromDomainToModel(t *translation.Translation) (TranslationModel, error) {
 	model := TranslationModel{}

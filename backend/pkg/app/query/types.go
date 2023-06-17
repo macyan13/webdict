@@ -5,11 +5,16 @@ import "time"
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
 	GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (LastViews, error)
+	GetRandomViews(authorID, langID string, tagIds []string, limit int) (RandomViews, error)
 }
 
 type LastViews struct {
 	Views        []TranslationView
 	TotalRecords int
+}
+
+type RandomViews struct {
+	Views []TranslationView
 }
 
 type TagViewRepository interface {

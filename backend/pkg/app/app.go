@@ -30,8 +30,9 @@ type Commands struct {
 }
 
 type Queries struct {
-	SingleTranslation query.SingleTranslationHandler
-	LastTranslations  query.LastTranslationsHandler
+	SingleTranslation  query.SingleTranslationHandler
+	LastTranslations   query.LastTranslationsHandler
+	RandomTranslations query.RandomTranslationsHandler
 
 	SingleTag query.SingleTagHandler
 	AllTags   query.AllTagsHandler

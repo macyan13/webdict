@@ -18,6 +18,7 @@ func (s *HTTPServer) buildRoutes() {
 		translationAPI := v1.Group("/translations", s.authHandler.Middleware())
 		translationAPI.POST("", s.CreateTranslation())
 		translationAPI.GET("/last", s.GetLastTranslations())
+		translationAPI.GET("/random", s.GetRandomTranslations())
 		translationAPI.PUT(fmt.Sprintf("/:%s", translationIDParam), s.UpdateTranslation())
 		translationAPI.GET(fmt.Sprintf("/:%s", translationIDParam), s.GetTranslationByID())
 		translationAPI.DELETE(fmt.Sprintf("/:%s", translationIDParam), s.DeleteTranslationByID())
