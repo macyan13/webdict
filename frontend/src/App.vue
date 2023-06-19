@@ -9,6 +9,7 @@
       <span v-if="isLoggedIn"><router-link to="/langs">Languages</router-link> | </span>
       <span v-if="isLoggedIn"><router-link to="/profile">Profile</router-link> | </span>
       <span v-if="isAdmin"><router-link to="/newUser">Add User</router-link> | </span>
+      <span v-if="isAdmin"><router-link to="/users">Users</router-link> | </span>
       <router-link to="/about">About</router-link> |
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
       <a to="" v-if="isLoggedIn" href @click.prevent="logOut">Logout</a>
