@@ -23,7 +23,7 @@ func TestHTTPServer_GetProfile(t *testing.T) {
 	profile := getProfile(t, s, email, passwd)
 	assert.Equal(t, name, profile.Name)
 	assert.Equal(t, email, profile.Email)
-	assert.Equal(t, int(user.Author), profile.Role)
+	assert.Equal(t, int(user.Author), profile.Role.ID)
 }
 
 func TestHTTPServer_GetProfile_Unauthorized(t *testing.T) {

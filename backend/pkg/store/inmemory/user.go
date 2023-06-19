@@ -7,12 +7,14 @@ import (
 )
 
 type UserRepo struct {
-	storage map[string]*user.User
+	storage       map[string]*user.User
+	roleConverter *query.RoleConverter
 }
 
-func NewUserRepository() *UserRepo {
+func NewUserRepository(roleMapper *query.RoleConverter) *UserRepo {
 	return &UserRepo{
-		storage: map[string]*user.User{},
+		storage:       map[string]*user.User{},
+		roleConverter: roleMapper,
 	}
 }
 
@@ -51,11 +53,16 @@ func (u *UserRepo) GetAllViews() ([]query.UserView, error) {
 
 	for s := range u.storage {
 		userData := u.storage[s].ToMap()
+		role, err := u.roleConverter.RoleToView(user.Role(userData["role"].(int)))
+		if err != nil {
+			return []query.UserView{}, err
+		}
+
 		results = append(results, query.UserView{
 			ID:    userData["id"].(string),
 			Name:  userData["name"].(string),
 			Email: userData["email"].(string),
-			Role:  userData["role"].(int),
+			Role:  role,
 		})
 	}
 
@@ -67,11 +74,16 @@ func (u *UserRepo) GetView(id string) (query.UserView, error) {
 
 	if ok {
 		userData := t.ToMap()
+		role, err := u.roleConverter.RoleToView(user.Role(userData["role"].(int)))
+		if err != nil {
+			return query.UserView{}, err
+		}
+
 		return query.UserView{
 			ID:    userData["id"].(string),
 			Name:  userData["name"].(string),
 			Email: userData["email"].(string),
-			Role:  userData["role"].(int),
+			Role:  role,
 		}, nil
 	}
 

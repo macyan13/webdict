@@ -102,6 +102,14 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/newUser',
+    name: 'NewUser',
+    component: () => import('@/views/NewUser.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = new VueRouter({

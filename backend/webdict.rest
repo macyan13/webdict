@@ -12,6 +12,22 @@ client.global.set("admin_auth_token", response.body.accessToken)
 client.global.set("admin_auth_type", response.body.type)
  %}
 
+### Get roles list
+GET {{host}}/v1/api/roles
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.hasOwnProperty("roles"), "Roles does not present")
+        client.assert(response.body.roles.length === 2, "amount of roles is not correct")
+    })
+%}
+
+
 ### Crete User
 POST {{host}}/v1/api/users
 Content-Type: application/json

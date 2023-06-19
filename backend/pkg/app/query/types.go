@@ -1,6 +1,8 @@
 package query
 
-import "time"
+import (
+	"time"
+)
 
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
@@ -44,6 +46,12 @@ type TranslationView struct {
 	Lang          LangView
 }
 
+type RoleView struct {
+	ID      int
+	Name    string
+	IsAdmin bool
+}
+
 func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richTextSanitizer) {
 	v.Source = reachSntz.SanitizeAndEscape(v.Source)
 	v.Transcription = reachSntz.SanitizeAndEscape(v.Transcription)
@@ -78,7 +86,7 @@ type UserView struct {
 	ID          string
 	Name        string
 	Email       string
-	Role        int
+	Role        RoleView
 	DefaultLang LangView
 }
 

@@ -167,7 +167,7 @@ func TestUserView_sanitize(t *testing.T) {
 		},
 	}
 	id := "<must_not_change>"
-	role := 5
+	role := RoleView{}
 	strictSntz := newStrictSanitizer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

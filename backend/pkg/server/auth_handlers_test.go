@@ -77,7 +77,7 @@ func getRefreshToken(s *HTTPServer) string {
 
 var authenticationToken *auth.AuthenticationToken
 
-func setAuthToken(s *HTTPServer, r *http.Request) {
+func setAdminAuthToken(s *HTTPServer, r *http.Request) {
 	if authenticationToken == nil {
 		token, _ := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
 		authenticationToken = &token

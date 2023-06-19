@@ -158,7 +158,7 @@ func (s *HTTPServer) userViewToResponse(usr query.UserView) userResponse {
 		ID:    usr.ID,
 		Name:  usr.Name,
 		Email: usr.Email,
-		Role:  usr.Role,
+		Role:  s.roleViewToResponse(usr.Role),
 	}
 
 	if usr.DefaultLang.ID != "" {

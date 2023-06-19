@@ -4,6 +4,7 @@ import auth from './auth.module'
 import tag from './tag.module'
 import lang from './lang.module'
 import profile from './profile.module'
+import role from './role.module'
 
 Vue.use(Vuex)
 
@@ -13,5 +14,6 @@ export default new Vuex.Store({
         tag,
         lang,
         profile,
+        role,
     }
 })
