@@ -15,6 +15,19 @@ class UserService {
                 });
         });
     }
+    getAll() {
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/v1/api/users', {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
     get(id) {
         return new Promise((resolve, reject) => {
             axios

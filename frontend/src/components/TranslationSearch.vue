@@ -138,9 +138,7 @@ export default {
     this.showLoadSpinner = false;
   },
   created() {
-    this.showLoadSpinner = true;
     this.search();
-    this.showLoadSpinner = false;
   },
   methods: {
     fetchLangsAndInitSearch() {

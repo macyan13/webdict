@@ -1,31 +1,41 @@
 <template>
-  <b-card :title="title">
+  <b-card title="Created Users">
     <div class="lang-list" style="display: flex; justify-content: center;">
-      <b-list-group style="width: 40%;">
-        <b-list-group-item v-for="lang in langs" :key="lang.id">
-          <div style="display: flex; justify-content: space-between;">
-            <span>{{ lang.name }}</span>
-            <span>
-              <b-button variant="primary" @click="editLang(lang.id)">Edit</b-button>
-              <b-button variant="danger" @click="confirmDelete(lang.id)">Delete</b-button>
-            </span>
-          </div>
-        </b-list-group-item>
-      </b-list-group>
+      <table class="table" id="users" style="width: 75%;">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="user in users" :key="user.id" :id="user.id">
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role.name }}</td>
+<!--          <td>-->
+<!--            <button class="btn btn-sm btn-primary" @click="editUser(user.id)">Edit</button>-->
+<!--            <button class="btn btn-sm btn-danger" @click="confirmDelete(user.id)">Delete</button>-->
+<!--          </td>-->
+        </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
+    <div v-if="hasError" style="color: red;">{{ errorMessage }}</div>
 
     <div v-if="showLoadSpinner" class="d-flex justify-content-center m-3">
       <b-spinner variant="primary" label="Spinning"></b-spinner>
     </div>
-    <b-modal v-model="showConfirmationModal" title="Delete Language?" hide-footer hide-backdrop>
-      <p>Are you sure you want to delete this language?</p>
+    <b-modal v-model="showConfirmationModal" title="Delete User?" hide-footer hide-backdrop>
+      <p>Are you sure you want to delete this user and all user related content?</p>
       <div class="d-flex justify-content-end">
         <b-button variant="secondary" class="mr-2" @click="deleteCancel">
           Cancel
         </b-button>
-        <b-button variant="danger" @click="deleteLang">
+        <b-button variant="danger" @click="deleteUser">
           Delete
         </b-button>
       </div>
@@ -37,21 +47,13 @@
 </template>
 <script>
 
-import LangService from "@/services/lang.service";
+import UserService from "@/services/user.service";
 
 export default {
-  name: 'LangList',
-  props: {
-    title: {
-      type: String,
-      default() {
-        return "Your Languages";
-      }
-    },
-  },
+  name: 'UserList',
   data() {
     return {
-      langs: [],
+      users: [],
       hasError: false,
       errorMessage: '',
       showConfirmationModal: false,
@@ -61,22 +63,22 @@ export default {
     }
   },
   mounted() {
-    this.fetchLangs();
+    this.fetchUsers();
   },
   methods: {
-    editLang(id) {
-      this.$router.push(`/editLang/${id}`)
+    editUser(id) {
+      this.$router.push(`/editUser/${id}`)
     },
     confirmDelete(id) {
       this.idToDelete = id;
       this.showConfirmationModal = true;
     },
-    deleteLang() {
+    deleteUser() {
       this.showDeleteSpinner = true;
-      LangService.delete(this.idToDelete)
+      UserService.delete(this.idToDelete)
           .then(() => {
-            this.$store.dispatch('lang/clear');
-            this.fetchLangs();
+            this.$store.dispatch('user/clear');
+            this.fetchUsers();
           })
           .catch((error) => {
             this.hasError = true;
@@ -92,16 +94,16 @@ export default {
       this.showConfirmationModal = false;
       this.idToDelete = null
     },
-    fetchLangs() {
+    fetchUsers() {
       this.showLoadSpinner = true;
-      this.$store.dispatch('lang/fetchAll')
-          .then((langs) => this.langs = langs)
+      this.$store.dispatch('user/fetchAll')
+          .then((users) => this.users = users)
           .catch(() => {
             this.hasError = true
-            this.errorMessage = 'Can not get langs from server :('
+            this.errorMessage = 'Can not get users from server :('
           })
           .finally(() => {
-            this.showLoadSpinner = false;
+            this.showLoadSpinner = false
           })
     }
   }
