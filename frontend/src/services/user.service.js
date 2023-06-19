@@ -2,6 +2,19 @@ import axios from 'axios';
 import authHeader from "@/services/auth-header";
 
 class UserService {
+    create(user) {
+        return new Promise((resolve, reject) => {
+            axios
+                .post('/v1/api/users', user, {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
     get(id) {
         return new Promise((resolve, reject) => {
             axios

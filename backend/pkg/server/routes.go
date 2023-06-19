@@ -30,11 +30,14 @@ func (s *HTTPServer) buildRoutes() {
 		tagAPI.GET(fmt.Sprintf("/:%s", tagIDParam), s.GetTagByID())
 		tagAPI.DELETE(fmt.Sprintf("/:%s", tagIDParam), s.DeleteTagByID())
 
-		userAPI := v1.Group("/users", s.authHandler.Middleware())
+		userAPI := v1.Group("/users", s.authHandler.Middleware(), s.authHandler.AdminMiddleware())
 		userAPI.POST("", s.CreateUser())
 		userAPI.PUT(fmt.Sprintf("/:%s", userIDParam), s.UpdateUser())
 		userAPI.GET("", s.GetUsers())
 		userAPI.GET(fmt.Sprintf("/:%s", userIDParam), s.GetUserByID())
+
+		roleAPI := v1.Group("/roles", s.authHandler.Middleware(), s.authHandler.AdminMiddleware())
+		roleAPI.GET("", s.GetRoles())
 
 		langAPI := v1.Group("/langs", s.authHandler.Middleware())
 		langAPI.GET("", s.GetLangs())

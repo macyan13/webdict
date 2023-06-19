@@ -42,4 +42,6 @@ type Queries struct {
 
 	SingleLang query.SingleLangHandler
 	AllLangs   query.AllLangsHandler
+
+	AllRoles query.AllRolesHandler
 }

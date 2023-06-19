@@ -125,6 +125,23 @@ func (h Handler) Middleware() gin.HandlerFunc {
 	}
 }
 
+func (h Handler) AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		usr, err := h.UserFromContext(c)
+		if err != nil {
+			log.Printf("[Error] Admin Middleware: can not get usr data: %v", err)
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if !usr.IsAdmin() {
+			log.Printf("[Error] Admin Middleware: attempt to make admin action not as admin: %v", err)
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+	}
+}
+
 func (h Handler) UserFromContext(c *gin.Context) (User, error) {
 	value, exists := c.Get(userContextKey)
 

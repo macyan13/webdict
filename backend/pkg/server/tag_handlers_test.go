@@ -21,7 +21,7 @@ func TestServer_CreateTag(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
@@ -54,12 +54,12 @@ func TestServer_DeleteTagById(t *testing.T) {
 	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
 	id := getExistingTags(t, s)[0].ID
 	req, _ = http.NewRequest("DELETE", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -72,7 +72,7 @@ func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 
 	id := getExistingTags(t, s)[0].ID
@@ -88,7 +88,7 @@ func TestServer_UpdateTag(t *testing.T) {
 	request := tagRequest{Tag: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 	id := getExistingTags(t, s)[0].ID
 	tg := "UpdateTag"
@@ -99,13 +99,13 @@ func TestServer_UpdateTag(t *testing.T) {
 
 	jsonValue, _ = json.Marshal(request)
 	req, _ = http.NewRequest("PUT", v1TagAPI+"/"+id, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	req, _ = http.NewRequest("GET", v1TagAPI+"/"+id, http.NoBody)
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
@@ -124,7 +124,7 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	s.engine.ServeHTTP(httptest.NewRecorder(), req)
 	id := getExistingTags(t, s)[0].ID
 	tg := "UpdateTag"
@@ -140,7 +140,7 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	req, _ = http.NewRequest("GET", v1TagAPI+"/"+id, http.NoBody)
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
@@ -160,7 +160,7 @@ func TestServer_GetTags(t *testing.T) {
 		request := tagRequest{Tag: tag}
 		jsonValue, _ := json.Marshal(request)
 		req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
-		setAuthToken(s, req)
+		setAdminAuthToken(s, req)
 		recorder := httptest.NewRecorder()
 		s.engine.ServeHTTP(recorder, req)
 		assert.Equal(t, http.StatusCreated, recorder.Code)
@@ -187,7 +187,7 @@ func TestServer_GetTagsUnauthorised(t *testing.T) {
 
 func getExistingTags(t *testing.T, s *HTTPServer) []tagResponse {
 	req, _ := http.NewRequest("GET", v1TagAPI, http.NoBody)
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 

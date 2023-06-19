@@ -69,7 +69,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	userRepo, err := mongo.NewUserRepo(dbConnect, cachedLangRepo)
+	userRepo, err := mongo.NewUserRepo(dbConnect, cachedLangRepo, query.NewRoleMapper())
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +103,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		AllUsers:           query.NewAllUsersHandler(userRepo),
 		SingleLang:         query.NewSingleLangHandler(cachedLangRepo),
 		AllLangs:           query.NewAllLangsHandler(cachedLangRepo),
+		AllRoles:           query.NewAllRolesHandler(),
 	}
 
 	application := app.Application{

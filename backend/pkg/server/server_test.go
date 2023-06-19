@@ -30,7 +30,7 @@ func initTestServer() *HTTPServer {
 	tagRepo := inmemory.NewTagRepository()
 	langRepo := inmemory.NewLangRepository()
 	translationRepo := inmemory.NewTranslationRepository(*tagRepo, *langRepo)
-	userRepo := inmemory.NewUserRepository()
+	userRepo := inmemory.NewUserRepository(query.NewRoleMapper())
 
 	cipher := auth.Cipher{}
 	cmd := app.Commands{
@@ -58,6 +58,7 @@ func initTestServer() *HTTPServer {
 		AllUsers:           query.NewAllUsersHandler(userRepo),
 		SingleLang:         query.NewSingleLangHandler(langRepo),
 		AllLangs:           query.NewAllLangsHandler(langRepo),
+		AllRoles:           query.NewAllRolesHandler(),
 	}
 
 	application := app.Application{

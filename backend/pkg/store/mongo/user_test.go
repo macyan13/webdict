@@ -29,7 +29,8 @@ func TestUserRepo_fromDomainToModel(t *testing.T) {
 
 func TestUserRepo_fromModelToView(t *testing.T) {
 	type fields struct {
-		langRepo query.LangViewRepository
+		langRepo      query.LangViewRepository
+		roleConverter *query.RoleConverter
 	}
 	type args struct {
 		model UserModel
@@ -44,10 +45,14 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 		{
 			"Default lang is not set",
 			func() fields {
-				return fields{langRepo: &query.MockLangViewRepository{}}
+				return fields{langRepo: &query.MockLangViewRepository{}, roleConverter: query.NewRoleMapper()}
 			},
-			args{model: UserModel{ID: "authorID"}},
-			query.UserView{ID: "authorID"},
+			args{model: UserModel{ID: "authorID", Role: 1}},
+			query.UserView{ID: "authorID", Role: query.RoleView{
+				ID:      1,
+				Name:    "Admin",
+				IsAdmin: true,
+			}},
 			assert.NoError,
 		},
 		{
@@ -55,9 +60,18 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 			func() fields {
 				langRepo := query.MockLangViewRepository{}
 				langRepo.On("GetView", "langID", "authorID").Return(query.LangView{}, fmt.Errorf("testError"))
-				return fields{langRepo: &langRepo}
+				return fields{langRepo: &langRepo, roleConverter: query.NewRoleMapper()}
 			},
-			args{model: UserModel{ID: "authorID", DefaultLangID: "langID"}},
+			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1}},
+			query.UserView{},
+			assert.Error,
+		},
+		{
+			"Error on converting role view",
+			func() fields {
+				return fields{langRepo: &query.MockLangViewRepository{}, roleConverter: query.NewRoleMapper()}
+			},
+			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 3}},
 			query.UserView{},
 			assert.Error,
 		},
@@ -66,17 +80,23 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 			func() fields {
 				langRepo := query.MockLangViewRepository{}
 				langRepo.On("GetView", "langID", "authorID").Return(query.LangView{Name: "test"}, nil)
-				return fields{langRepo: &langRepo}
+				return fields{langRepo: &langRepo, roleConverter: query.NewRoleMapper()}
 			},
-			args{model: UserModel{ID: "authorID", DefaultLangID: "langID"}},
-			query.UserView{ID: "authorID", DefaultLang: query.LangView{Name: "test"}},
+			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1}},
+			query.UserView{ID: "authorID", DefaultLang: query.LangView{Name: "test"}, Role: query.RoleView{
+				ID:      1,
+				Name:    "Admin",
+				IsAdmin: true,
+			}},
 			assert.NoError,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			f := tt.fieldsFn()
 			r := &UserRepo{
-				langRepo: tt.fieldsFn().langRepo,
+				langRepo:      f.langRepo,
+				roleConverter: f.roleConverter,
 			}
 			got, err := r.fromModelToView(tt.args.model)
 			if !tt.wantErr(t, err, fmt.Sprintf("fromModelToView(%v)", tt.args.model)) {

@@ -82,8 +82,18 @@ type userResponse struct {
 	ID          string       `json:"id"`
 	Name        string       `json:"name"`
 	Email       string       `json:"email"`
-	Role        int          `json:"role"`
+	Role        roleResponse `json:"role"`
 	DefaultLang langResponse `json:"default_lang"`
+}
+
+type roleResponse struct {
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	IsAdmin bool   `json:"is_admin"`
+}
+
+type rolesResponse struct {
+	Roles []roleResponse `json:"roles"`
 }
 
 type idResponse struct {

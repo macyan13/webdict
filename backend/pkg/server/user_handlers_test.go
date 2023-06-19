@@ -24,7 +24,7 @@ func TestHTTPServer_CreateUser(t *testing.T) {
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
-	assert.Equal(t, int(user.Author), usr.Role)
+	assert.Equal(t, int(user.Author), usr.Role.ID)
 }
 
 func TestHTTPServer_CreateUser_Unauthorized(t *testing.T) {
@@ -75,7 +75,7 @@ func TestHTTPServer_GetUsers(t *testing.T) {
 	for usr := range users {
 		jsonValue, _ := json.Marshal(users[usr])
 		req, _ := http.NewRequest("POST", v1UserAPI, bytes.NewBuffer(jsonValue))
-		setAuthToken(s, req)
+		setAdminAuthToken(s, req)
 		w := httptest.NewRecorder()
 		s.engine.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusCreated, w.Code)
@@ -84,7 +84,7 @@ func TestHTTPServer_GetUsers(t *testing.T) {
 
 	var records []userResponse
 	req, _ := http.NewRequest("GET", v1UserAPI, http.NoBody)
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -99,7 +99,7 @@ func TestHTTPServer_GetUsers(t *testing.T) {
 		}
 		assert.Equal(t, usr.Email, records[i].Email)
 		assert.Equal(t, usr.Name, records[i].Name)
-		assert.Equal(t, int(user.Author), records[i].Role)
+		assert.Equal(t, int(user.Author), records[i].Role.ID)
 	}
 }
 
@@ -151,7 +151,7 @@ func TestHTTPServer_UpdateUser_Unauthorized(t *testing.T) {
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
-	assert.Equal(t, int(user.Author), usr.Role)
+	assert.Equal(t, int(user.Author), usr.Role.ID)
 }
 
 func TestHTTPServer_UpdateUser(t *testing.T) {
@@ -171,7 +171,7 @@ func TestHTTPServer_UpdateUser(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -180,12 +180,12 @@ func TestHTTPServer_UpdateUser(t *testing.T) {
 	assert.Equal(t, name, usr.Name)
 	assert.Equal(t, response.ID, usr.ID)
 	assert.Equal(t, email, usr.Email)
-	assert.Equal(t, int(user.Admin), usr.Role)
+	assert.Equal(t, int(user.Admin), usr.Role.ID)
 }
 
 func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
@@ -203,7 +203,7 @@ func createUser(t *testing.T, s *HTTPServer, name, email, passwd string) idRespo
 		Password: passwd,
 	})
 	req, _ := http.NewRequest("POST", v1UserAPI, bytes.NewBuffer(jsonValue))
-	setAuthToken(s, req)
+	setAdminAuthToken(s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)

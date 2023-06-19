@@ -355,6 +355,7 @@ func TestHandler_Middleware(t *testing.T) {
 			},
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {
 				assert.Equal(t, http.StatusUnauthorized, r.Code)
+				assert.True(t, c.IsAborted())
 			},
 		},
 		{
@@ -372,6 +373,7 @@ func TestHandler_Middleware(t *testing.T) {
 			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder, tokener *mockTokener, repo *user.MockRepository) {
 				tokener.AssertCalled(t, "parseToken", "testToken")
 				assert.Equal(t, http.StatusUnauthorized, r.Code)
+				assert.True(t, c.IsAborted())
 			},
 		},
 		{
@@ -394,6 +396,7 @@ func TestHandler_Middleware(t *testing.T) {
 				tokener.AssertCalled(t, "parseToken", "testToken")
 				repo.AssertCalled(t, "GetByEmail", "testEmail")
 				assert.Equal(t, http.StatusUnauthorized, r.Code)
+				assert.True(t, c.IsAborted())
 			},
 		},
 		{
@@ -581,6 +584,70 @@ func TestHandler_UserFromContext(t *testing.T) {
 				return
 			}
 			assert.Equalf(t, tt.want, got, "UserFromContext(%v)", tt.argsFn().c)
+		})
+	}
+}
+
+func TestHandler_AdminMiddleware(t *testing.T) {
+	tests := []struct {
+		name       string
+		contextFn  func(r *httptest.ResponseRecorder) *gin.Context
+		validateFn func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder)
+	}{
+		{
+			"User is not set",
+			func(r *httptest.ResponseRecorder) *gin.Context {
+				c, _ := gin.CreateTestContext(r)
+				c.Request = &http.Request{}
+				return c
+			},
+			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusUnauthorized, r.Code)
+				assert.True(t, c.IsAborted())
+			},
+		},
+		{
+			"User is not admin",
+			func(r *httptest.ResponseRecorder) *gin.Context {
+				c, _ := gin.CreateTestContext(r)
+				c.Set(userContextKey, User{
+					ID:    "id",
+					Email: "email",
+					Role:  user.Author,
+				})
+				c.Request = &http.Request{}
+				return c
+			},
+			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusUnauthorized, r.Code)
+				assert.True(t, c.IsAborted())
+			},
+		},
+		{
+			"User is admin",
+			func(r *httptest.ResponseRecorder) *gin.Context {
+				c, _ := gin.CreateTestContext(r)
+				c.Set(userContextKey, User{
+					ID:    "id",
+					Email: "email",
+					Role:  user.Admin,
+				})
+				c.Request = &http.Request{}
+				return c
+			},
+			func(t *testing.T, c *gin.Context, r *httptest.ResponseRecorder) {
+				assert.False(t, r.Flushed)
+				assert.False(t, c.IsAborted())
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := Handler{}
+			responseRecorder := httptest.NewRecorder()
+			context := tt.contextFn(responseRecorder)
+			handler.AdminMiddleware()(context)
+			tt.validateFn(t, context, responseRecorder)
 		})
 	}
 }

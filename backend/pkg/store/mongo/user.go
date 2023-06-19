@@ -14,8 +14,9 @@ import (
 
 // UserRepo Mongo DB implementation for domain user entity
 type UserRepo struct {
-	collection *mongo.Collection
-	langRepo   query.LangViewRepository
+	collection    *mongo.Collection
+	langRepo      query.LangViewRepository
+	roleConverter *query.RoleConverter
 }
 
 // UserModel represents mongo user document
@@ -29,8 +30,8 @@ type UserModel struct {
 }
 
 // NewUserRepo creates new UserRepo
-func NewUserRepo(db *mongo.Database, langRepo query.LangViewRepository) (*UserRepo, error) {
-	u := UserRepo{collection: db.Collection("users"), langRepo: langRepo}
+func NewUserRepo(db *mongo.Database, langRepo query.LangViewRepository, roleMapper *query.RoleConverter) (*UserRepo, error) {
+	u := UserRepo{collection: db.Collection("users"), langRepo: langRepo, roleConverter: roleMapper}
 
 	if err := u.initIndexes(); err != nil {
 		return nil, err
@@ -185,11 +186,16 @@ func (r *UserRepo) fromDomainToModel(usr *user.User) (UserModel, error) {
 
 // fromModelToView converts mongo model to user View
 func (r *UserRepo) fromModelToView(model UserModel) (query.UserView, error) {
+	role, err := r.roleConverter.RoleToView(user.Role(model.Role))
+	if err != nil {
+		return query.UserView{}, err
+	}
+
 	view := query.UserView{
 		ID:          model.ID,
 		Name:        model.Name,
 		Email:       model.Email,
-		Role:        model.Role,
+		Role:        role,
 		DefaultLang: query.LangView{},
 	}
 
