@@ -86,7 +86,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		UpdateTag:         command.NewUpdateTagHandler(cachedTagRepo),
 		DeleteTag:         command.NewDeleteTagHandler(cachedTagRepo, cachedTranslationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
-		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher, cachedLangRepo),
+		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
 		AddLang:           command.NewAddLangHandler(cachedLangRepo),
 		UpdateLang:        command.NewUpdateLangHandler(cachedLangRepo),
 		DeleteLang:        command.NewDeleteLangHandler(cachedLangRepo, cachedTranslationRepo),

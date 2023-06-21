@@ -20,7 +20,6 @@ type User struct {
 type Role int
 
 const (
-	NotSet Role = 0
 	Admin  Role = 1
 	Author Role = 2
 )
@@ -59,6 +58,10 @@ func (u *User) Password() string {
 
 func (u *User) Role() Role {
 	return u.role
+}
+
+func (u *User) DefaultLangID() string {
+	return u.defaultLangID
 }
 
 func (u *User) ApplyChanges(name, email, passwd string, role Role, defaultLangID string) error {

@@ -74,8 +74,7 @@ Authorization: {{admin_auth_type}} {{admin_auth_token}}
 {
   "name": "John Do",
   "email": "{{userEmail}}",
-  "current_password": "password before update",
-  "new_password": "{{userPassword}}",
+  "password": "{{userPassword}}",
   "role": 2
 }
 

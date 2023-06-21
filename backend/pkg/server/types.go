@@ -22,15 +22,6 @@ type userRequest struct {
 	Role     int    `json:"role"`
 }
 
-type updateUserRequest struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	CurrentPassword string `json:"current_password"`
-	NewPassword     string `json:"new_password"`
-	Role            int    `json:"role"`
-	DefaultLangID   string `json:"default_lang_id"`
-}
-
 type updateProfileRequest struct {
 	Name            string `json:"name"`
 	Email           string `json:"email"`

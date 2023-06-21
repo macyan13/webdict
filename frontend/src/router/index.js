@@ -118,6 +118,14 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/editUser/:id',
+    name: 'EditUser',
+    component: () => import('@/views/EditUser.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = new VueRouter({

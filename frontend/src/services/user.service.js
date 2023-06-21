@@ -47,9 +47,8 @@ class UserService {
                 .put('/v1/api/users/' + user.id, {
                     name: user.name,
                     email: user.email,
-                    current_password: user.currentPassword,
-                    new_password: user.newPassword,
-                    default_lang_id: user.defaultLangId,
+                    password: user.password,
+                    role: user.role,
                 }, {headers: authHeader()})
                 .then(response => {
                     resolve(response.data);
