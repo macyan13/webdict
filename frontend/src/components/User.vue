@@ -160,11 +160,13 @@ export default {
     loadData() {
       UserService.get(this.id)
           .then((data) => {
-            this.tag = data.tag;
+            this.name = data.name;
+            this.email = data.email;
+            this.role = data.role;
           })
           .catch((error) => {
             this.hasError = true;
-            this.errorMessage = "Can not get tag data from server: " + error;
+            this.errorMessage = "Can not get user data from server: " + error;
           });
     },
     confirmDelete() {
@@ -199,9 +201,8 @@ export default {
       let method = this.id ? UserService.update : UserService.create;
       method(new User(this.id, this.name, this.email, this.password, this.role.id))
           .then(() => {
-            // todo: push to user list
-            // this.$store.dispatch('tag/clear');
-            router.push({name: 'Home'});
+            this.$store.dispatch('user/clear');
+            router.push({name: 'Users'});
           })
           .catch((error) => {
             this.hasError = true;

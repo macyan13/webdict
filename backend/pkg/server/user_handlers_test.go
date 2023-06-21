@@ -154,6 +154,35 @@ func TestHTTPServer_UpdateUser_Unauthorized(t *testing.T) {
 	assert.Equal(t, int(user.Author), usr.Role.ID)
 }
 
+func TestHTTPServer_UpdateUser_NotAdmin(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, name, email, pwd)
+
+	updRequest := userRequest{
+		Name:     "test",
+		Email:    "updated@test.com",
+		Password: "newPasswd12345",
+		Role:     int(user.Author),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	w := httptest.NewRecorder()
+	setAuthTokenWithCredentials(s, req, email, pwd)
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	usr := getUserByID(t, s, response.ID)
+	assert.Equal(t, name, usr.Name)
+	assert.Equal(t, response.ID, usr.ID)
+	assert.Equal(t, email, usr.Email)
+	assert.Equal(t, int(user.Author), usr.Role.ID)
+}
+
 func TestHTTPServer_UpdateUser(t *testing.T) {
 	s := initTestServer()
 	name := "John Do"

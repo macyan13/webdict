@@ -15,10 +15,10 @@
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role.name }}</td>
-<!--          <td>-->
-<!--            <button class="btn btn-sm btn-primary" @click="editUser(user.id)">Edit</button>-->
+          <td>
+            <button class="btn btn-sm btn-primary" @click="editUser(user.id)">Edit</button>
 <!--            <button class="btn btn-sm btn-danger" @click="confirmDelete(user.id)">Delete</button>-->
-<!--          </td>-->
+          </td>
         </tr>
         </tbody>
       </table>
