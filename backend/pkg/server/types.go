@@ -83,6 +83,10 @@ type roleResponse struct {
 	IsAdmin bool   `json:"is_admin"`
 }
 
+type userDeleteResponse struct {
+	Count int `json:"count"`
+}
+
 type rolesResponse struct {
 	Roles []roleResponse `json:"roles"`
 }

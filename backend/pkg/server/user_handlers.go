@@ -6,6 +6,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
+	"log"
 	"net/http"
 )
 
@@ -98,6 +99,21 @@ func (s *HTTPServer) UpdateUser() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, http.NoBody)
+	}
+}
+
+func (s *HTTPServer) DeleteUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+
+		count, err := s.app.Commands.DeleteUser.Handle(command.DeleteUser{
+			AuthorID: c.Param(userIDParam),
+		})
+		if err != nil {
+			log.Printf("[Error] Can not handle request - %v", err)
+		}
+
+		c.JSON(http.StatusOK, userDeleteResponse{Count: count})
 	}
 }
 

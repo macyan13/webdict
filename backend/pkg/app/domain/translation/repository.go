@@ -13,4 +13,5 @@ type Repository interface {
 	ExistByTag(tagID, authorID string) (bool, error)   // ExistByTag checks if at least one translation tagged with tagID exist
 	ExistByLang(langID, authorID string) (bool, error) // ExistByLang checks if at least one translation created with the passed language
 	Delete(id, authorID string) error
+	DeleteByAuthorID(authorID string) (int, error)
 }

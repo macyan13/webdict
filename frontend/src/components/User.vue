@@ -81,9 +81,9 @@
           {{ buttonLabel }}
         </b-button>
 
-<!--        <b-button v-if="id" variant="danger" @click="confirmDelete">-->
-<!--          Delete-->
-<!--        </b-button>-->
+        <b-button v-if="id" variant="danger" @click="confirmDelete">
+          Delete
+        </b-button>
 
         <div v-if="showEditSpinner" class="d-flex justify-content-center m-3">
           <b-spinner variant="primary" label="Spinning"></b-spinner>
@@ -92,20 +92,31 @@
 
       <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
 
-<!--      <b-modal v-model="showConfirmationModal" title="Delete Tag?" hide-footer hide-backdrop>-->
-<!--        <p>Are you sure you want to delete this tag?</p>-->
-<!--        <div class="d-flex justify-content-end">-->
-<!--          <b-button variant="secondary" class="mr-2" @click="showConfirmationModal = false">-->
-<!--            Cancel-->
-<!--          </b-button>-->
-<!--          <b-button variant="danger" @click="deleteTag">-->
-<!--            Delete-->
-<!--          </b-button>-->
-<!--        </div>-->
-<!--        <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">-->
-<!--          <b-spinner variant="danger" label="Spinning"></b-spinner>-->
-<!--        </div>-->
-<!--      </b-modal>-->
+      <b-modal v-model="showConfirmationModal" title="Delete User?" hide-footer hide-backdrop>
+        <p>Are you sure you want to delete this user and all user related content?</p>
+        <div class="d-flex justify-content-end">
+          <b-button variant="secondary" class="mr-2" @click="deleteCancel">
+            Cancel
+          </b-button>
+          <b-button variant="danger" @click="deleteUser">
+            Delete
+          </b-button>
+        </div>
+        <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
+          <b-spinner variant="danger" label="Spinning"></b-spinner>
+        </div>
+      </b-modal>
+      <b-modal v-model="showDeleteResults" title="User deletion results" hide-footer hide-backdrop>
+        <p>{{deletedCount}} records related to user have been deleted.</p>
+        <div class="d-flex justify-content-end">
+          <b-button variant="success" class="mr-2" @click="deleteResultsClose" @close="deleteResultsClose">
+            Ok
+          </b-button>
+        </div>
+        <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
+          <b-spinner variant="danger" label="Spinning"></b-spinner>
+        </div>
+      </b-modal>
 
     </b-card>
   </div>
@@ -142,6 +153,8 @@ export default {
       showEditSpinner: false,
       hasError: false,
       errorMessage: '',
+      showDeleteResults: false,
+      deletedCount: 0,
     }
   },
   mounted() {
@@ -180,22 +193,30 @@ export default {
             this.errorMessage = 'Can not get roles from server :('
           })
     },
-    // deleteTag() {
-    //   this.showDeleteSpinner = true;
-    //   TagService.delete(this.id)
-    //       .then(() => {
-    //         this.$store.dispatch('tag/clear');
-    //         router.push({name: 'Tags'});
-    //       })
-    //       .catch((error) => {
-    //         this.hasError = true;
-    //         this.errorMessage = error;
-    //       })
-    //       .finally(() => {
-    //         this.showDeleteSpinner = false;
-    //         this.showConfirmationModal = false;
-    //       });
-    // },
+    deleteUser() {
+      this.showDeleteSpinner = true;
+      UserService.delete(this.id)
+          .then((results) => {
+            this.$store.dispatch('user/clear');
+            this.deletedCount = results.count;
+            this.showDeleteResults = true;
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showDeleteSpinner = false;
+            this.showConfirmationModal = false;
+            this.idToDelete = null;
+          });
+    },
+    deleteCancel() {
+      this.showConfirmationModal = false;
+    },
+    deleteResultsClose() {
+      router.push({name: 'Users'});
+    },
     submitForm() {
       this.showEditSpinner = true;
       let method = this.id ? UserService.update : UserService.create;

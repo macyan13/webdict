@@ -114,6 +114,15 @@ func (t TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	return t.domainProxy.AllExist(ids, authorID)
 }
 
+func (t TagRepo) DeleteByAuthorID(authorID string) (int, error) {
+	count, err := t.domainProxy.DeleteByAuthorID(authorID)
+	if err == nil {
+		t.cache.Delete(authorID)
+	}
+
+	return count, err
+}
+
 func (t TagRepo) initCache(authorID string) (map[string]query.TagView, error) {
 	views, err := t.queryProxy.GetAllViews(authorID)
 	if err != nil {

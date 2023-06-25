@@ -52,15 +52,20 @@ func (r *TranslationRepo) initIndexes() error {
 		},
 		{
 			Keys: bson.D{
-				{Key: "lang_id", Value: 1},
 				{Key: "author_id", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "lang_id", Value: 1},
 				{Key: "created_at", Value: -1},
 			},
 		},
 		{
 			Keys: bson.D{
-				{Key: "lang_id", Value: 1},
 				{Key: "author_id", Value: 1},
+				{Key: "lang_id", Value: 1},
 				{Key: "tag_ids", Value: 1},
 			},
 		},
@@ -145,7 +150,6 @@ func (r *TranslationRepo) Get(id, authorID string) (*translation.Translation, er
 	), nil
 }
 
-// Delete removes translation record by passed id and authorId fields
 func (r *TranslationRepo) Delete(id, authorID string) error {
 	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
 	defer cancel()
@@ -179,6 +183,17 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	count, err := r.collection.CountDocuments(ctx, bson.D{{Key: "tag_ids", Value: tagID}, {Key: "author_id", Value: authorID}})
 
 	return count > 0, err
+}
+
+func (r *TranslationRepo) DeleteByAuthorID(authorID string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+	result, err := r.collection.DeleteMany(ctx, bson.D{{Key: "author_id", Value: authorID}})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(result.DeletedCount), nil
 }
 
 func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {

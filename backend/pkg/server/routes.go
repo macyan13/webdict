@@ -35,6 +35,7 @@ func (s *HTTPServer) buildRoutes() {
 		userAPI.PUT(fmt.Sprintf("/:%s", userIDParam), s.UpdateUser())
 		userAPI.GET("", s.GetUsers())
 		userAPI.GET(fmt.Sprintf("/:%s", userIDParam), s.GetUserByID())
+		userAPI.DELETE(fmt.Sprintf("/:%s", userIDParam), s.DeleteUser())
 
 		roleAPI := v1.Group("/roles", s.authHandler.Middleware(), s.authHandler.AdminMiddleware())
 		roleAPI.GET("", s.GetRoles())

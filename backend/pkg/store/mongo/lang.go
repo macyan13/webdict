@@ -42,6 +42,11 @@ func (r *LangRepo) initIndexes() error {
 		{
 			Keys: bson.D{
 				{Key: "author_id", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
 				{Key: "created_at", Value: -1},
 			},
 		},
@@ -139,6 +144,17 @@ func (r *LangRepo) Delete(id, authorID string) error {
 	}
 
 	return nil
+}
+
+func (r *LangRepo) DeleteByAuthorID(authorID string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+	result, err := r.collection.DeleteMany(ctx, bson.D{{Key: "author_id", Value: authorID}})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(result.DeletedCount), nil
 }
 
 func (r *LangRepo) Exist(id, authorID string) (bool, error) {

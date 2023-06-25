@@ -48,6 +48,17 @@ func (u *UserRepo) Update(usr *user.User) error {
 	return nil
 }
 
+func (u *UserRepo) Delete(id string) (int, error) {
+	_, ok := u.storage[id]
+
+	if ok {
+		delete(u.storage, id)
+		return 1, nil
+	}
+
+	return 0, fmt.Errorf("not found")
+}
+
 func (u *UserRepo) GetAllViews() ([]query.UserView, error) {
 	results := make([]query.UserView, 0, len(u.storage))
 

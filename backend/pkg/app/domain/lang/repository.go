@@ -11,4 +11,5 @@ type Repository interface {
 	Update(lang *Lang) error // Update returns ErrLangAlreadyExists if record for pair name-authorID already exists
 	Get(id, authorID string) (*Lang, error)
 	Delete(id, authorID string) error
+	DeleteByAuthorID(authorID string) (int, error)
 }
