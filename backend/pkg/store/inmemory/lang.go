@@ -57,6 +57,18 @@ func (l LangRepo) Exist(id, authorID string) (bool, error) {
 	return false, nil
 }
 
+func (l LangRepo) DeleteByAuthorID(authorID string) (int, error) {
+	counter := 0
+	for key, ln := range l.storage {
+		if ln.AuthorID() == authorID {
+			delete(l.storage, key)
+			counter++
+		}
+	}
+
+	return counter, nil
+}
+
 func (l LangRepo) GetAllViews(authorID string) ([]query.LangView, error) {
 	langs := make([]query.LangView, 0)
 	for _, ln := range l.storage {

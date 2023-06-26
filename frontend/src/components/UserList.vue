@@ -17,7 +17,7 @@
           <td>{{ user.role.name }}</td>
           <td>
             <button class="btn btn-sm btn-primary" @click="editUser(user.id)">Edit</button>
-<!--            <button class="btn btn-sm btn-danger" @click="confirmDelete(user.id)">Delete</button>-->
+            <button class="btn btn-sm btn-danger" @click="confirmDelete(user.id)">Delete</button>
           </td>
         </tr>
         </tbody>
@@ -43,6 +43,17 @@
         <b-spinner variant="danger" label="Spinning"></b-spinner>
       </div>
     </b-modal>
+    <b-modal v-model="showDeleteResults" title="User deletion results" hide-footer hide-backdrop>
+      <p>{{deletedCount}} records related to user have been deleted.</p>
+      <div class="d-flex justify-content-end">
+        <b-button variant="success" class="mr-2" @click="deleteResultsClose" @close="deleteResultsClose">
+          Ok
+        </b-button>
+      </div>
+      <div v-if="showDeleteSpinner" class="d-flex justify-content-center mb-3">
+        <b-spinner variant="danger" label="Spinning"></b-spinner>
+      </div>
+    </b-modal>
   </b-card>
 </template>
 <script>
@@ -60,6 +71,8 @@ export default {
       idToDelete: null,
       showDeleteSpinner: false,
       showLoadSpinner: true,
+      showDeleteResults: false,
+      deletedCount: 0,
     }
   },
   mounted() {
@@ -76,9 +89,11 @@ export default {
     deleteUser() {
       this.showDeleteSpinner = true;
       UserService.delete(this.idToDelete)
-          .then(() => {
+          .then((results) => {
             this.$store.dispatch('user/clear');
             this.fetchUsers();
+            this.deletedCount = results.count;
+            this.showDeleteResults = true;
           })
           .catch((error) => {
             this.hasError = true;
@@ -92,7 +107,11 @@ export default {
     },
     deleteCancel() {
       this.showConfirmationModal = false;
-      this.idToDelete = null
+      this.idToDelete = null;
+    },
+    deleteResultsClose() {
+      this.showDeleteResults = false;
+      this.deletedCount = 0;
     },
     fetchUsers() {
       this.showLoadSpinner = true;

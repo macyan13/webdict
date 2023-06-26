@@ -140,6 +140,17 @@ func (r *TagRepo) Delete(id, authorID string) error {
 	return nil
 }
 
+func (r *TagRepo) DeleteByAuthorID(authorID string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+	result, err := r.collection.DeleteMany(ctx, bson.D{{Key: "author_id", Value: authorID}})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(result.DeletedCount), nil
+}
+
 // AllExist checks that all tags exist in DB with passed ids and authorId
 func (r *TagRepo) AllExist(ids []string, authorID string) (bool, error) {
 	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}, {Key: "author_id", Value: authorID}}

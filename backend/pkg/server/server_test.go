@@ -42,6 +42,7 @@ func initTestServer() *HTTPServer {
 		DeleteTag:         command.NewDeleteTagHandler(tagRepo, translationRepo),
 		AddUser:           command.NewAddUserHandler(userRepo, cipher),
 		UpdateUser:        command.NewUpdateUserHandler(userRepo, cipher),
+		DeleteUser:        command.NewDeleteUserHandler(userRepo, langRepo, tagRepo, translationRepo),
 		AddLang:           command.NewAddLangHandler(langRepo),
 		UpdateLang:        command.NewUpdateLangHandler(langRepo),
 		DeleteLang:        command.NewDeleteLangHandler(langRepo, translationRepo),

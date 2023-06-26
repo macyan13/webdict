@@ -59,6 +59,19 @@ class UserService {
                 });
         });
     }
+    delete(id) {
+        return new Promise((resolve, reject) => {
+            axios
+                .delete('/v1/api/users/' + id, {headers: authHeader()})
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    console.log(error)
+                    reject(error);
+                });
+        });
+    }
 }
 
 export default new UserService();

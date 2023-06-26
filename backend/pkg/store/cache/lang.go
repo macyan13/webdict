@@ -61,6 +61,15 @@ func (l LangRepo) Exist(id, authorID string) (bool, error) {
 	return l.domainProxy.Exist(id, authorID)
 }
 
+func (l LangRepo) DeleteByAuthorID(authorID string) (int, error) {
+	count, err := l.domainProxy.DeleteByAuthorID(authorID)
+	if err == nil {
+		l.cache.Delete(authorID)
+	}
+
+	return count, err
+}
+
 func (l LangRepo) GetAllViews(authorID string) ([]query.LangView, error) {
 	if cachedViews, ok := l.cache.Get(authorID); ok {
 		return maps.Values(cachedViews), nil

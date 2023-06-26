@@ -11,4 +11,5 @@ type Repository interface {
 	GetByEmail(email string) (*User, error) // GetByEmail gets user by email, return ErrNotFound if user not exists
 	Get(id string) (*User, error)           // Get gets user by id, return ErrNotFound if user not exists
 	Update(usr *User) error                 // Update saves the updated usr entity to store, return ErrEmailAlreadyExists when user with email already exists
+	Delete(id string) (int, error)          // Delete removes user from DB
 }

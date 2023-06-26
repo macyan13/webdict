@@ -489,3 +489,80 @@ func TestLangRepo_GetView(t *testing.T) {
 		})
 	}
 }
+
+func TestLangRepo_DeleteByAuthorID(t *testing.T) {
+	type fields struct {
+		domainProxy lang.Repository
+		cache       *cache.Cache[string, map[string]query.LangView]
+	}
+	type args struct {
+		authorID string
+	}
+	tests := []struct {
+		name          string
+		fieldsFn      func() fields
+		args          args
+		want          int
+		wantErr       assert.ErrorAssertionFunc
+		assertCacheFn assert.ValueAssertionFunc
+	}{
+		{
+			"Error on DB request",
+			func() fields {
+				domainProxy := lang.NewMockRepository(t)
+				domainProxy.On("DeleteByAuthorID", "testAuthor").Return(0, fmt.Errorf("testErr"))
+				c := cache.New[string, map[string]query.LangView]()
+				c.Set("testAuthor", map[string]query.LangView{"lang1": {ID: "lang1"}})
+				return fields{
+					domainProxy: domainProxy,
+					cache:       c,
+				}
+			},
+			args{authorID: "testAuthor"},
+			0,
+			assert.Error,
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				cacheMap, _ := i.(*cache.Cache[string, map[string]query.LangView]).Get("testAuthor")
+				_, ok := cacheMap["lang1"]
+				assert.True(t, ok, i2)
+				return true
+			},
+		},
+		{
+			"Cache is cleared",
+			func() fields {
+				domainProxy := lang.NewMockRepository(t)
+				domainProxy.On("DeleteByAuthorID", "testAuthor").Return(5, nil)
+				c := cache.New[string, map[string]query.LangView]()
+				c.Set("testAuthor", map[string]query.LangView{"lang1": {ID: "lang1"}})
+				return fields{
+					domainProxy: domainProxy,
+					cache:       c,
+				}
+			},
+			args{authorID: "testAuthor"},
+			5,
+			assert.NoError,
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				_, ok := i.(*cache.Cache[string, map[string]query.LangView]).Get("testAuthor")
+				assert.False(t, ok)
+				return true
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := tt.fieldsFn()
+			l := LangRepo{
+				domainProxy: f.domainProxy,
+				cache:       f.cache,
+			}
+			got, err := l.DeleteByAuthorID(tt.args.authorID)
+			tt.assertCacheFn(t, l.cache, fmt.Sprintf("DeleteByAuthorID(%v)", tt.args.authorID))
+			if !tt.wantErr(t, err, fmt.Sprintf("DeleteByAuthorID(%v)", tt.args.authorID)) {
+				return
+			}
+			assert.Equalf(t, tt.want, got, "DeleteByAuthorID(%v)", tt.args.authorID)
+		})
+	}
+}

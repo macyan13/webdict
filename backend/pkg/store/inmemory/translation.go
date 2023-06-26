@@ -81,6 +81,18 @@ func (r *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return false, nil
 }
 
+func (r *TranslationRepo) DeleteByAuthorID(authorID string) (int, error) {
+	counter := 0
+	for key, tr := range r.storage {
+		if tr.AuthorID() == authorID {
+			delete(r.storage, key)
+			counter++
+		}
+	}
+
+	return counter, nil
+}
+
 func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	type mapItem struct {
 		t         *translation.Translation

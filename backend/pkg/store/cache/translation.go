@@ -29,7 +29,7 @@ func NewTranslationRepo(ctx context.Context, domainProxy translation.Repository,
 	}
 }
 
-func (t TranslationRepo) Create(record *translation.Translation) error {
+func (t *TranslationRepo) Create(record *translation.Translation) error {
 	err := t.domainProxy.Create(record)
 	if err == nil {
 		t.pageCache.Delete(t.authorLangCacheKey(record.AuthorID(), record.LangID()))
@@ -38,7 +38,7 @@ func (t TranslationRepo) Create(record *translation.Translation) error {
 	return err
 }
 
-func (t TranslationRepo) Update(record *translation.Translation) error {
+func (t *TranslationRepo) Update(record *translation.Translation) error {
 	err := t.domainProxy.Update(record)
 	if err == nil {
 		t.singleRecordCache.Delete(record.ID())
@@ -48,19 +48,19 @@ func (t TranslationRepo) Update(record *translation.Translation) error {
 	return err
 }
 
-func (t TranslationRepo) Get(id, authorID string) (*translation.Translation, error) {
+func (t *TranslationRepo) Get(id, authorID string) (*translation.Translation, error) {
 	return t.domainProxy.Get(id, authorID)
 }
 
-func (t TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
+func (t *TranslationRepo) ExistByTag(tagID, authorID string) (bool, error) {
 	return t.domainProxy.ExistByTag(tagID, authorID)
 }
 
-func (t TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
+func (t *TranslationRepo) ExistByLang(langID, authorID string) (bool, error) {
 	return t.domainProxy.ExistByLang(langID, authorID)
 }
 
-func (t TranslationRepo) Delete(id, authorID string) error {
+func (t *TranslationRepo) Delete(id, authorID string) error {
 	record, err := t.domainProxy.Get(id, authorID)
 
 	if err != nil {
@@ -76,7 +76,17 @@ func (t TranslationRepo) Delete(id, authorID string) error {
 	return err
 }
 
-func (t TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
+func (t *TranslationRepo) DeleteByAuthorID(authorID string) (int, error) {
+	count, err := t.domainProxy.DeleteByAuthorID(authorID)
+	if err == nil {
+		t.pageCache = cache.New[string, map[string]query.LastViews]()
+		t.singleRecordCache = cache.New[string, query.TranslationView]()
+	}
+
+	return count, err
+}
+
+func (t *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
 	if cachedView, ok := t.singleRecordCache.Get(id); ok {
 		return cachedView, nil
 	}
@@ -89,7 +99,7 @@ func (t TranslationRepo) GetView(id, authorID string) (query.TranslationView, er
 	return view, err
 }
 
-func (t TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (t *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
 	pageKey := fmt.Sprintf("%d-%d-%v", pageSize, page, strings.Join(t.sortTagsAlphabetically(tagIds), "-"))
 	authorPagesKey := t.authorLangCacheKey(authorID, langID)
 
@@ -117,11 +127,11 @@ func (t TranslationRepo) GetLastViews(authorID, langID string, pageSize, page in
 	return views, err
 }
 
-func (t TranslationRepo) GetRandomViews(authorID, langID string, tagIds []string, limit int) (query.RandomViews, error) {
+func (t *TranslationRepo) GetRandomViews(authorID, langID string, tagIds []string, limit int) (query.RandomViews, error) {
 	return t.queryProxy.GetRandomViews(authorID, langID, tagIds, limit)
 }
 
-func (t TranslationRepo) sortTagsAlphabetically(tagIds []string) []string {
+func (t *TranslationRepo) sortTagsAlphabetically(tagIds []string) []string {
 	sort.Slice(tagIds, func(i, j int) bool {
 		return tagIds[i] < tagIds[j]
 	})
@@ -129,6 +139,6 @@ func (t TranslationRepo) sortTagsAlphabetically(tagIds []string) []string {
 	return tagIds
 }
 
-func (t TranslationRepo) authorLangCacheKey(authorID, lang string) string {
+func (t *TranslationRepo) authorLangCacheKey(authorID, lang string) string {
 	return fmt.Sprintf("%s-%s", authorID, lang)
 }

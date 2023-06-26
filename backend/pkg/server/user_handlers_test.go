@@ -212,6 +212,86 @@ func TestHTTPServer_UpdateUser(t *testing.T) {
 	assert.Equal(t, int(user.Admin), usr.Role.ID)
 }
 
+func TestHTTPServer_DeleteUser_Unauthorized(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, name, email, pwd)
+
+	updRequest := userRequest{
+		Name:     "test",
+		Email:    "updated@test.com",
+		Password: "newPasswd12345",
+		Role:     int(user.Author),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("DELETE", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	usr := getUserByID(t, s, response.ID)
+	assert.Equal(t, name, usr.Name)
+}
+
+func TestHTTPServer_DeleteUser_NotAdmin(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, name, email, pwd)
+
+	updRequest := userRequest{
+		Name:     "test",
+		Email:    "updated@test.com",
+		Password: "newPasswd12345",
+		Role:     int(user.Author),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("DELETE", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	setAuthTokenWithCredentials(s, req, email, pwd)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	usr := getUserByID(t, s, response.ID)
+	assert.Equal(t, name, usr.Name)
+}
+
+func TestHTTPServer_DeleteUser(t *testing.T) {
+	s := initTestServer()
+	name := "John Do"
+	email := "john@test.com"
+	pwd := "testPassword"
+
+	response := createUser(t, s, name, email, pwd)
+
+	updRequest := userRequest{
+		Name:     "test",
+		Email:    "updated@test.com",
+		Password: "newPasswd12345",
+		Role:     int(user.Author),
+	}
+
+	jsonValue, _ := json.Marshal(updRequest)
+	req, _ := http.NewRequest("DELETE", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
+	setAdminAuthToken(s, req)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	req, _ = http.NewRequest("GET", v1UserAPI+"/"+response.ID, http.NoBody)
+	setAdminAuthToken(s, req)
+	w = httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
 func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
 	setAdminAuthToken(s, req)

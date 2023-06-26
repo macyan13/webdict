@@ -616,3 +616,93 @@ func TestTranslationRepo_authorLangCacheKey(t *testing.T) {
 	repo := TranslationRepo{}
 	assert.Equal(t, "authorID-EN", repo.authorLangCacheKey(authorID, lang))
 }
+
+func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
+	type fields struct {
+		domainProxy       translation.Repository
+		singleRecordCache *cache.Cache[string, query.TranslationView]
+		pageCache         *cache.Cache[string, map[string]query.LastViews]
+	}
+	type args struct {
+		authorID string
+	}
+	tests := []struct {
+		name          string
+		fieldsFn      func() fields
+		args          args
+		want          int
+		wantErr       assert.ErrorAssertionFunc
+		assertCacheFn assert.ValueAssertionFunc
+	}{
+		{
+			"Error on DB DELETE",
+			func() fields {
+				repo := translation.MockRepository{}
+				repo.On("DeleteByAuthorID", "authorID").Return(0, fmt.Errorf("error"))
+				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
+				singleCache.Set("testID", query.TranslationView{})
+				return fields{
+					domainProxy:       &repo,
+					pageCache:         pageCache,
+					singleRecordCache: singleCache,
+				}
+			},
+			args{authorID: "authorID"},
+			0,
+			assert.Error,
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				repo := i.(TranslationRepo)
+				pageCache, ok := repo.pageCache.Get("authorID-EN")
+				assert.True(t, ok, i2...)
+				_, ok = pageCache["key"]
+				assert.True(t, ok, i2...)
+				_, ok = repo.singleRecordCache.Get("testID")
+				return assert.True(t, ok, i2...)
+			},
+		},
+		{
+			"Cache is cleared",
+			func() fields {
+				repo := translation.MockRepository{}
+				repo.On("DeleteByAuthorID", "authorID").Return(5, nil)
+				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
+				singleCache.Set("testID", query.TranslationView{})
+				return fields{
+					domainProxy:       &repo,
+					pageCache:         pageCache,
+					singleRecordCache: singleCache,
+				}
+			},
+			args{authorID: "authorID"},
+			5,
+			assert.NoError,
+			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+				repo := i.(TranslationRepo)
+				_, ok := repo.pageCache.Get("authorID-EN")
+				assert.False(t, ok, i2...)
+				_, ok = repo.singleRecordCache.Get("testID")
+				return assert.False(t, ok, i2...)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t1 *testing.T) {
+			f := tt.fieldsFn()
+			repo := TranslationRepo{
+				domainProxy:       f.domainProxy,
+				singleRecordCache: f.singleRecordCache,
+				pageCache:         f.pageCache,
+			}
+			got, err := repo.DeleteByAuthorID(tt.args.authorID)
+			tt.assertCacheFn(t, repo, fmt.Sprintf("DeleteByAuthorID(%v)", tt.args.authorID))
+			if !tt.wantErr(t1, err, fmt.Sprintf("DeleteByAuthorID(%v)", tt.args.authorID)) {
+				return
+			}
+			assert.Equalf(t1, tt.want, got, "DeleteByAuthorID(%v)", tt.args.authorID)
+		})
+	}
+}

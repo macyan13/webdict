@@ -21,6 +21,7 @@ type Commands struct {
 
 	AddUser    command.AddUserHandler
 	UpdateUser command.UpdateUserHandler
+	DeleteUser command.DeleteUserHandler
 
 	AddLang    command.AddLangHandler
 	UpdateLang command.UpdateLangHandler

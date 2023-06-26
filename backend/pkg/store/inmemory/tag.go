@@ -52,6 +52,18 @@ func (r *TagRepo) Create(t *tag.Tag) error {
 	return nil
 }
 
+func (r *TagRepo) DeleteByAuthorID(authorID string) (int, error) {
+	counter := 0
+	for key, tg := range r.storage {
+		if tg.AuthorID() == authorID {
+			delete(r.storage, key)
+			counter++
+		}
+	}
+
+	return counter, nil
+}
+
 func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 	tags := make([]query.TagView, 0)
 	for _, t := range r.storage {

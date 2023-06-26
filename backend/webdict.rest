@@ -27,7 +27,6 @@ Authorization: {{admin_auth_type}} {{admin_auth_token}}
     })
 %}
 
-
 ### Crete User
 POST {{host}}/v1/api/users
 Content-Type: application/json
@@ -393,7 +392,6 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     client.global.set("tag2_id", response.body.id)
 %}
 
-
 ### Get all tags
 GET {{host}}/v1/api/tags
 Content-Type: application/json
@@ -621,6 +619,108 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.body.hasOwnProperty("total_records"), "Translation created_at is not present")
         client.assert(response.body.total_records === 0, "Amount of pages is not correct")
         client.assert(response.body.translations.length === 0, "Amount of translations is not correct")
+    })
+%}
+
+### Create user for delete user validation
+POST {{host}}/v1/api/users
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+{
+  "name": "test",
+  "email": "test@for.delete",
+  "password": "{{userPassword}}",
+  "role": 2
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    })
+    client.global.set("user_id_to_admin_delete", response.body.id)
+%}
+
+### Generate Author Authentication token
+POST {{host}}/v1/api/auth/signin
+Content-Type: application/json
+
+{
+  "email": "test@for.delete",
+  "password": "{{userPassword}}"
+}
+
+> {%
+    client.global.set("user_auth_token", response.body.accessToken)
+    client.global.set("user_auth_type", response.body.type)
+%}
+
+### Crete tag for delete user validation
+POST {{host}}/v1/api/tags
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "tag": "AdminTest"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    })
+    client.global.set("tag_id_to_admin_delete", response.body.id)
+%}
+
+### Crete Lang for delete user validation
+POST {{host}}/v1/api/langs
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "name": "BY"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is present")
+    })
+    client.global.set("lang_id_to_admin_delete", response.body.id)
+%}
+
+### Create Translation for delete user validation
+POST {{host}}/v1/api/translations
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+{
+  "source": "test1",
+  "transcription": "test1",
+  "target": "test1",
+  "example": "test1",
+  "tag_ids": ["{{tag_id_to_admin_delete}}"],
+  "lang_id": "{{lang_id_to_admin_delete}}"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201")
+        client.assert(response.body.hasOwnProperty("id"), "ID is not present")
+    })
+    client.global.set("translation_id_to_admin_delete", response.body.id)
+%}
+
+### Delete user
+DELETE {{host}}/v1/api/users/{{user_id_to_admin_delete}}
+Content-Type: application/json
+Authorization: {{admin_auth_type}} {{admin_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+        client.assert(response.body.count === 4, "amount of removed entities is correct")
     })
 %}
 

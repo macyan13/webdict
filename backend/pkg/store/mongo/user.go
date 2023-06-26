@@ -15,7 +15,7 @@ import (
 // UserRepo Mongo DB implementation for domain user entity
 type UserRepo struct {
 	collection    *mongo.Collection
-	langRepo      query.LangViewRepository
+	langViewRepo  query.LangViewRepository
 	roleConverter *query.RoleConverter
 }
 
@@ -31,7 +31,7 @@ type UserModel struct {
 
 // NewUserRepo creates new UserRepo
 func NewUserRepo(db *mongo.Database, langRepo query.LangViewRepository, roleMapper *query.RoleConverter) (*UserRepo, error) {
-	u := UserRepo{collection: db.Collection("users"), langRepo: langRepo, roleConverter: roleMapper}
+	u := UserRepo{collection: db.Collection("users"), langViewRepo: langRepo, roleConverter: roleMapper}
 
 	if err := u.initIndexes(); err != nil {
 		return nil, err
@@ -136,6 +136,22 @@ func (r *UserRepo) Update(usr *user.User) error {
 	return nil
 }
 
+func (r *UserRepo) Delete(id string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
+	if err != nil {
+		return 0, err
+	}
+
+	if result.DeletedCount != 1 {
+		return 0, fmt.Errorf("1 record was supposed to be deleted, %d removed", result.DeletedCount)
+	}
+
+	return 1, nil
+}
+
 func (r *UserRepo) GetAllViews() ([]query.UserView, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()
@@ -200,7 +216,7 @@ func (r *UserRepo) fromModelToView(model UserModel) (query.UserView, error) {
 	}
 
 	if model.DefaultLangID != "" {
-		langView, err := r.langRepo.GetView(model.DefaultLangID, model.ID)
+		langView, err := r.langViewRepo.GetView(model.DefaultLangID, model.ID)
 
 		if err != nil {
 			return query.UserView{}, err

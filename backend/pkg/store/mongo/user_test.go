@@ -95,7 +95,7 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
 			r := &UserRepo{
-				langRepo:      f.langRepo,
+				langViewRepo:  f.langRepo,
 				roleConverter: f.roleConverter,
 			}
 			got, err := r.fromModelToView(tt.args.model)
