@@ -3,12 +3,12 @@ import ProfileService from '../services/profile.service';
 export default {
     namespaced: true,
     state: {
-        user: null,
+        profile: null,
     },
     actions: {
         fetchProfile({state, commit}) {
-            if (state.user) {
-                return Promise.resolve(state.user);
+            if (state.profile) {
+                return Promise.resolve(state.profile);
             }
             return ProfileService.get().then(
                 profile => {
@@ -22,16 +22,21 @@ export default {
             );
         },
         clear({commit}) {
-            commit('profileUser');
+            commit('clearProfile');
             return Promise.resolve();
         }
     },
     mutations: {
-        profileSuccess(state, user) {
-            state.user = user;
+        profileSuccess(state, profile) {
+            state.profile = profile;
         },
-        profileUser(state) {
-            state.user = null;
+        clearProfile(state) {
+            state.profile = null;
         },
     },
+    getters: {
+        isAdmin: function (state) {
+            return state.profile && state.profile.role.is_admin;
+        },
+    }
 };

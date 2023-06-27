@@ -49,7 +49,10 @@ export default {
     callLogin() {
       let authParams = new AuthParams(this.email, this.password)
       this.$store.dispatch('auth/login', authParams)
-          .then(() => this.$router.push({name: 'Home'}))
+          .then(() => {
+            this.$store.dispatch('profile/fetchProfile');
+            this.$router.push({name: 'Home'});
+          })
           .catch(error => {
             this.loginError = true
             this.error.push(error)
