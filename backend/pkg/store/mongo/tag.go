@@ -20,7 +20,7 @@ type TagRepo struct {
 // TagModel represents mongo tag document
 type TagModel struct {
 	ID       string `bson:"_id"`
-	Tag      string `bson:"tag"`
+	Name     string `bson:"name"`
 	AuthorID string `bson:"author_id"`
 }
 
@@ -38,7 +38,7 @@ func NewTagRepo(db *mongo.Database) (*TagRepo, error) {
 func (r *TagRepo) initIndexes() error {
 	indexes := []mongo.IndexModel{
 		{
-			Keys:    bson.D{{Key: "tag", Value: 1}, {Key: "author_id", Value: 1}},
+			Keys:    bson.D{{Key: "name", Value: 1}, {Key: "author_id", Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 		{
@@ -117,7 +117,7 @@ func (r *TagRepo) Get(id, authorID string) (*tag.Tag, error) {
 
 	return tag.UnmarshalFromDB(
 		record.ID,
-		record.Tag,
+		record.Name,
 		record.AuthorID,
 	), nil
 }
@@ -246,7 +246,7 @@ func (r *TagRepo) fromDomainToModel(t *tag.Tag) (TagModel, error) {
 // fromModelToView converts mongo model to tag View
 func (r *TagRepo) fromModelToView(model TagModel) query.TagView {
 	return query.TagView{
-		ID:  model.ID,
-		Tag: model.Tag,
+		ID:   model.ID,
+		Name: model.Name,
 	}
 }

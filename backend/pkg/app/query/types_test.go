@@ -27,11 +27,11 @@ func TestTagView_sanitize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &TagView{
-				ID:  id,
-				Tag: tt.rawTag,
+				ID:   id,
+				Name: tt.rawTag,
 			}
 			v.sanitize(sntz)
-			assert.Equal(t, tt.sanitizedTag, v.Tag)
+			assert.Equal(t, tt.sanitizedTag, v.Name)
 			assert.Equal(t, id, v.ID)
 		})
 	}
@@ -113,7 +113,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 				Transcription: tt.rawFields.Transcription,
 				Target:        tt.rawFields.Translation,
 				Example:       tt.rawFields.Example,
-				Tags:          []TagView{{Tag: tt.rawFields.Tag}},
+				Tags:          []TagView{{Name: tt.rawFields.Tag}},
 				Lang:          tt.rawFields.LangView,
 			}
 			v.sanitize(strictSntz, reachSntz)
@@ -122,7 +122,7 @@ func TestTranslationView_sanitize(t *testing.T) {
 			assert.Equal(t, tt.sanitizedFields.Transcription, v.Transcription)
 			assert.Equal(t, tt.sanitizedFields.Translation, v.Target)
 			assert.Equal(t, tt.sanitizedFields.Example, v.Example)
-			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Tag)
+			assert.Equal(t, tt.sanitizedFields.Tag, v.Tags[0].Name)
 			assert.Equal(t, tt.sanitizedFields.LangView, v.Lang)
 		})
 	}

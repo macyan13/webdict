@@ -26,7 +26,7 @@ func TestServer_CreateTranslation(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = s.app.Commands.AddTag.Handle(command.AddTag{
-		Tag:      tg,
+		Name:     tg,
 		AuthorID: user.ID(),
 	})
 	assert.Nil(t, err)

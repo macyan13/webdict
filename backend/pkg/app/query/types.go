@@ -65,12 +65,12 @@ func (v *TranslationView) sanitize(strictSntz *strictSanitizer, reachSntz *richT
 }
 
 type TagView struct {
-	ID  string
-	Tag string
+	ID   string
+	Name string
 }
 
 func (v *TagView) sanitize(sanitizer *strictSanitizer) {
-	v.Tag = sanitizer.Sanitize(v.Tag)
+	v.Name = sanitizer.Sanitize(v.Name)
 }
 
 type LangView struct {

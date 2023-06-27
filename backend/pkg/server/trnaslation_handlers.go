@@ -217,8 +217,8 @@ func (s *HTTPServer) translationViewToResponse(view query.TranslationView) trans
 
 	for i, tag := range view.Tags {
 		tags[i] = tagResponse{
-			ID:  tag.ID,
-			Tag: tag.Tag,
+			ID:   tag.ID,
+			Name: tag.Name,
 		}
 	}
 

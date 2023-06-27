@@ -4,7 +4,7 @@
       <b-list-group style="width: 40%;">
         <b-list-group-item v-for="tag in tags" :key="tag.id">
           <div style="display: flex; justify-content: space-between;">
-            <span>{{ tag.tag }}</span>
+            <span>{{ tag.name }}</span>
             <span>
               <b-button variant="primary" @click="editTag(tag.id)">Edit</b-button>
               <b-button variant="danger" @click="confirmDelete(tag.id)">Delete</b-button>

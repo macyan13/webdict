@@ -29,7 +29,7 @@ func TestTag_ApplyChanges(t *testing.T) {
 			},
 			args{tag: "t"},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				assert.Equal(t, "name length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
@@ -39,7 +39,7 @@ func TestTag_ApplyChanges(t *testing.T) {
 				tag:      "testTag",
 				authorID: "testAuthor",
 			},
-			args{tag: "tag"},
+			args{tag: "name"},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i)
 				return false
@@ -49,11 +49,11 @@ func TestTag_ApplyChanges(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t1 *testing.T) {
 			t := &Tag{
-				tag:      tt.fields.tag,
+				name:     tt.fields.tag,
 				authorID: tt.fields.authorID,
 			}
 			if tt.wantErr(t1, t.ApplyChanges(tt.args.tag), fmt.Sprintf("ApplyChanges(%v)", tt.args.tag)) {
-				assert.Equal(t1, tt.fields.tag, t.tag)
+				assert.Equal(t1, tt.fields.tag, t.name)
 			}
 		})
 	}
@@ -62,11 +62,11 @@ func TestTag_ApplyChanges(t *testing.T) {
 func TestUnmarshalFromDB(t *testing.T) {
 	tag := Tag{
 		id:       "testId",
-		tag:      "testTag",
+		name:     "testTag",
 		authorID: "testAuthor",
 	}
 
-	assert.Equal(t, &tag, UnmarshalFromDB(tag.id, tag.tag, tag.authorID))
+	assert.Equal(t, &tag, UnmarshalFromDB(tag.id, tag.name, tag.authorID))
 }
 
 func TestNewTag(t *testing.T) {
@@ -88,7 +88,7 @@ func TestNewTag(t *testing.T) {
 			},
 			nil,
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				assert.Equal(t, "name length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return false
 			},
 		},
@@ -100,7 +100,7 @@ func TestNewTag(t *testing.T) {
 			},
 			func(t assert.TestingT, tg interface{}, i ...interface{}) bool {
 				result := tg.(*Tag)
-				assert.Equal(t, "testTag", result.tag, i)
+				assert.Equal(t, "testTag", result.name, i)
 				assert.Equal(t, "testAuthor", result.authorID, i)
 				return false
 			},
@@ -132,24 +132,24 @@ func TestTag_validate(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			"Tag is too short",
+			"Name is too short",
 			fields{
 				tag:      "t",
 				authorID: "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				assert.Equal(t, "name length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
 		{
-			"Tag is too long",
+			"Name is too long",
 			fields{
 				tag:      string(make([]rune, 31)),
 				authorID: "test",
 			},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.True(t, strings.Contains(err.Error(), "tag max length is 30 symbols, 31 passed"), i)
+				assert.True(t, strings.Contains(err.Error(), "name max length is 30 symbols, 31 passed"), i)
 				return true
 			},
 		},
@@ -179,7 +179,7 @@ func TestTag_validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t1 *testing.T) {
 			t := &Tag{
-				tag:      tt.fields.tag,
+				name:     tt.fields.tag,
 				authorID: tt.fields.authorID,
 			}
 			tt.wantErr(t1, t.validate(), "validate()")

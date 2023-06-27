@@ -16,7 +16,7 @@ func TestServer_CreateTag(t *testing.T) {
 	tg := "CreateTag"
 
 	request := tagRequest{
-		Tag: tg,
+		Name: tg,
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -29,7 +29,7 @@ func TestServer_CreateTag(t *testing.T) {
 	records := getExistingTags(t, s)
 	created := records[0]
 
-	assert.Equal(t, tg, created.Tag)
+	assert.Equal(t, tg, created.Name)
 }
 
 func TestServer_CreateTagUnauthorised(t *testing.T) {
@@ -37,7 +37,7 @@ func TestServer_CreateTagUnauthorised(t *testing.T) {
 	tg := "CreateTag"
 
 	request := tagRequest{
-		Tag: tg,
+		Name: tg,
 	}
 
 	jsonValue, _ := json.Marshal(request)
@@ -51,7 +51,7 @@ func TestServer_CreateTagUnauthorised(t *testing.T) {
 func TestServer_DeleteTagById(t *testing.T) {
 	s := initTestServer()
 
-	request := tagRequest{Tag: "test"}
+	request := tagRequest{Name: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAdminAuthToken(s, req)
@@ -69,7 +69,7 @@ func TestServer_DeleteTagById(t *testing.T) {
 func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 
-	request := tagRequest{Tag: "test"}
+	request := tagRequest{Name: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAdminAuthToken(s, req)
@@ -85,7 +85,7 @@ func TestServer_DeleteTagByIdUnauthorised(t *testing.T) {
 
 func TestServer_UpdateTag(t *testing.T) {
 	s := initTestServer()
-	request := tagRequest{Tag: "test"}
+	request := tagRequest{Name: "test"}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 	setAdminAuthToken(s, req)
@@ -94,7 +94,7 @@ func TestServer_UpdateTag(t *testing.T) {
 	tg := "UpdateTag"
 
 	request = tagRequest{
-		Tag: tg,
+		Name: tg,
 	}
 
 	jsonValue, _ = json.Marshal(request)
@@ -113,14 +113,14 @@ func TestServer_UpdateTag(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &record)
 	assert.Nil(t, err)
 
-	assert.Equal(t, tg, record.Tag)
+	assert.Equal(t, tg, record.Name)
 }
 
 func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	s := initTestServer()
 	originalTag := "originalTag"
 	request := tagRequest{
-		Tag: originalTag,
+		Name: originalTag,
 	}
 	jsonValue, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
@@ -130,7 +130,7 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	tg := "UpdateTag"
 
 	request = tagRequest{
-		Tag: tg,
+		Name: tg,
 	}
 
 	jsonValue, _ = json.Marshal(request)
@@ -148,7 +148,7 @@ func TestServer_UpdateTagUnauthorised(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &record)
 	assert.Nil(t, err)
 
-	assert.Equal(t, originalTag, record.Tag)
+	assert.Equal(t, originalTag, record.Name)
 }
 
 func TestServer_GetTags(t *testing.T) {
@@ -157,7 +157,7 @@ func TestServer_GetTags(t *testing.T) {
 	tags := map[string]interface{}{"testTag1": nil, "testTag2": nil}
 
 	for tag := range tags {
-		request := tagRequest{Tag: tag}
+		request := tagRequest{Name: tag}
 		jsonValue, _ := json.Marshal(request)
 		req, _ := http.NewRequest("POST", v1TagAPI, bytes.NewBuffer(jsonValue))
 		setAdminAuthToken(s, req)
@@ -171,7 +171,7 @@ func TestServer_GetTags(t *testing.T) {
 	assert.Equal(t, len(tags), len(createdTags))
 
 	for _, tag := range createdTags {
-		_, exist := tags[tag.Tag]
+		_, exist := tags[tag.Name]
 		assert.True(t, exist)
 	}
 }

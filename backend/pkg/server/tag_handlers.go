@@ -28,12 +28,12 @@ func (s *HTTPServer) CreateTag() gin.HandlerFunc { //nolint:dupl // it's not ful
 		}
 
 		id, err := s.app.Commands.AddTag.Handle(command.AddTag{
-			Tag:      request.Tag,
+			Name:     request.Name,
 			AuthorID: user.ID,
 		})
 
 		if err == tag.ErrTagAlreadyExists {
-			s.badRequest(c, fmt.Errorf("tag %s already exists", request.Tag))
+			s.badRequest(c, fmt.Errorf("tag %s already exists", request.Name))
 			return
 		}
 
@@ -85,11 +85,11 @@ func (s *HTTPServer) UpdateTag() gin.HandlerFunc { //nolint:dupl // it's not ful
 
 		if err = s.app.Commands.UpdateTag.Handle(command.UpdateTag{
 			TagID:    c.Param(tagIDParam),
-			Tag:      request.Tag,
+			Name:     request.Name,
 			AuthorID: user.ID,
 		}); err != nil {
 			if err == tag.ErrTagAlreadyExists {
-				s.badRequest(c, fmt.Errorf("tag %s already exists", request.Tag))
+				s.badRequest(c, fmt.Errorf("tag %s already exists", request.Name))
 				return
 			}
 			s.badRequest(c, fmt.Errorf("can not Update Existing tag: %v", err))
@@ -148,8 +148,8 @@ func (s *HTTPServer) DeleteTagByID() gin.HandlerFunc {
 
 func (s *HTTPServer) tagViewToResponse(tg query.TagView) tagResponse {
 	return tagResponse{
-		ID:  tg.ID,
-		Tag: tg.Tag,
+		ID:   tg.ID,
+		Name: tg.Name,
 	}
 }
 

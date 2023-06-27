@@ -4,16 +4,16 @@
       <b-form @submit.prevent="submitForm">
         <b-form-group
             id="tag-group"
-            label="Tag:"
-            label-for="tag-input"
-            :state="tag ? true : false"
+            label="Name:"
+            label-for="name-input"
+            :state="name ? true : false"
             invalid-feedback="required"
         >
           <div style="display: flex; justify-content: center;">
             <b-form-input
                 :required=true
-                id="tag-input"
-                v-model="tag"
+                id="name-input"
+                v-model="name"
                 placeholder="Enter a tag..."
                 class="w-25"
             ></b-form-input>
@@ -68,7 +68,7 @@ export default {
     return {
       title: '',
       buttonLabel: '',
-      tag: '',
+      name: '',
       showConfirmationModal: false,
       showDeleteSpinner: false,
       showEditSpinner: false,
@@ -90,7 +90,7 @@ export default {
     loadData() {
       TagService.get(this.id)
           .then((data) => {
-            this.tag = data.tag;
+            this.name = data.name;
           })
           .catch((error) => {
             this.hasError = true;
@@ -119,7 +119,7 @@ export default {
     submitForm() {
       this.showEditSpinner = true;
       let method = this.id ? TagService.update : TagService.create;
-      method(new Tag(this.tag, this.id))
+      method(new Tag(this.name, this.id))
           .then(() => {
             this.$store.dispatch('tag/clear');
             router.push({name: 'Tags'});

@@ -127,7 +127,7 @@
                     :multiple="true"
                     :max="5"
                     :show-labels="false"
-                    label="tag"
+                    label="name"
                     track-by="id"
                     placeholder="Pick a tag"
                     style="width: 50%"

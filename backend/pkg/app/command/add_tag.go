@@ -6,7 +6,7 @@ import (
 
 // AddTag create new tag cmd
 type AddTag struct {
-	Tag      string
+	Name     string
 	AuthorID string
 }
 
@@ -23,7 +23,7 @@ func NewAddTagHandler(tagRepo tag.Repository) AddTagHandler {
 
 // Handle performs tag creation cmd
 func (h AddTagHandler) Handle(cmd AddTag) (string, error) {
-	tg, err := tag.NewTag(cmd.Tag, cmd.AuthorID)
+	tg, err := tag.NewTag(cmd.Name, cmd.AuthorID)
 	if err != nil {
 		return "", err
 	}

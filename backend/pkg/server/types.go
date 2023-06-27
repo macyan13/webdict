@@ -12,7 +12,7 @@ type translationRequest struct {
 }
 
 type tagRequest struct {
-	Tag string `json:"tag"`
+	Name string `json:"name"`
 }
 
 type userRequest struct {
@@ -60,8 +60,8 @@ type randomTranslationsResponse struct {
 }
 
 type tagResponse struct {
-	ID  string `json:"id"`
-	Tag string `json:"tag"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type langResponse struct {

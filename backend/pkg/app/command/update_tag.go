@@ -7,7 +7,7 @@ import (
 // UpdateTag update existing tag cmd
 type UpdateTag struct {
 	TagID    string
-	Tag      string
+	Name     string
 	AuthorID string
 }
 
@@ -28,7 +28,7 @@ func (h UpdateTagHandler) Handle(cmd UpdateTag) error {
 		return err
 	}
 
-	if err := tg.ApplyChanges(cmd.Tag); err != nil {
+	if err := tg.ApplyChanges(cmd.Name); err != nil {
 		return err
 	}
 
