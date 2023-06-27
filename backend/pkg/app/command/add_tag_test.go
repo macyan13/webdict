@@ -28,11 +28,11 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 				return fields{tagRepo: &tag.MockRepository{}}
 			},
 			args{cmd: AddTag{
-				Tag:      "t",
+				Name:     "t",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				assert.Equal(t, "name length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
@@ -45,7 +45,7 @@ func TestAddTagHandler_Handle_NegativeCases(t *testing.T) {
 				return fields{tagRepo: &tagRepo}
 			},
 			args{cmd: AddTag{
-				Tag:      "testTag",
+				Name:     "testTag",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -73,7 +73,7 @@ func TestAddTagHandler_Handle_PositiveCase(t *testing.T) {
 
 	handler := NewAddTagHandler(&tagRepo)
 	cmd := AddTag{
-		Tag:      tg,
+		Name:     tg,
 		AuthorID: authorID,
 	}
 
@@ -84,6 +84,6 @@ func TestAddTagHandler_Handle_PositiveCase(t *testing.T) {
 	data := createdTag.ToMap()
 
 	assert.Equal(t, createdTag.ID(), id)
-	assert.Equal(t, cmd.Tag, data["tag"])
+	assert.Equal(t, cmd.Name, data["name"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
 }

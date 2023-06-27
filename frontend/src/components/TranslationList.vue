@@ -16,7 +16,7 @@
         <td>{{ translation.transcription }}</td>
         <td>{{ translation.target }}</td>
         <td>
-          <span v-for="tag in translation.tags" :key="tag.id" class="badge badge-primary">{{ tag.tag }}</span>
+          <span v-for="tag in translation.tags" :key="tag.id" class="badge badge-primary">{{ tag.name }}</span>
         </td>
         <td>
           <button class="btn btn-sm btn-primary" @click="editTranslation(translation.id)">Edit</button>

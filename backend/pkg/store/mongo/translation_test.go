@@ -51,7 +51,7 @@ func TestTranslationRepo_fromModelToView_positiveCase(t *testing.T) {
 		LangID:        "EN",
 	}
 
-	tagViews := []query.TagView{{Tag: "tag1"}, {Tag: "tag2"}}
+	tagViews := []query.TagView{{Name: "tag1"}, {Name: "tag2"}}
 	tagRepo := query.MockTagViewRepository{}
 	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return(tagViews, nil)
 
@@ -138,7 +138,7 @@ func TestTranslationRepo_fromModelToView_errorOnTagViewsMiscount(t *testing.T) {
 	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{ID: "EN"}, nil)
 
 	tagRepo := query.MockTagViewRepository{}
-	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return([]query.TagView{{Tag: "tag1"}}, nil)
+	tagRepo.On("GetViews", []string{"tag1", "tag2"}, "testAuthor").Return([]query.TagView{{Name: "tag1"}}, nil)
 
 	translationRepo := &TranslationRepo{
 		tagRepo:  &tagRepo,
@@ -157,7 +157,7 @@ func TestTranslationRepo_fromModelToView_errorOnGetLangView(t *testing.T) {
 	}
 
 	tagRepo := query.MockTagViewRepository{}
-	tagRepo.On("GetViews", []string{"tag1"}, "testAuthor").Return([]query.TagView{{Tag: "tag1"}}, nil)
+	tagRepo.On("GetViews", []string{"tag1"}, "testAuthor").Return([]query.TagView{{Name: "tag1"}}, nil)
 
 	langRepo := query.MockLangViewRepository{}
 	langRepo.On("GetView", "EN", "testAuthor").Return(query.LangView{}, errors.New("testError"))

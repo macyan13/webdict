@@ -73,8 +73,8 @@ func (r *TagRepo) GetAllViews(authorID string) ([]query.TagView, error) {
 
 		tagData := t.ToMap()
 		tags = append(tags, query.TagView{
-			ID:  t.ID(),
-			Tag: tagData["tag"].(string),
+			ID:   t.ID(),
+			Name: tagData["name"].(string),
 		})
 	}
 
@@ -87,8 +87,8 @@ func (r *TagRepo) GetView(id, authorID string) (query.TagView, error) {
 	if ok && t.AuthorID() == authorID {
 		tagData := t.ToMap()
 		return query.TagView{
-			ID:  t.ID(),
-			Tag: tagData["tag"].(string),
+			ID:   t.ID(),
+			Name: tagData["name"].(string),
 		}, nil
 	}
 
@@ -103,8 +103,8 @@ func (r *TagRepo) GetViews(ids []string, authorID string) ([]query.TagView, erro
 			if t.AuthorID() == authorID && t.ID() == id {
 				tagData := t.ToMap()
 				views = append(views, query.TagView{
-					ID:  t.ID(),
-					Tag: tagData["tag"].(string),
+					ID:   t.ID(),
+					Name: tagData["name"].(string),
 				})
 			}
 		}

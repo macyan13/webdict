@@ -8,14 +8,14 @@ import (
 
 type Tag struct {
 	id       string
-	tag      string
+	name     string
 	authorID string
 }
 
-func NewTag(tag, authorID string) (*Tag, error) {
+func NewTag(name, authorID string) (*Tag, error) {
 	tg := Tag{
 		id:       uuid.New().String(),
-		tag:      tag,
+		name:     name,
 		authorID: authorID,
 	}
 
@@ -36,25 +36,25 @@ func (t *Tag) AuthorID() string {
 
 func (t *Tag) ApplyChanges(tag string) error {
 	updated := *t
-	updated.tag = tag
+	updated.name = tag
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	t.tag = tag
+	t.name = tag
 	return nil
 }
 
 func (t *Tag) validate() error {
-	tagCount := utf8.RuneCountInString(t.tag)
+	tagCount := utf8.RuneCountInString(t.name)
 
 	if tagCount < 2 {
-		return fmt.Errorf("tag length should be at least 2 symbols, %d passed (%s)", tagCount, t.tag)
+		return fmt.Errorf("name length should be at least 2 symbols, %d passed (%s)", tagCount, t.name)
 	}
 
 	if tagCount > 30 {
-		return fmt.Errorf("tag max length is 30 symbols, %d passed (%s)", tagCount, t.tag)
+		return fmt.Errorf("name max length is 30 symbols, %d passed (%s)", tagCount, t.name)
 	}
 
 	if t.authorID == "" {
@@ -67,7 +67,7 @@ func (t *Tag) validate() error {
 func (t *Tag) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":       t.id,
-		"tag":      t.tag,
+		"name":     t.name,
 		"authorID": t.authorID,
 	}
 }
@@ -79,7 +79,7 @@ func UnmarshalFromDB(
 ) *Tag {
 	return &Tag{
 		id:       id,
-		tag:      tag,
+		name:     tag,
 		authorID: authorID,
 	}
 }

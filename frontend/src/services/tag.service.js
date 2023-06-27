@@ -32,7 +32,7 @@ class TagService {
         return new Promise((resolve, reject) => {
             axios
                 .put('/v1/api/tags/' + tag.id, {
-                    tag: tag.tag,
+                    name: tag.name,
                 }, {headers: authHeader()})
                 .then(response => {
                     resolve(response.data);

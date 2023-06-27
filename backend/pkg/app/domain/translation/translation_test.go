@@ -39,7 +39,7 @@ func TestTranslation_ApplyChanges_PositiveCase(t *testing.T) {
 	assert.Equal(t, tr.source, text)
 	assert.Equal(t, tr.example, example)
 	assert.Equal(t, tr.target, translation)
-	assert.Greaterf(t, tr.updatedAt, updatedAt, "Tag.ApplyChanges - updatedAt should be greater createdAt")
+	assert.Greaterf(t, tr.updatedAt, updatedAt, "Name.ApplyChanges - updatedAt should be greater createdAt")
 	assert.Equal(t, tr.tagIDs[0], tg)
 	assert.Equal(t, langID, tr.langID)
 }

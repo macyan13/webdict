@@ -36,15 +36,15 @@ func TestSingleTagHandler_Handle(t *testing.T) {
 			func() fields {
 				repo := MockTagViewRepository{}
 				repo.On("GetView", "tagID", "testAuthor").Return(TagView{
-					ID:  "tagID",
-					Tag: "tag",
+					ID:   "tagID",
+					Name: "tag",
 				}, nil)
 				return fields{tagRepo: &repo}
 			},
 			args{cmd: SingleTag{ID: "tagID", AuthorID: "testAuthor"}},
 			TagView{
-				ID:  "tagID",
-				Tag: "tag",
+				ID:   "tagID",
+				Name: "tag",
 			},
 			false,
 		},
@@ -53,15 +53,15 @@ func TestSingleTagHandler_Handle(t *testing.T) {
 			func() fields {
 				repo := MockTagViewRepository{}
 				repo.On("GetView", "tagID", "testAuthor").Return(TagView{
-					ID:  "tagID",
-					Tag: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Tag<a>`,
+					ID:   "tagID",
+					Name: `<a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">Test Tag<a>`,
 				}, nil)
 				return fields{tagRepo: &repo}
 			},
 			args{cmd: SingleTag{ID: "tagID", AuthorID: "testAuthor"}},
 			TagView{
-				ID:  "tagID",
-				Tag: "Test Tag",
+				ID:   "tagID",
+				Name: "Test Tag",
 			},
 			false,
 		},

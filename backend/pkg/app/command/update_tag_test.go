@@ -30,7 +30,7 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 			},
 			args{cmd: UpdateTag{
 				TagID:    "testID",
-				Tag:      "tag",
+				Name:     "tag",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -51,7 +51,7 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 			},
 			args{cmd: UpdateTag{
 				TagID:    "testID",
-				Tag:      "updatedTag",
+				Name:     "updatedTag",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -69,11 +69,11 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 			},
 			args{cmd: UpdateTag{
 				TagID:    "testID",
-				Tag:      "t",
+				Name:     "t",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
-				assert.Equal(t, "tag length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
+				assert.Equal(t, "name length should be at least 2 symbols, 1 passed (t)", err.Error(), i)
 				return true
 			},
 		},
@@ -90,7 +90,7 @@ func TestUpdateTagHandler_Handle(t *testing.T) {
 			},
 			args{cmd: UpdateTag{
 				TagID:    "testID",
-				Tag:      "updatedTag",
+				Name:     "updatedTag",
 				AuthorID: "testAuthor",
 			}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {

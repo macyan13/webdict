@@ -277,7 +277,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     })
     client.test("Response body is correct", function () {
         client.assert(response.body.length === 1, "Amount of langs is not correct")
-        client.assert(response.body[0].name === "EN", "Lang from get tag by id is not correct")
+        client.assert(response.body[0].name === "EN", "Lang from get lang by id is not correct")
     })
 %}
 
@@ -287,7 +287,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "test"
+  "name": "test"
 }
 
 > {%
@@ -304,7 +304,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "test"
+  "name": "test"
 }
 
 > {%
@@ -320,7 +320,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "test"
+  "name": "test"
 }
 
 > {%
@@ -336,7 +336,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "Programming"
+  "name": "Programming"
 }
 
 > {%
@@ -356,7 +356,7 @@ client.test("Request executed successfully", function () {
 })
 client.test("Response body is correct", function () {
     client.assert(response.body.length === 1, "Amount of tags")
-    client.assert(response.body[0].tag === "Programming", "Tag from get tag by id is not correct")
+    client.assert(response.body[0].name === "Programming", "Name from get tag by id is not correct")
 })
  %}
 
@@ -371,7 +371,7 @@ client.test("Request executed successfully", function () {
 })
 client.test("Response body is correct", function () {
     client.assert(response.body.hasOwnProperty("id"), "Tag ID is not present")
-    client.assert(response.body.tag === "Programming", "Tag from get tag by id is not correct")
+    client.assert(response.body.name === "Programming", "Name from get tag by id is not correct")
 })
  %}
 
@@ -381,7 +381,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "Tech"
+  "name": "Tech"
 }
 
 > {%
@@ -404,7 +404,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
     client.test("Response body is correct", function () {
         client.assert(response.body.length === 2, "Amount of tags is not correct")
         client.assert(function() {
-            const tags = response.body.map(x => x.tag)
+            const tags = response.body.map(x => x.name)
             return tags.every(tag => ["Programming", "Tech"].includes(tag))
         }(), "Tags from get all tags are not correct")
     })
@@ -489,7 +489,7 @@ client.test("Response body is correct", function () {
     client.assert(response.body.example === "Just give it a shot", "example from get translation by id is not correct")
     client.assert(response.body.tags.length === 2, "Amount of tags from get translation by id is not correct")
     client.assert(function() {
-        const tags = response.body.tags.map(x => x.tag)
+        const tags = response.body.tags.map(x => x.name)
         return tags.every(tag => ["Programming", "Tech"].includes(tag))
     }(), "Amount of tags from get translation by id is not correct")
 })
@@ -662,7 +662,7 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "tag": "AdminTest"
+  "name": "AdminTest"
 }
 
 > {%

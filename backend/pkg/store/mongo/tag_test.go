@@ -16,18 +16,18 @@ func TestTagRepo_fromDomainToModel(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, entity.ID(), model.ID)
 	assert.Equal(t, entity.AuthorID(), model.AuthorID)
-	assert.Equal(t, tagValue, model.Tag)
+	assert.Equal(t, tagValue, model.Name)
 }
 
 func TestTagRepo_fromModelToView(t *testing.T) {
 	model := TagModel{
 		ID:       "id",
-		Tag:      "tag",
+		Name:     "tag",
 		AuthorID: "author",
 	}
 
 	repo := TagRepo{}
 	view := repo.fromModelToView(model)
 	assert.Equal(t, model.ID, view.ID)
-	assert.Equal(t, model.Tag, view.Tag)
+	assert.Equal(t, model.Name, view.Name)
 }
