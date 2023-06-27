@@ -24,8 +24,15 @@ export default () => {
                 });
             }
 
-            if (error.config.url === authService.getRefreshUrl()) {
+            if (error.config.url === authService.getRefreshUrl() ) {
                 store.dispatch('auth/logout').then(() => router.push({name: 'Login'}));
+                return new Promise((resolve, reject) => {
+                    reject(error);
+                });
+            }
+
+            if (error.config.url === authService.getAuthUrl() ) {
+                store.dispatch('auth/logout').then(() => {});
                 return new Promise((resolve, reject) => {
                     reject(error);
                 });

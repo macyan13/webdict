@@ -47,6 +47,10 @@ class AuthService {
     getRefreshUrl() {
         return '/v1/api/auth/refresh';
     }
+
+    getAuthUrl() {
+        return '/v1/api/auth/signin';
+    }
 }
 
 export default new AuthService();
