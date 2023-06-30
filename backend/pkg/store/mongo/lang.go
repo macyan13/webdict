@@ -36,12 +36,6 @@ func (r *LangRepo) initIndexes() error {
 		{
 			Keys: bson.D{
 				{Key: "author_id", Value: 1},
-				{Key: "_id", Value: 1},
-			},
-		},
-		{
-			Keys: bson.D{
-				{Key: "author_id", Value: 1},
 			},
 		},
 		{

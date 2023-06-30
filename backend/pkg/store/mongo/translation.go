@@ -58,8 +58,13 @@ func (r *TranslationRepo) initIndexes() error {
 		{
 			Keys: bson.D{
 				{Key: "author_id", Value: 1},
+				{Key: "tag_ids", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
 				{Key: "lang_id", Value: 1},
-				{Key: "created_at", Value: -1},
 			},
 		},
 		{
@@ -67,6 +72,7 @@ func (r *TranslationRepo) initIndexes() error {
 				{Key: "author_id", Value: 1},
 				{Key: "lang_id", Value: 1},
 				{Key: "tag_ids", Value: 1},
+				{Key: "created_at", Value: -1},
 			},
 		},
 	}
