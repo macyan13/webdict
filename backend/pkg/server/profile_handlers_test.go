@@ -56,7 +56,7 @@ func TestHTTPServer_TestHTTPServer_UpdateProfile(t *testing.T) {
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("PUT", v1ProfileAPI, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	setAuthTokenWithCredentials(s, req, email, currentPasswd)
+	setAuthTokenWithCredentials(t, s, req, email, currentPasswd)
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -93,7 +93,7 @@ func TestHTTPServer_TestHTTPServerUnauthorized(t *testing.T) {
 func getProfile(t *testing.T, s *HTTPServer, email, passwd string) userResponse {
 	var profile userResponse
 	req, _ := http.NewRequest("GET", v1ProfileAPI, http.NoBody)
-	setAuthTokenWithCredentials(s, req, email, passwd)
+	setAuthTokenWithCredentials(t, s, req, email, passwd)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)

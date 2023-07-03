@@ -50,7 +50,7 @@ func TestHTTPServer_CreateUser_NotAdmin(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(userRequest{})
 	req, _ := http.NewRequest("POST", v1UserAPI, bytes.NewBuffer(jsonValue))
-	setAuthTokenWithCredentials(s, req, email, pwd)
+	setAuthTokenWithCredentials(t, s, req, email, pwd)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -75,7 +75,7 @@ func TestHTTPServer_GetUsers(t *testing.T) {
 	for usr := range users {
 		jsonValue, _ := json.Marshal(users[usr])
 		req, _ := http.NewRequest("POST", v1UserAPI, bytes.NewBuffer(jsonValue))
-		setAdminAuthToken(s, req)
+		setAdminAuthToken(t, s, req)
 		w := httptest.NewRecorder()
 		s.engine.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusCreated, w.Code)
@@ -84,7 +84,7 @@ func TestHTTPServer_GetUsers(t *testing.T) {
 
 	var records []userResponse
 	req, _ := http.NewRequest("GET", v1UserAPI, http.NoBody)
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -120,7 +120,7 @@ func TestHTTPServer_GetUsers_NotAdmin(t *testing.T) {
 	createUser(t, s, name, email, pwd)
 
 	req, _ := http.NewRequest("GET", v1UserAPI, http.NoBody)
-	setAuthTokenWithCredentials(s, req, email, pwd)
+	setAuthTokenWithCredentials(t, s, req, email, pwd)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -172,7 +172,7 @@ func TestHTTPServer_UpdateUser_NotAdmin(t *testing.T) {
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
 	w := httptest.NewRecorder()
-	setAuthTokenWithCredentials(s, req, email, pwd)
+	setAuthTokenWithCredentials(t, s, req, email, pwd)
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
@@ -200,7 +200,7 @@ func TestHTTPServer_UpdateUser(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("PUT", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -254,7 +254,7 @@ func TestHTTPServer_DeleteUser_NotAdmin(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("DELETE", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
-	setAuthTokenWithCredentials(s, req, email, pwd)
+	setAuthTokenWithCredentials(t, s, req, email, pwd)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -280,13 +280,13 @@ func TestHTTPServer_DeleteUser(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(updRequest)
 	req, _ := http.NewRequest("DELETE", v1UserAPI+"/"+response.ID, bytes.NewBuffer(jsonValue))
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	req, _ = http.NewRequest("GET", v1UserAPI+"/"+response.ID, http.NoBody)
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w = httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -294,7 +294,7 @@ func TestHTTPServer_DeleteUser(t *testing.T) {
 
 func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 
@@ -312,7 +312,7 @@ func createUser(t *testing.T, s *HTTPServer, name, email, passwd string) idRespo
 		Password: passwd,
 	})
 	req, _ := http.NewRequest("POST", v1UserAPI, bytes.NewBuffer(jsonValue))
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)

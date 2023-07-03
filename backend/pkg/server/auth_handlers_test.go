@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -73,19 +72,4 @@ func getRefreshToken(s *HTTPServer) string {
 
 	token := []rune(strings.Split(w.Header().Get("Set-Cookie"), ";")[0])
 	return string(token[13:]) // `refreshToken=` - 13
-}
-
-var authenticationToken *auth.AuthenticationToken
-
-func setAdminAuthToken(s *HTTPServer, r *http.Request) {
-	if authenticationToken == nil {
-		token, _ := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
-		authenticationToken = &token
-	}
-	r.Header.Set("Authorization", authenticationToken.Type+" "+authenticationToken.Token)
-}
-
-func setAuthTokenWithCredentials(s *HTTPServer, r *http.Request, email, passwd string) {
-	token, _ := s.authHandler.Authenticate(email, passwd)
-	r.Header.Set("Authorization", token.Type+" "+token.Token)
 }
