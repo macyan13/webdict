@@ -7,6 +7,9 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/macyan13/webdict/backend/pkg/auth"
 	"github.com/macyan13/webdict/backend/pkg/store/inmemory"
+	"github.com/stretchr/testify/assert"
+	"net/http"
+	"testing"
 	"time"
 )
 
@@ -86,4 +89,16 @@ func initTestServer() *HTTPServer {
 	s.buildRoutes()
 	s.populateInitData()
 	return &s
+}
+
+func setAdminAuthToken(t *testing.T, s *HTTPServer, r *http.Request) {
+	token, err := s.authHandler.Authenticate(s.opts.Admin.AdminEmail, s.opts.Admin.AdminPasswd)
+	assert.NoError(t, err)
+	r.Header.Set("Authorization", token.Type+" "+token.Token)
+}
+
+func setAuthTokenWithCredentials(t *testing.T, s *HTTPServer, r *http.Request, email, passwd string) {
+	token, err := s.authHandler.Authenticate(email, passwd)
+	assert.NoError(t, err)
+	r.Header.Set("Authorization", token.Type+" "+token.Token)
 }

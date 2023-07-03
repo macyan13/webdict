@@ -30,7 +30,7 @@ func TestHTTPServer_GetRoles_NotAdmin(t *testing.T) {
 
 	jsonValue, _ := json.Marshal("")
 	req, _ := http.NewRequest("GET", v1RoleAPI, bytes.NewBuffer(jsonValue))
-	setAuthTokenWithCredentials(s, req, email, pwd)
+	setAuthTokenWithCredentials(t, s, req, email, pwd)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -41,7 +41,7 @@ func TestHTTPServer_GetRoles_Authorized(t *testing.T) {
 
 	jsonValue, _ := json.Marshal("")
 	req, _ := http.NewRequest("GET", v1RoleAPI, bytes.NewBuffer(jsonValue))
-	setAdminAuthToken(s, req)
+	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
