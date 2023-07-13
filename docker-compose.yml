@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
   webdict:
@@ -7,14 +7,18 @@ services:
     container_name: "webdict"
     hostname: "webdict"
     restart: always
-    mem_limit: ${APP_MEMORY_LIMIT}
+    depends_on:
+      - mongo
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
     # uncomment to expose directly (no proxy)
     ports:
-      - "4000:${PORT}"
+      - "4000:4000"
 
     environment:
-      - APP_MEMORY_LIMIT=${APP_MEMORY_LIMIT:-512m}
       - AUTH_TTL_AUTH
       - AUTH_TTL_REFRESH
       - AUTH_TTL_COOKIE
@@ -28,3 +32,12 @@ services:
       - MONGO_DB
       - MONGO_HOST
       - MONGO_PORT
+
+  mongo:
+    image: mongo:4.2.3
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}

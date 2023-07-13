@@ -1,6 +1,6 @@
 FROM golang:1.20.4-bullseye as build-backend
 
-ARG SKIP_BACKEND_TEST
+ARG SKIP_BACKEND_TEST=1
 
 ADD backend /build/backend
 WORKDIR /build/backend
@@ -17,12 +17,28 @@ RUN \
     echo "skip backend tests and linter" \
   ; fi
 
-RUN go build -o webdict ./cmd/server
+RUN go build -o app ./cmd/server
 
-FROM golang:1.18-bullseye
+FROM node:19.9.0-alpine AS build-frontend
 
-WORKDIR /srv
+WORKDIR /build/frontend
 
-COPY --from=build-backend /build/backend/webdict /srv/webdict
+COPY ./frontend/package*.json ./frontend/vue.config.js /build/frontend/
+RUN npm install
 
-CMD ["/srv/webdict"]
+COPY ./frontend/src /build/frontend/src
+
+RUN npm run build
+
+FROM golang:1.20.4-bullseye
+
+WORKDIR /srv/webdict
+
+EXPOSE ${PORT}
+
+COPY --from=build-frontend /build/frontend/target/dist /srv/webdict/public
+COPY --from=build-backend /build/backend/app /srv/webdict/app
+
+RUN chown -R root:root /srv
+
+CMD ["/srv/webdict/app"]

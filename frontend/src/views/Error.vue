@@ -15,6 +15,8 @@
 </style>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'error',
   data() {
@@ -24,6 +26,7 @@ export default {
   },
   computed: {
     rotateStyle() {
+      console.log(axios.defaults.baseURL);
       return {
         '-webkit-transform': 'rotate(' + this.rot + 'deg)',
         '-moz-transform': 'rotate(' + this.rot + 'deg)',

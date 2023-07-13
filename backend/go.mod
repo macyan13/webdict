@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/Code-Hex/go-generics-cache v1.2.1
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/uuid v1.3.0

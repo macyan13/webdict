@@ -735,3 +735,21 @@ GET {{host}}
         client.assert(response.body.search("<title>Test Page</title>") !== -1, "Static data from index.html is not correct")
     })
 %}
+
+### Check static data - css is accessible
+GET {{host}}/static/css/test.css
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+%}
+
+### Check static data - js is accessible
+GET {{host}}/static/js/test.js
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+%}
