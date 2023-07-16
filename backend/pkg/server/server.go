@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
@@ -119,8 +120,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	})
 
 	router := gin.Default()
-	// 	"github.com/gin-contrib/cors"
-	// router.Use(cors.Default()) - middleware for CORS support, maybe add later
+	router.Use(cors.Default())
 
 	s := HTTPServer{
 		engine:      router,
@@ -147,7 +147,8 @@ func (s *HTTPServer) Run() error {
 }
 
 func (s *HTTPServer) loadStaticData() {
-	s.engine.LoadHTMLGlob("public/*.html")
+	s.engine.LoadHTMLGlob("./public/*.html")
+	s.engine.Static("/static", "./public/static")
 }
 
 func (s *HTTPServer) populateInitData() {
