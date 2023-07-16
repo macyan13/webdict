@@ -98,7 +98,7 @@ func (h Handler) Middleware() gin.HandlerFunc {
 		claims, err := h.tokener.parseToken(token)
 
 		if err != nil {
-			log.Printf("[Error] Can not parse auth token: %v", err)
+			log.Printf("[INFO] Can not parse auth token: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -106,13 +106,13 @@ func (h Handler) Middleware() gin.HandlerFunc {
 		usr, err := h.userRepo.GetByEmail(claims.Email)
 
 		if err == user.ErrNotFound {
-			log.Printf("[Error] Attempt to authenticate with not existing user and valid token")
+			log.Printf("[ERROR] Attempt to authenticate with not existing user and valid token")
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		if err != nil {
-			log.Printf("[Error] Can not get user from DB: %v", err)
+			log.Printf("[ERROR] Can not get user from DB: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -129,13 +129,13 @@ func (h Handler) AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		usr, err := h.UserFromContext(c)
 		if err != nil {
-			log.Printf("[Error] Admin Middleware: can not get usr data: %v", err)
+			log.Printf("[ERROR] Admin Middleware: can not get usr data: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		if !usr.IsAdmin() {
-			log.Printf("[Error] Admin Middleware: attempt to make admin action not as admin: %v", err)
+			log.Printf("[ERROR] Admin Middleware: attempt to make admin action not as admin: %v", err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

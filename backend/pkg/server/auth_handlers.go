@@ -17,7 +17,7 @@ func (s *HTTPServer) SighIn() gin.HandlerFunc {
 		var request signInRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
-			s.badRequest(c, fmt.Errorf("[Error] Can not parse SighIn request: %v", err))
+			s.badRequest(c, fmt.Errorf("[ERROR] Can not parse SighIn request: %v", err))
 			return
 		}
 
@@ -25,7 +25,7 @@ func (s *HTTPServer) SighIn() gin.HandlerFunc {
 
 		if err != nil {
 			if err != auth.ErrInvalidCredentials {
-				log.Printf("[Error] Can not handle auth request: %v", err)
+				log.Printf("[ERROR] Can not handle auth request: %v", err)
 			}
 			c.JSON(http.StatusUnauthorized, nil)
 			return
@@ -34,7 +34,7 @@ func (s *HTTPServer) SighIn() gin.HandlerFunc {
 		refreshToken, err := s.authHandler.GenerateRefreshToken(request.Email)
 
 		if err != nil {
-			s.unauthorized(c, fmt.Errorf("[Error] Can not generate Refresh token: %v", err))
+			s.unauthorized(c, fmt.Errorf("[ERROR] Can not generate Refresh token: %v", err))
 			return
 		}
 
@@ -61,7 +61,7 @@ func (s *HTTPServer) Refresh() gin.HandlerFunc {
 
 		if err != nil {
 			if err != auth.ErrExpiredRefreshToken {
-				log.Printf("[Error] Can not handle Refresh token request: %v", err)
+				log.Printf("[ERROR] Can not handle Refresh token request: %v", err)
 			}
 			c.JSON(http.StatusUnauthorized, nil)
 			return

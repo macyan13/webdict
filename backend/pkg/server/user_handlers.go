@@ -110,7 +110,7 @@ func (s *HTTPServer) DeleteUser() gin.HandlerFunc {
 			AuthorID: c.Param(userIDParam),
 		})
 		if err != nil {
-			log.Printf("[Error] Can not handle request - %v", err)
+			log.Printf("[ERROR] Can not handle request - %v", err)
 		}
 
 		c.JSON(http.StatusOK, userDeleteResponse{Count: count})

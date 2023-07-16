@@ -41,3 +41,31 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}
+
+  logger:
+    image: umputun/dkll:latest
+    container_name: "dkll-agent"
+    hostname: "dkll-agent"
+    restart: always
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+    environment:
+      - LOG_FILES=true
+      - LOG_SYSLOG=false
+      - EXCLUDE=logger
+      - MAX_FILES=10
+      - MAX_SIZE=10 #MB
+      - MAX_AGE=30 # days
+      - DEBUG=true
+      - APP_UID=0 # you can specify any userid with access to docker.sock or leave 0 to run with root access
+
+    volumes:
+      - ./logs:/srv/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    command: ["/srv/dkll", "agent"]
