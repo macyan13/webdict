@@ -168,11 +168,11 @@ func (s *HTTPServer) unauthorized(c *gin.Context, err error) {
 	frames := runtime.CallersFrames(pc[:n])
 	frame, _ := frames.Next()
 
-	log.Printf("[Error] Can not authorize action: %s:%s: %v", frame.File, frame.Function, err)
+	log.Printf("[ERROR] Can not authorize action: %s:%s: %v", frame.File, frame.Function, err)
 	c.JSON(http.StatusUnauthorized, nil)
 }
 
 func (s *HTTPServer) badRequest(c *gin.Context, err error) {
-	log.Printf("[Error] Can not handle request - %v", err)
+	log.Printf("[ERROR] Can not handle request - %v", err)
 	c.JSON(http.StatusBadRequest, err.Error())
 }
