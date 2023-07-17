@@ -31,6 +31,8 @@ services:
       - GIN_MODE
       - MONGO_DB
       - MONGO_HOST
+      - MONGO_USERNAME
+      - MONGO_PASSWD
       - MONGO_PORT
 
   mongo:
@@ -41,6 +43,21 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}
+
+  mongodb-backup:
+    image: macyan/mongodb-backup:latest
+    container_name: "mongodb-backup"
+    restart: always
+    environment:
+      - MONGO_HOST
+      - MONGO_PORT
+      - MONGO_USERNAME
+      - MONGO_PASSWD
+      - MONGO_DB
+      - CRON_TIME=${MONGO_BACKUP_CRON_TIME:-0 0 * * *}
+      - MAX_BACKUPS=${MONGO_BACKUP_MAX_BACKUPS:-10}
+    volumes:
+      - ./backup:/backup
 
   logger:
     image: umputun/dkll:latest
