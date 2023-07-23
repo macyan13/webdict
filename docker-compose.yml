@@ -15,8 +15,8 @@ services:
           memory: 512m
 
     # uncomment to expose directly (no proxy)
-    ports:
-      - "4000:4000"
+#    ports:
+#      - "4000:4000"
 
     environment:
       - AUTH_TTL_AUTH
@@ -58,6 +58,35 @@ services:
       - MAX_BACKUPS=${MONGO_BACKUP_MAX_BACKUPS:-10}
     volumes:
       - ./backup:/backup
+
+  webserver:
+    image: nginx:1.25
+    depends_on:
+      - webdict
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+#    Need to run origin docker-entrypoint.sh as it processed templates with env variables.
+    command: sh -c 'while :; do sleep 12h & wait $${!}; nginx -s reload; done & /docker-entrypoint.sh nginx -g "daemon off;";'
+    volumes:
+      - ./templates/nginx:/etc/nginx/templates
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+
+    environment:
+      - APP_PORT=${PORT}
+      - SERVER_NAME
+      - LOG_SYSLOG=false
+
+#  docker compose run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d example.org - generate certificate before first run
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
 
   logger:
     image: umputun/dkll:latest
