@@ -148,6 +148,7 @@ func (s *HTTPServer) Run() error {
 
 func (s *HTTPServer) loadStaticData() {
 	s.engine.LoadHTMLGlob("./public/*.html")
+	s.engine.StaticFile("favicon.ico", "./public/favicon.ico")
 	s.engine.Static("/static", "./public/static")
 }
 
