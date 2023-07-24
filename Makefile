@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := help
 .PHONY: *
 
+GITTAG=$(shell git describe --abbrev=0 --tags)
+
 help: ## Display available commands
 	@printf "\033[0;36mAvailable commands:\033[0m\n"
 	@IFS=$$'\n' ; \
@@ -35,3 +37,7 @@ restart: ## Stops ran containers, destroys them and restart
  	docker compose -f compose-dev-backend.yml rm -f ;\
 	docker compose -f compose-dev-backend.yml build  ;\
 	docker compose -f compose-dev-backend.yml up -d
+
+release_latest: ## Creates and pushes imaged to docker hub using the last git tag
+	- docker buildx build --push --platform linux/amd64,linux/arm/v7,linux/arm64 \
+ 		-t macyan/webdict:${GITTAG} -t macyan/webdict:latest .

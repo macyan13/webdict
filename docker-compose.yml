@@ -12,7 +12,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: ${APP_MEMORY_LIMIT}
 
     # uncomment to expose directly (no proxy)
 #    ports:
@@ -43,6 +43,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}
+    deploy:
+      resources:
+        limits:
+          memory: ${MONGO_MEMORY_LIMIT}
+
 
   mongodb-backup:
     image: macyan/mongodb-backup:latest
