@@ -39,6 +39,4 @@ EXPOSE ${PORT}
 COPY --from=build-frontend /build/frontend/target/dist /srv/webdict/public
 COPY --from=build-backend /build/backend/app /srv/webdict/app
 
-RUN chown -R root:root /srv
-
 CMD ["/srv/webdict/app"]
