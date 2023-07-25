@@ -2,7 +2,7 @@ version: "3"
 
 services:
   webdict:
-    build: .
+#    build: .
     image: macyan13/webdict:latest
     container_name: "webdict"
     hostname: "webdict"
