@@ -3,7 +3,7 @@ version: "3"
 services:
   webdict:
 #    build: .
-    image: macyan13/webdict:latest
+    image: macyan/webdict:latest
     container_name: "webdict"
     hostname: "webdict"
     restart: always
@@ -47,7 +47,6 @@ services:
       resources:
         limits:
           memory: ${MONGO_MEMORY_LIMIT}
-
 
   mongodb-backup:
     image: macyan/mongodb-backup:latest

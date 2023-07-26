@@ -24,6 +24,8 @@ FROM node:19.9.0-alpine AS build-frontend
 WORKDIR /build/frontend
 
 COPY ./frontend/package*.json ./frontend/vue.config.js /build/frontend/
+COPY ./frontend/public /build/frontend/public
+
 RUN npm install
 
 COPY ./frontend/src /build/frontend/src
