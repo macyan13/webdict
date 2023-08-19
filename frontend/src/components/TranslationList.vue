@@ -14,7 +14,7 @@
       <tr v-for="translation in translations" :key="translation.id" :id="translation.id">
         <td>{{ translation.source }}</td>
         <td>{{ translation.transcription }}</td>
-        <td>{{ translation.target }}</td>
+        <td><vue-markdown>{{translation.target}}</vue-markdown></td>
         <td>
           <span v-for="tag in translation.tags" :key="tag.id" class="badge badge-primary">{{ tag.name }}</span>
         </td>
