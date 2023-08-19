@@ -46,13 +46,13 @@
                 invalid-feedback="required"
             >
               <div style="display: flex; justify-content: center;">
-                <b-form-input
-                    :required=true
-                    id="target-input"
+                <mavon-editor
                     v-model="target"
                     placeholder="Enter target text..."
-                    style="width: 40%;"
-                ></b-form-input>
+                    language="en"
+                    style="width: 75%;"
+                    :toolbars="markdownOption">
+                </mavon-editor>
               </div>
             </b-form-group>
 
@@ -70,23 +70,6 @@
                     style="width: 75%;"
                     :toolbars="markdownOption">
                 </mavon-editor>
-              </div>
-            </b-form-group>
-
-
-            <b-form-group
-                v-if="id"
-                id="createdAt-group"
-                label="Created:"
-                label-for="createdAt-input"
-            >
-              <div class="d-inline-flex">
-                <b-form-input
-                    :disabled="true"
-                    id="createdAt-input"
-                    v-model="createdAtFormatted"
-                    class="flex-grow-1"
-                ></b-form-input>
               </div>
             </b-form-group>
           </div>
@@ -110,7 +93,7 @@
                     track-by="id"
                     deselectLabel=""
                     placeholder="Pick a language"
-                    style="width: 25%"
+                    style="width: 75%"
                 ></VueMultiselect>
               </div>
             </b-form-group>
@@ -130,20 +113,36 @@
                     label="name"
                     track-by="id"
                     placeholder="Pick a tag"
-                    style="width: 50%"
+                    style="width: 85%"
                 ></VueMultiselect>
               </div>
             </b-form-group>
+
+            <b-form-group
+                v-if="id"
+                id="createdAt-group"
+                label="Created:"
+                label-for="createdAt-input"
+            >
+              <div class="d-inline-flex">
+                <b-form-input
+                    :disabled="true"
+                    id="createdAt-input"
+                    v-model="createdAtFormatted"
+                    class="flex-grow-1"
+                ></b-form-input>
+              </div>
+            </b-form-group>
+
+            <b-button type="submit" variant="primary">
+              {{ buttonLabel }}
+            </b-button>
+            <b-button v-if="id" variant="danger" @click="confirmDelete">
+              Delete
+            </b-button>
           </div>
           <div class="col-md-1"/>
         </div>
-
-        <b-button type="submit" variant="primary">
-          {{ buttonLabel }}
-        </b-button>
-        <b-button v-if="id" variant="danger" @click="confirmDelete">
-          Delete
-        </b-button>
 
         <div v-if="showEditSpinner" class="d-flex justify-content-center m-3">
           <b-spinner variant="primary" label="Spinning"></b-spinner>
