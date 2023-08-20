@@ -149,8 +149,6 @@
         </div>
       </b-form>
 
-      <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
-
       <b-modal v-model="showConfirmationModal" title="Delete Translation?" hide-footer hide-backdrop>
         <p>Are you sure you want to delete this translation?</p>
         <div class="d-flex justify-content-end">
@@ -317,6 +315,12 @@ export default {
       if (!this.lang) {
         this.hasError = true;
         this.errorMessage = "Please select the language";
+        return false;
+      }
+
+      if (!this.target) {
+        this.hasError = true;
+        this.errorMessage = "Please fill the target text";
         return false;
       }
       return true;
