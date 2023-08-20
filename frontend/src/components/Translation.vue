@@ -2,6 +2,7 @@
   <div>
     <b-card :title="title">
       <b-form @submit.prevent="submitForm">
+        <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
         <div class="row">
           <div class="col-md-1"/>
           <div class="col-md-7">
@@ -148,8 +149,6 @@
           <b-spinner variant="primary" label="Spinning"></b-spinner>
         </div>
       </b-form>
-
-      <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
 
       <b-modal v-model="showConfirmationModal" title="Delete Translation?" hide-footer hide-backdrop>
         <p>Are you sure you want to delete this translation?</p>
@@ -319,6 +318,12 @@ export default {
         this.errorMessage = "Please select the language";
         return false;
       }
+
+      if (!this.target) {
+        this.hasError = true;
+        this.errorMessage = "Please fill the target text";
+        return false;
+      }
       return true;
     },
     submitForm() {
@@ -332,8 +337,6 @@ export default {
       let tagIds = this.tags.map((tag) => tag.id);
       method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang.id))
           .then((data) => {
-            // this.$store.dispatch('tag/clear');
-            // router.push({name: 'Home'});
             let id = this.id ? this.id : data.id;
             router.push("/editTranslation/" + id);
           })
