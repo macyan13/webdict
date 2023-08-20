@@ -14,6 +14,7 @@
             last-number
             align="center"
             aria-controls="search-results"
+            @change="search"
         ></b-pagination>
       </div>
 
@@ -138,7 +139,7 @@ export default {
     this.showLoadSpinner = false;
   },
   created() {
-    this.search();
+    this.search(this.currentPage);
   },
   methods: {
     fetchLangsAndInitSearch() {
@@ -153,14 +154,14 @@ export default {
                     } else {
                       this.lang = langs[0];
                     }
-                    this.search();
+                    this.search(this.currentPage);
                   })
                   .catch((error) => {
                     this.hasError = true;
                     this.errorMessage = "Can not get user data from server: " + error;
                   });
             } else {
-              this.search();
+              this.search(this.currentPage);
             }
           })
           .catch(() => {
@@ -169,7 +170,7 @@ export default {
           })
     },
     refreshData() {
-      this.search();
+      this.search(this.currentPage);
 
       if (this.showRandomTranslations) {
         this.fetchRandomTranslations();
@@ -216,7 +217,7 @@ export default {
             this.errorMessage = 'Can not get tags from server :(';
           })
     },
-    search() {
+    search(currentPage) {
       if (!this.lang) {
         this.hasError = true;
         this.errorMessage = 'Please select the language to perform translation search';
@@ -226,7 +227,7 @@ export default {
       this.showLoadSpinner = true;
       let tagIds = this.tags.map(x => x.id);
 
-      TranslationService.search(new SearchParams(tagIds, this.lang.id, this.currentPage, this.pageSize))
+      TranslationService.search(new SearchParams(tagIds, this.lang.id, currentPage, this.pageSize))
           .then(searchResult => {
             this.translations = searchResult.translations;
             this.totalRecords = searchResult.total_records;
