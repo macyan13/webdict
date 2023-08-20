@@ -2,6 +2,7 @@
   <div>
     <b-card :title="title">
       <b-form @submit.prevent="submitForm">
+        <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
         <div class="row">
           <div class="col-md-1"/>
           <div class="col-md-7">
@@ -336,8 +337,6 @@ export default {
       let tagIds = this.tags.map((tag) => tag.id);
       method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang.id))
           .then((data) => {
-            // this.$store.dispatch('tag/clear');
-            // router.push({name: 'Home'});
             let id = this.id ? this.id : data.id;
             router.push("/editTranslation/" + id);
           })
