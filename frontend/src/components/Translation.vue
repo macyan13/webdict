@@ -243,6 +243,14 @@ export default {
       this.buttonLabel = 'Create';
     }
   },
+  watch: {
+    tagOptions: function (newVal) {
+      let lastUsedTags = this.$store.state.tag.lastUsedTranslationTagIds;
+      if (!this.id && newVal.length > 0 && this.tags.length === 0 && lastUsedTags.length > 0) {
+        this.tags = newVal.filter((tag) => lastUsedTags.includes(tag.id));
+      }
+    },
+  },
   methods: {
     fetchTags() {
       this.$store.dispatch('tag/fetchAll')
@@ -335,6 +343,7 @@ export default {
       this.showEditSpinner = true;
       let method = this.id ? TranslationService.update : TranslationService.create;
       let tagIds = this.tags.map((tag) => tag.id);
+      this.$store.dispatch('tag/updateLastUsedTranslationTagIds', tagIds);
       method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang.id))
           .then((data) => {
             let id = this.id ? this.id : data.id;

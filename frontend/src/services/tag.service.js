@@ -1,6 +1,8 @@
 import axios from 'axios';
 import authHeader from "@/services/auth-header";
 
+const LAST_USED_TRANSLATION_TAGS_LOCAL_STORAGE_KEY = 'last_used_translation_tags';
+
 class TagService {
     create(tag) {
         return new Promise((resolve, reject) => {
@@ -68,6 +70,12 @@ class TagService {
                     reject(error);
                 });
         });
+    }
+    getLastUsedTranslationTagIds() {
+        return JSON.parse(localStorage.getItem(LAST_USED_TRANSLATION_TAGS_LOCAL_STORAGE_KEY));
+    }
+    updateLastUsedTranslationTagIds(tagIds) {
+        localStorage.setItem(LAST_USED_TRANSLATION_TAGS_LOCAL_STORAGE_KEY, JSON.stringify(tagIds));
     }
 }
 
