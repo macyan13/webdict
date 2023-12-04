@@ -3,6 +3,7 @@
     <div v-if="showLoadSpinner" class="d-flex justify-content-center m-3">
       <b-spinner variant="primary" label="Spinning"></b-spinner>
     </div>
+    <flash-message v-if="showFlashMessage" :message="flashMessage"/>
     <div class="row">
       <div class="col-md-10">
         <!-- Translation search result -->
@@ -105,12 +106,15 @@ import TranslationService from "@/services/translation.service";
 import SearchParams from "@/models/searchParams";
 import RandomParams from "@/models/randomParams";
 import TranslationList from "@/components/TranslationList.vue";
+import FlashMessage from "@/components/FlashMessage.vue";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'translationSearch',
   components: {
     TranslationList,
     VueMultiselect,
+    FlashMessage,
   },
   data() {
     return {
@@ -129,7 +133,9 @@ export default {
       showRandomTranslations: false,
       randomTranslations: [],
       randomLimit: 10,
-      randomLimitOptions: [10, 15, 20]
+      randomLimitOptions: [10, 15, 20],
+      flashMessage: '',
+      showFlashMessage: false,
     };
   },
   mounted() {
@@ -137,6 +143,10 @@ export default {
     this.fetchTags();
     this.fetchLangsAndInitSearch();
     this.showLoadSpinner = false;
+
+    if (this.$store.getters["translation/entityStatus"] !== null) {
+      this.triggerFlashMessage();
+    }
   },
   created() {
     this.search(this.currentPage);
@@ -216,6 +226,18 @@ export default {
             this.hasError = true;
             this.errorMessage = 'Can not get tags from server :(';
           })
+    },
+    triggerFlashMessage() {
+      let status = this.$store.getters["translation/entityStatus"];
+      if (status == null) {
+        return;
+      }
+      this.flashMessage = EntityStatusService.getMessageByStatus("Translation", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('translation/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
     },
     search(currentPage) {
       if (!this.lang) {

@@ -55,6 +55,7 @@
 import TagService from "@/services/tag.service";
 import Tag from "@/models/tag";
 import router from "@/router";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'Tag',
@@ -104,6 +105,7 @@ export default {
       this.showDeleteSpinner = true;
       TagService.delete(this.id)
           .then(() => {
+            this.$store.dispatch('tag/setEntityStatus',  EntityStatusService.deleted());
             this.$store.dispatch('tag/clear');
             router.push({name: 'Tags'});
           })
@@ -122,6 +124,7 @@ export default {
       method(new Tag(this.name, this.id))
           .then(() => {
             this.$store.dispatch('tag/clear');
+            this.$store.dispatch('tag/setEntityStatus',  this.id ? EntityStatusService.updated() : EntityStatusService.created());
             router.push({name: 'Tags'});
           })
           .catch((error) => {

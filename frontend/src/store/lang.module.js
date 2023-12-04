@@ -4,6 +4,7 @@ export default {
     namespaced: true,
     state: {
         langs: [],
+        entityStatus: null,
     },
     actions: {
         fetchAll({state, commit}) {
@@ -24,7 +25,20 @@ export default {
         clear({commit}) {
             commit('cleanLangs');
             return Promise.resolve();
+        },
+        setEntityStatus({commit}, status) {
+            commit('setEntityStatus', status);
+            return Promise.resolve();
+        },
+        clearEntityStatus({commit}) {
+            commit('setEntityStatus', null);
+            return Promise.resolve();
         }
+    },
+    getters: {
+        entityStatus: function (state) {
+            return state.entityStatus;
+        },
     },
     mutations: {
         allLangSuccess(state, langs) {
@@ -32,6 +46,9 @@ export default {
         },
         cleanLangs(state) {
             state.langs = [];
+        },
+        setEntityStatus(state, status) {
+            state.entityStatus = status;
         },
     },
 };

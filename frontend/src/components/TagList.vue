@@ -1,5 +1,6 @@
 <template>
   <b-card :title="title">
+    <flash-message v-if="showFlashMessage" :message="flashMessage"/>
     <div class="tag-list" style="display: flex; justify-content: center;">
       <b-list-group style="width: 40%;">
         <b-list-group-item v-for="tag in tags" :key="tag.id">
@@ -38,9 +39,14 @@
 <script>
 
 import TagService from "@/services/tag.service";
+import FlashMessage from "@/components/FlashMessage.vue";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'TagList',
+  components: {
+    FlashMessage
+  },
   props: {
     title: {
       type: String,
@@ -58,11 +64,13 @@ export default {
       idToDelete: null,
       showDeleteSpinner: false,
       showLoadSpinner: true,
+      flashMessage: '',
+      showFlashMessage: false,
     }
   },
   mounted() {
     this.fetchTags();
-    this.showLoadSpinner = false;
+    this.triggerFlashMessage();
   },
   methods: {
     editTag(id) {
@@ -76,6 +84,8 @@ export default {
       this.showDeleteSpinner = true;
       TagService.delete(this.idToDelete)
           .then(() => {
+            this.$store.dispatch('tag/setEntityStatus', EntityStatusService.deleted())
+            this.triggerFlashMessage();
             this.$store.dispatch('tag/clear');
             this.fetchTags();
           })
@@ -93,13 +103,30 @@ export default {
       this.showConfirmationModal = false;
       this.idToDelete = null
     },
+    triggerFlashMessage() {
+      let status = this.$store.getters["tag/entityStatus"];
+      if (status === null) {
+        return;
+      }
+
+      this.flashMessage = EntityStatusService.getMessageByStatus("Tag", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('tag/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
+    },
     fetchTags() {
+      this.showLoadSpinner = true;
       this.$store.dispatch('tag/fetchAll')
           .then((tags) => this.tags = tags)
           .catch(() => {
             this.hasError = true
             this.errorMessage = 'Can not get tags from server :('
           })
+          .finally(() => {
+            this.showLoadSpinner = false;
+          });
     }
   }
 };

@@ -4,6 +4,7 @@ export default {
     namespaced: true,
     state: {
         users: [],
+        entityStatus: null,
     },
     actions: {
         fetchAll({state, commit}) {
@@ -24,7 +25,20 @@ export default {
         clear({commit}) {
             commit('cleanUsers');
             return Promise.resolve();
+        },
+        setEntityStatus({commit}, status) {
+            commit('setEntityStatus', status);
+            return Promise.resolve();
+        },
+        clearEntityStatus({commit}) {
+            commit('setEntityStatus', null);
+            return Promise.resolve();
         }
+    },
+    getters: {
+        entityStatus: function (state) {
+            return state.entityStatus;
+        },
     },
     mutations: {
         allUsersSuccess(state, users) {
@@ -32,6 +46,9 @@ export default {
         },
         cleanUsers(state) {
             state.users = [];
+        },
+        setEntityStatus(state, status) {
+            state.entityStatus = status;
         },
     },
 };

@@ -1,5 +1,6 @@
 <template>
   <b-card :title="title">
+    <flash-message v-if="showFlashMessage" :message="flashMessage"/>
     <div class="lang-list" style="display: flex; justify-content: center;">
       <b-list-group style="width: 40%;">
         <b-list-group-item v-for="lang in langs" :key="lang.id">
@@ -38,9 +39,15 @@
 <script>
 
 import LangService from "@/services/lang.service";
+import FlashMessage from "@/components/FlashMessage.vue";
+import EntityStatusService from "@/services/entity-status.service";
+import EntityStatus from "@/services/entity-status.service";
 
 export default {
   name: 'LangList',
+  components: {
+    FlashMessage
+  },
   props: {
     title: {
       type: String,
@@ -58,10 +65,13 @@ export default {
       idToDelete: null,
       showDeleteSpinner: false,
       showLoadSpinner: true,
+      flashMessage: '',
+      showFlashMessage: false,
     }
   },
   mounted() {
     this.fetchLangs();
+    this.triggerFlashMessage();
   },
   methods: {
     editLang(id) {
@@ -75,6 +85,8 @@ export default {
       this.showDeleteSpinner = true;
       LangService.delete(this.idToDelete)
           .then(() => {
+            this.$store.dispatch('lang/setEntityStatus', EntityStatus.deleted())
+            this.triggerFlashMessage();
             this.$store.dispatch('lang/clear');
             this.fetchLangs();
           })
@@ -91,6 +103,19 @@ export default {
     deleteCancel() {
       this.showConfirmationModal = false;
       this.idToDelete = null
+    },
+    triggerFlashMessage() {
+      let status = this.$store.getters["lang/entityStatus"];
+      if (status === null) {
+        return;
+      }
+
+      this.flashMessage = EntityStatusService.getMessageByStatus("Language", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('lang/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
     },
     fetchLangs() {
       this.showLoadSpinner = true;
