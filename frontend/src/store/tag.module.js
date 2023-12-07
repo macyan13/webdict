@@ -7,6 +7,7 @@ export default {
     state: {
         tags: [],
         lastUsedTranslationTagIds: lastUsedTranslationTagIds ? lastUsedTranslationTagIds : [],
+        entityStatus: null,
     },
     actions: {
         fetchAll({state, commit}) {
@@ -31,7 +32,23 @@ export default {
         updateLastUsedTranslationTagIds({commit}, tagIds) {
             commit('updateLastUsedTranslationTagIds', tagIds);
             return Promise.resolve();
+        },
+        setEntityStatus({commit}, status) {
+            commit('setEntityStatus', status);
+            return Promise.resolve();
+        },
+        clearEntityStatus({commit}) {
+            commit('setEntityStatus', null);
+            return Promise.resolve();
         }
+    },
+    getters: {
+        lastUsedTranslationTagIds: function (state) {
+            return state.lastUsedTranslationTagIds;
+        },
+        entityStatus: function (state) {
+            return state.entityStatus;
+        },
     },
     mutations: {
         allTagsSuccess(state, tags) {
@@ -43,11 +60,9 @@ export default {
         updateLastUsedTranslationTagIds(state, tagIds) {
             state.lastUsedTranslationTagIds = tagIds;
             TagService.updateLastUsedTranslationTagIds(tagIds);
-        }
-    },
-    getters: {
-        lastUsedTranslationTagIds: function (state) {
-            return state.lastUsedTranslationTagIds;
         },
-    }
+        setEntityStatus(state, status) {
+            state.entityStatus = status;
+        },
+    },
 };

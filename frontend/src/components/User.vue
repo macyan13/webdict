@@ -107,7 +107,7 @@
         </div>
       </b-modal>
       <b-modal v-model="showDeleteResults" title="User deletion results" hide-footer hide-backdrop>
-        <p>{{deletedCount}} records related to user have been deleted.</p>
+        <p>User {{ deletedCount > 1 ? "and " + deletedCount -1 + "records related to user have been deleted." : "has been deleted."}}</p>
         <div class="d-flex justify-content-end">
           <b-button variant="success" class="mr-2" @click="deleteResultsClose" @close="deleteResultsClose">
             Ok
@@ -127,6 +127,7 @@ import UserService from "@/services/user.service";
 import User from "@/models/user";
 import router from "@/router";
 import VueMultiselect from 'vue-multiselect'
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'User',
@@ -223,6 +224,7 @@ export default {
       method(new User(this.id, this.name, this.email, this.password, this.role.id))
           .then(() => {
             this.$store.dispatch('user/clear');
+            this.$store.dispatch('user/setEntityStatus', this.id ? EntityStatusService.updated() : EntityStatusService.created());
             router.push({name: 'Users'});
           })
           .catch((error) => {

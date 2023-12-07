@@ -55,6 +55,7 @@
 import LangService from "@/services/lang.service";
 import router from "@/router";
 import Lang from "@/models/lang";
+import EntityStatus from "@/services/entity-status.service";
 
 export default {
   name: 'Lang',
@@ -105,6 +106,7 @@ export default {
       LangService.delete(this.id)
           .then(() => {
             this.$store.dispatch('lang/clear');
+            this.$store.dispatch('lang/setEntityStatus', EntityStatus.deleted())
             router.push({name: 'Langs'});
           })
           .catch((error) => {
@@ -122,6 +124,7 @@ export default {
       method(new Lang(this.name, this.id))
           .then(() => {
             this.$store.dispatch('lang/clear');
+            this.$store.dispatch('lang/setEntityStatus',  this.id ? EntityStatus.updated() : EntityStatus.created());
             router.push({name: 'Langs'});
           })
           .catch((error) => {

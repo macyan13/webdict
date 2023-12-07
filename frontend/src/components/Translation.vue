@@ -2,7 +2,8 @@
   <div>
     <b-card :title="title">
       <b-form @submit.prevent="submitForm">
-        <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
+        <div v-if="hasError" style="color: red;">{{ errorMessage }}</div>
+        <flash-message v-if="showFlashMessage" :message="flashMessage"/>
         <div class="row">
           <div class="col-md-1"/>
           <div class="col-md-7">
@@ -14,13 +15,13 @@
                 invalid-feedback="required"
             >
               <div style="display: flex; justify-content: center;">
-                  <b-form-input
-                      :required=true
-                      id="source-input"
-                      v-model="source"
-                      placeholder="Enter source text..."
-                      style="width: 40%;"
-                  ></b-form-input>
+                <b-form-input
+                    :required=true
+                    id="source-input"
+                    v-model="source"
+                    placeholder="Enter source text..."
+                    style="width: 40%;"
+                ></b-form-input>
               </div>
             </b-form-group>
 
@@ -176,13 +177,16 @@ import TranslationService from "@/services/translation.service";
 import Translation from "@/models/translation";
 import router from "@/router";
 import VueMultiselect from 'vue-multiselect'
-import { mavonEditor } from 'mavon-editor'
+import {mavonEditor} from 'mavon-editor'
+import FlashMessage from "@/components/FlashMessage";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'Translation',
   components: {
     VueMultiselect,
-    mavonEditor
+    mavonEditor,
+    FlashMessage
   },
   props: {
     id: {
@@ -209,6 +213,8 @@ export default {
       createdAtFormatted: null,
       hasError: false,
       errorMessage: '',
+      flashMessage: '',
+      showFlashMessage: false,
       markdownOption: {
         bold: true,
         italic: true,
@@ -242,10 +248,12 @@ export default {
       this.title = 'Create New Translation';
       this.buttonLabel = 'Create';
     }
+
+    this.triggerFlashMessage();
   },
   watch: {
     tagOptions: function (newVal) {
-      let lastUsedTags = this.$store.state.tag.lastUsedTranslationTagIds;
+      let lastUsedTags = this.$store.getters["tag/lastUsedTranslationTagIds"];
       if (!this.id && newVal.length > 0 && this.tags.length === 0 && lastUsedTags.length > 0) {
         this.tags = newVal.filter((tag) => lastUsedTags.includes(tag.id));
       }
@@ -309,6 +317,7 @@ export default {
       this.showDeleteSpinner = true;
       TranslationService.delete(this.id)
           .then(() => {
+            this.$store.dispatch('translation/setEntityStatus', EntityStatusService.deleted());
             router.push({name: 'Home'});
           })
           .catch((error) => {
@@ -334,6 +343,18 @@ export default {
       }
       return true;
     },
+    triggerFlashMessage() {
+      let status = this.$store.getters["translation/entityStatus"];
+      if (status == null) {
+        return;
+      }
+      this.flashMessage = EntityStatusService.getMessageByStatus("Translation", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('translation/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
+    },
     submitForm() {
       this.hasError = false;
       if (!this.validate()) {
@@ -346,8 +367,13 @@ export default {
       this.$store.dispatch('tag/updateLastUsedTranslationTagIds', tagIds);
       method(new Translation(this.id, this.source, this.transcription, this.target, this.example, tagIds, this.lang.id))
           .then((data) => {
-            let id = this.id ? this.id : data.id;
-            router.push("/editTranslation/" + id);
+            if (!this.id) {
+              this.$store.dispatch('translation/setEntityStatus', EntityStatusService.created());
+              router.push("/editTranslation/" + data.id);
+            } else {
+              this.$store.dispatch('translation/setEntityStatus', EntityStatusService.updated());
+              this.triggerFlashMessage();
+            }
           })
           .catch((error) => {
             console.log(error);
