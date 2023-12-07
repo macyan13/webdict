@@ -1,5 +1,6 @@
 <template>
   <b-card title="Created Users">
+    <flash-message v-if="showFlashMessage" :message="flashMessage"/>
     <div class="lang-list" style="display: flex; justify-content: center;">
       <table class="table" id="users" style="width: 75%;">
         <thead>
@@ -44,7 +45,7 @@
       </div>
     </b-modal>
     <b-modal v-model="showDeleteResults" title="User deletion results" hide-footer hide-backdrop>
-      <p>{{deletedCount}} records related to user have been deleted.</p>
+      <p>User {{ deletedCount > 1 ? "and " + deletedCount -1 + "records related to user have been deleted." : "has been deleted."}}</p>
       <div class="d-flex justify-content-end">
         <b-button variant="success" class="mr-2" @click="deleteResultsClose" @close="deleteResultsClose">
           Ok
@@ -59,9 +60,14 @@
 <script>
 
 import UserService from "@/services/user.service";
+import FlashMessage from "@/components/FlashMessage.vue";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'UserList',
+  components: {
+    FlashMessage
+  },
   data() {
     return {
       users: [],
@@ -73,10 +79,13 @@ export default {
       showLoadSpinner: true,
       showDeleteResults: false,
       deletedCount: 0,
+      flashMessage: '',
+      showFlashMessage: false,
     }
   },
   mounted() {
     this.fetchUsers();
+    this.triggerFlashMessage();
   },
   methods: {
     editUser(id) {
@@ -112,6 +121,19 @@ export default {
     deleteResultsClose() {
       this.showDeleteResults = false;
       this.deletedCount = 0;
+    },
+    triggerFlashMessage() {
+      let status = this.$store.getters["user/entityStatus"];
+      if (status === null) {
+        return;
+      }
+
+      this.flashMessage = EntityStatusService.getMessageByStatus("User", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('user/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
     },
     fetchUsers() {
       this.showLoadSpinner = true;

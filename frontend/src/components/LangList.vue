@@ -41,7 +41,6 @@
 import LangService from "@/services/lang.service";
 import FlashMessage from "@/components/FlashMessage.vue";
 import EntityStatusService from "@/services/entity-status.service";
-import EntityStatus from "@/services/entity-status.service";
 
 export default {
   name: 'LangList',
@@ -85,7 +84,7 @@ export default {
       this.showDeleteSpinner = true;
       LangService.delete(this.idToDelete)
           .then(() => {
-            this.$store.dispatch('lang/setEntityStatus', EntityStatus.deleted())
+            this.$store.dispatch('lang/setEntityStatus', EntityStatusService.deleted())
             this.triggerFlashMessage();
             this.$store.dispatch('lang/clear');
             this.fetchLangs();

@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-card title="Edit Profile">
+      <flash-message v-if="showFlashMessage" :message="flashMessage"/>
       <b-form @submit.prevent="submitForm">
         <b-form-group
             id="name-group"
@@ -120,13 +121,15 @@
 <script>
 import VueMultiselect from 'vue-multiselect'
 import ProfileService from "@/services/profile.service";
-import router from "@/router";
 import Profile from "@/models/profile";
+import FlashMessage from "@/components/FlashMessage.vue";
+import EntityStatusService from "@/services/entity-status.service";
 
 export default {
   name: 'Profile',
   components: {
-    VueMultiselect
+    VueMultiselect,
+    FlashMessage
   },
   data() {
     return {
@@ -141,6 +144,8 @@ export default {
       errorMessage: '',
       langOptions: [],
       defaultLang: null,
+      flashMessage: '',
+      showFlashMessage: false,
     }
   },
   mounted() {
@@ -197,6 +202,19 @@ export default {
       }
       return true;
     },
+    triggerFlashMessage() {
+      let status = this.$store.getters["profile/entityStatus"];
+      if (status === null) {
+        return;
+      }
+
+      this.flashMessage = EntityStatusService.getMessageByStatus("Profile", status);
+      this.showFlashMessage = true;
+      this.$store.dispatch('profile/clearEntityStatus');
+      setTimeout(() => {
+        this.showFlashMessage = false;
+      }, 5000);
+    },
     submitForm() {
       this.hasError = false;
       if (!this.validate()) {
@@ -207,8 +225,9 @@ export default {
       let languageId = this.defaultLang ? this.defaultLang.id : null;
       ProfileService.update(new Profile(this.id, this.name, this.email, this.currentPassword, this.newPassword, languageId))
           .then(() => {
+            this.$store.dispatch('profile/setEntityStatus', EntityStatusService.updated());
+            this.triggerFlashMessage();
             this.$store.dispatch('profile/clear');
-            router.push({name: 'Home'});
           })
           .catch((error) => {
             this.hasError = true;

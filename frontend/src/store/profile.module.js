@@ -4,6 +4,7 @@ export default {
     namespaced: true,
     state: {
         profile: null,
+        entityStatus: null,
     },
     actions: {
         fetchProfile({state, commit}) {
@@ -24,6 +25,14 @@ export default {
         clear({commit}) {
             commit('clearProfile');
             return Promise.resolve();
+        },
+        setEntityStatus({commit}, status) {
+            commit('setEntityStatus', status);
+            return Promise.resolve();
+        },
+        clearEntityStatus({commit}) {
+            commit('setEntityStatus', null);
+            return Promise.resolve();
         }
     },
     mutations: {
@@ -33,10 +42,22 @@ export default {
         clearProfile(state) {
             state.profile = null;
         },
+        allUsersSuccess(state, users) {
+            state.users = users;
+        },
+        cleanUsers(state) {
+            state.users = [];
+        },
+        setEntityStatus(state, status) {
+            state.entityStatus = status;
+        },
     },
     getters: {
         isAdmin: function (state) {
             return state.profile && state.profile.role.is_admin;
+        },
+        entityStatus: function (state) {
+            return state.entityStatus;
         },
     }
 };
