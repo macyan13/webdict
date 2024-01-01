@@ -318,6 +318,7 @@ export default {
       TranslationService.delete(this.id)
           .then(() => {
             this.$store.dispatch('translation/setEntityStatus', EntityStatusService.deleted());
+            this.$store.dispatch('translationSearch/resetTranslations');
             router.push({name: 'Home'});
           })
           .catch((error) => {
@@ -374,6 +375,7 @@ export default {
               this.$store.dispatch('translation/setEntityStatus', EntityStatusService.updated());
               this.triggerFlashMessage();
             }
+            this.$store.dispatch('translationSearch/resetTranslations');
           })
           .catch((error) => {
             console.log(error);

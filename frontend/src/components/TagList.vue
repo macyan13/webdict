@@ -87,6 +87,7 @@ export default {
             this.$store.dispatch('tag/setEntityStatus', EntityStatusService.deleted())
             this.triggerFlashMessage();
             this.$store.dispatch('tag/clear');
+            this.$store.dispatch('translationSearch/resetTags');
             this.fetchTags();
           })
           .catch((error) => {
