@@ -138,49 +138,61 @@ export default {
       showFlashMessage: false,
     };
   },
-  mounted() {
+  async mounted() {
     this.showLoadSpinner = true;
-    this.fetchTags();
-    this.fetchLangsAndInitSearch();
+    await this.fetchTags();
+    await this.fetchLangs();
+    await this.initLang();
+    this.initSearchState();
+    this.initSearch();
     this.showLoadSpinner = false;
 
     if (this.$store.getters["translation/entityStatus"] !== null) {
       this.triggerFlashMessage();
     }
   },
-  created() {
-    this.search(this.currentPage);
-  },
   methods: {
-    fetchLangsAndInitSearch() {
-      this.$store.dispatch('lang/fetchAll')
-          .then((langs) =>{
+    fetchLangs() {
+      return this.$store.dispatch('lang/fetchAll')
+          .then((langs) => {
             this.langOptions = langs;
-            if (langs.length > 0) {
-              this.$store.dispatch('profile/fetchProfile')
-                  .then((profile) => {
-                    if (profile.default_lang && profile.default_lang.id) {
-                      this.lang = profile.default_lang;
-                    } else {
-                      this.lang = langs[0];
-                    }
-                    this.search(this.currentPage);
-                  })
-                  .catch((error) => {
-                    this.hasError = true;
-                    this.errorMessage = "Can not get user data from server: " + error;
-                  });
-            } else {
-              this.search(this.currentPage);
-            }
           })
           .catch(() => {
             this.hasError = true;
             this.errorMessage = 'Can not get languages from server :(';
           })
     },
+    initSearchState() {
+      this.pageSize = this.$store.getters["translationSearch/getPageSize"];
+      this.totalRecords = this.$store.getters["translationSearch/getTotalRecords"];
+      this.currentPage = this.$store.getters["translationSearch/getCurrentPage"];
+      this.tags = this.$store.getters["translationSearch/getTags"];
+      this.translations = this.$store.getters["translationSearch/getTranslations"];
+    },
+    initSearch() {
+      if (this.lang && this.translations.length === 0) {
+        this.search();
+      }
+    },
+    async initLang() {
+      if (this.langOptions.length > 0) {
+        return this.$store.dispatch('profile/fetchProfile')
+            .then((profile) => {
+              if (profile.default_lang && profile.default_lang.id) {
+                this.lang = profile.default_lang;
+              } else {
+                this.lang = this.langOptions[0];
+              }
+            })
+            .catch((error) => {
+              this.hasError = true;
+              this.errorMessage = "Can not get user data from server: " + error;
+            });
+      }
+      return Promise.resolve();
+    },
     refreshData() {
-      this.search(this.currentPage);
+      this.search();
 
       if (this.showRandomTranslations) {
         this.fetchRandomTranslations();
@@ -220,7 +232,7 @@ export default {
           });
     },
     fetchTags() {
-      this.$store.dispatch('tag/fetchAll')
+      return this.$store.dispatch('tag/fetchAll')
           .then((tags) => this.tagOptions = tags)
           .catch(() => {
             this.hasError = true;
@@ -239,7 +251,14 @@ export default {
         this.showFlashMessage = false;
       }, 5000);
     },
-    search(currentPage) {
+    commitSearchState() {
+      this.$store.dispatch('translationSearch/setPageSize', this.pageSize);
+      this.$store.dispatch('translationSearch/setTotalRecords', this.totalRecords);
+      this.$store.dispatch('translationSearch/setCurrentPage', this.currentPage);
+      this.$store.dispatch('translationSearch/setTranslations', this.translations);
+      this.$store.dispatch('translationSearch/setTags', this.tags);
+    },
+    search() {
       if (!this.lang) {
         this.hasError = true;
         this.errorMessage = 'Please select the language to perform translation search';
@@ -249,11 +268,12 @@ export default {
       this.showLoadSpinner = true;
       let tagIds = this.tags.map(x => x.id);
 
-      TranslationService.search(new SearchParams(tagIds, this.lang.id, currentPage, this.pageSize))
+      TranslationService.search(new SearchParams(tagIds, this.lang.id, this.$store.getters["translationSearch/getCurrentPage"], this.pageSize))
           .then(searchResult => {
             this.translations = searchResult.translations;
             this.totalRecords = searchResult.total_records;
             this.hasError = false;
+            this.commitSearchState();
           })
           .catch((error) => {
             this.hasError = true;
