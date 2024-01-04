@@ -4,8 +4,7 @@ run:
     format: tab
   skip-dirs:
     - vendor
-  build-tags:
-    - codeanalysis
+    - pkg/store/inmemory
 
 linters-settings:
   govet:

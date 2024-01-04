@@ -1,5 +1,3 @@
-// !codeanalysis
-
 package inmemory
 
 import (
