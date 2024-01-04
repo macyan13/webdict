@@ -107,8 +107,8 @@ export default {
           .then(() => {
             this.$store.dispatch('tag/setEntityStatus',  EntityStatusService.deleted());
             this.$store.dispatch('tag/clear');
-            this.$store.dispatch('translationSearch/resetTags');
-            router.push({name: 'Tags'});
+            this.$store.dispatch('translationHome/resetTags');
+            this.$router.push({name: 'Tags'});
           })
           .catch((error) => {
             this.hasError = true;

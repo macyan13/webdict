@@ -57,7 +57,7 @@ class TranslationService {
     search(SearchParams) {
         return new Promise((resolve, reject) => {
             axios
-                .get('/v1/api/translations/last', {headers: authHeader(), params: SearchParams})
+                .get('/v1/api/translations', {headers: authHeader(), params: SearchParams})
                 .then(response => {
                     resolve(response.data);
                 })

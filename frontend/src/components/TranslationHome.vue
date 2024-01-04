@@ -6,31 +6,6 @@
     <flash-message v-if="showFlashMessage" :message="flashMessage"/>
     <div class="row">
       <div class="col-md-10">
-        <b-form-group
-            id="search-keyword-group"
-            label="Search keyword:"
-            label-for="source-input"
-            :state="!!source || !!target"
-            invalid-feedback="required"
-        >
-          <div style="display: flex; justify-content: center;">
-            <b-form-input
-                id="source-input"
-                v-model="source"
-                :disabled="target.length > 0"
-                placeholder="Enter a part of source text..."
-                style="width: 40%;"
-            ></b-form-input>
-            <span></span>
-            <b-form-input
-                id="target-input"
-                v-model="target"
-                :disabled="source.length > 0"
-                placeholder="Enter a part of target text..."
-                style="width: 40%;"
-            ></b-form-input>
-          </div>
-        </b-form-group>
         <!-- Translation search result -->
         <translation-list :translations="translations" @onDelete="refreshData"></translation-list>
         <b-pagination
@@ -53,16 +28,33 @@
         >
           <div style="display: flex; justify-content: center;">
             <VueMultiselect
-                :preselect-first="true"
-                :allow-empty="false"
-                :options="langOptions"
                 v-model="lang"
+                :allow-empty="false"
                 :multiple="false"
+                :options="langOptions"
+                :preselect-first="true"
                 :show-labels="false"
                 label="name"
-                track-by="id"
-                deselectLabel=""
                 placeholder="Pick a language"
+                track-by="id"
+            ></VueMultiselect>
+          </div>
+        </b-form-group>
+
+        <b-form-group
+            id="tags-group"
+            label="Tags:"
+        >
+          <div style="display: flex; justify-content: center;">
+            <VueMultiselect
+                v-model="tags"
+                :max="5"
+                :multiple="true"
+                :options="tagOptions"
+                :show-labels="false"
+                label="name"
+                placeholder="Pick a tag"
+                track-by="id"
             ></VueMultiselect>
           </div>
         </b-form-group>
@@ -79,7 +71,30 @@
         </b-button>
       </div>
     </div>
-    <div v-if="hasError" style="color: red;">{{ errorMessage }}</div>
+    <div class="mt-5">
+      <b-button block variant="info" @click="onRandomTranslationsClick">Show random translations</b-button>
+    </div>
+    <div class="row">
+      <div class="col-md-10">
+        <div v-if="showRandomTranslations && lang">
+          <translation-list :translations="randomTranslations" @onDelete="refreshData"></translation-list>
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div v-if="showRandomTranslations && lang">
+          <b-form-group
+              id="page-size-group"
+              label="Random items amount:"
+              label-for="page-input"
+          >
+            <b-form-select v-model="randomLimit" :options="randomLimitOptions"></b-form-select>
+          </b-form-group>
+          <b-button variant="primary" @click="fetchRandomTranslations">Refresh</b-button>
+        </div>
+      </div>
+    </div>
+    <div v-if="hasError" style="color: red;">{{errorMessage}}</div>
   </div>
 </template>
 
@@ -89,12 +104,13 @@
 import VueMultiselect from 'vue-multiselect'
 import TranslationService from "@/services/translation.service";
 import SearchParams from "@/models/searchParams";
+import RandomParams from "@/models/randomParams";
 import TranslationList from "@/components/TranslationList.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import EntityStatusService from "@/services/entity-status.service";
 
 export default {
-  name: 'translationSearch',
+  name: 'translationHome',
   components: {
     TranslationList,
     VueMultiselect,
@@ -105,8 +121,8 @@ export default {
       lang: null,
       langOptions: [],
       translations: [],
-      source: '',
-      target: '',
+      tags: [],
+      tagOptions: [],
       currentPage: 1,
       pageSize: 20,
       totalRecords: null,
@@ -114,15 +130,21 @@ export default {
       errorMessage: '',
       showLoadSpinner: false,
       pageSizeOptions: [20, 30, 50, 100],
+      showRandomTranslations: false,
+      randomTranslations: [],
+      randomLimit: 10,
+      randomLimitOptions: [10, 15, 20],
       flashMessage: '',
       showFlashMessage: false,
     };
   },
   async mounted() {
     this.showLoadSpinner = true;
+    await this.fetchTags();
     await this.fetchLangs();
     await this.initLang();
     this.initSearchState();
+    this.initSearch();
     this.showLoadSpinner = false;
 
     if (this.$store.getters["translation/entityStatus"] !== null) {
@@ -141,14 +163,17 @@ export default {
           })
     },
     initSearchState() {
-      this.pageSize = this.$store.getters["translationSearch/getPageSize"];
-      this.totalRecords = this.$store.getters["translationSearch/getTotalRecords"];
-      this.currentPage = this.$store.getters["translationSearch/getCurrentPage"];
-      this.translations = this.$store.getters["translationSearch/getTranslations"];
-      this.target = this.$store.getters["translationSearch/getTarget"];
-      this.source = this.$store.getters["translationSearch/getSource"];
+      this.pageSize = this.$store.getters["translationHome/getPageSize"];
+      this.totalRecords = this.$store.getters["translationHome/getTotalRecords"];
+      this.currentPage = this.$store.getters["translationHome/getCurrentPage"];
+      this.tags = this.$store.getters["translationHome/getTags"];
+      this.translations = this.$store.getters["translationHome/getTranslations"];
     },
-
+    initSearch() {
+      if (this.lang && this.translations.length === 0) {
+        this.search();
+      }
+    },
     async initLang() {
       if (this.langOptions.length > 0) {
         return this.$store.dispatch('profile/fetchProfile')
@@ -168,6 +193,51 @@ export default {
     },
     refreshData() {
       this.search();
+
+      if (this.showRandomTranslations) {
+        this.fetchRandomTranslations();
+      }
+    },
+    onRandomTranslationsClick() {
+      if (!this.showRandomTranslations) {
+        if (this.randomTranslations.length === 0) {
+          this.fetchRandomTranslations();
+        }
+        this.showRandomTranslations = true;
+        return;
+      }
+      this.showRandomTranslations = false;
+    },
+    fetchRandomTranslations() {
+      if (!this.lang) {
+        this.hasError = true;
+        this.errorMessage = 'Please select the language to get random translations';
+        return;
+      }
+
+      this.showLoadSpinner = true;
+      let tagIds = this.tags.map(x => x.id);
+
+      TranslationService.random(new RandomParams(tagIds, this.lang.id, this.randomLimit))
+          .then(searchResult => {
+            this.randomTranslations = searchResult.translations;
+            this.hasError = false;
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = error;
+          })
+          .finally(() => {
+            this.showLoadSpinner = false;
+          });
+    },
+    fetchTags() {
+      return this.$store.dispatch('tag/fetchAll')
+          .then((tags) => this.tagOptions = tags)
+          .catch(() => {
+            this.hasError = true;
+            this.errorMessage = 'Can not get tags from server :(';
+          })
     },
     triggerFlashMessage() {
       let status = this.$store.getters["translation/entityStatus"];
@@ -182,42 +252,23 @@ export default {
       }, 5000);
     },
     commitSearchState() {
-      this.$store.dispatch('translationSearch/setPageSize', this.pageSize);
-      this.$store.dispatch('translationSearch/setTotalRecords', this.totalRecords);
-      this.$store.dispatch('translationSearch/setCurrentPage', this.currentPage);
-      this.$store.dispatch('translationSearch/setTranslations', this.translations);
-      this.$store.dispatch('translationSearch/setTarget', this.target);
-      this.$store.dispatch('translationSearch/setSource', this.source);
+      this.$store.dispatch('translationHome/setPageSize', this.pageSize);
+      this.$store.dispatch('translationHome/setTotalRecords', this.totalRecords);
+      this.$store.dispatch('translationHome/setCurrentPage', this.currentPage);
+      this.$store.dispatch('translationHome/setTranslations', this.translations);
+      this.$store.dispatch('translationHome/setTags', this.tags);
     },
-    validate() {
+    search() {
       if (!this.lang) {
         this.hasError = true;
         this.errorMessage = 'Please select the language to perform translation search';
-        return false;
-      }
-
-      if (!this.source && !this.target) {
-        this.hasError = true;
-        this.errorMessage = 'Please enter a part of source or target text to perform translation search';
-        return false;
-      }
-
-      if (this.source && this.target) {
-        this.hasError = true;
-        this.errorMessage = 'Please enter only a part of source or target text to perform translation search';
-        return false;
-      }
-
-      return true;
-    },
-    search() {
-      if (!this.validate()) {
         return;
       }
 
       this.showLoadSpinner = true;
+      let tagIds = this.tags.map(x => x.id);
 
-      TranslationService.search(new SearchParams([], this.lang.id, this.$store.getters["translationHome/getCurrentPage"], this.pageSize, this.source, this.target))
+      TranslationService.search(new SearchParams(tagIds, this.lang.id, this.$store.getters["translationHome/getCurrentPage"], this.pageSize))
           .then(searchResult => {
             this.translations = searchResult.translations;
             this.totalRecords = searchResult.total_records;

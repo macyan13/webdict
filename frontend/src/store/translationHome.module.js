@@ -5,8 +5,7 @@ export default {
         currentPage: 1,
         totalRecords: 0,
         translations: [],
-        target: '',
-        source: '',
+        tags: [],
     },
     actions: {
         setPageSize({ commit }, newSize) {
@@ -21,19 +20,20 @@ export default {
         setTranslations({ commit }, newTranslations) {
             commit("setTranslations", newTranslations);
         },
-        setTarget({ commit }, newTarget) {
-            commit("setTarget", newTarget);
-        },
-        setSource({ commit }, newSource) {
-            commit("setSource", newSource);
+        setTags({ commit }, newTags) {
+            commit("setTags", newTags);
         },
         resetTranslations({ commit }) {
             commit("setTranslations", []);
             commit("setTotalRecords", 0);
             commit("setCurrentPage", 1);
-            commit("setTarget", '');
-            commit("setSource", '');
         },
+        resetTags({ commit }) {
+            commit("setTags", []);
+            commit("setTranslations", []);
+            commit("setTotalRecords", 0);
+            commit("setCurrentPage", 1);
+        }
     },
     getters: {
         getPageSize: function (state) {
@@ -48,12 +48,9 @@ export default {
         getTranslations: function (state) {
             return state.translations;
         },
-        getTarget: function (state) {
-            return state.target;
-        },
-        getSource: function (state) {
-            return state.source;
-        },
+        getTags: function (state) {
+            return state.tags;
+        }
     },
     mutations: {
         setPageSize(state, newSize) {
@@ -68,11 +65,8 @@ export default {
         setTranslations(state, newTranslations) {
             state.translations = newTranslations;
         },
-        setTarget(state, newTarget) {
-            state.target = newTarget;
-        },
-        setSource(state, newSource) {
-            state.source = newSource;
-        },
+        setTags(state, newTags) {
+            state.tags = newTags;
+        }
     },
 };

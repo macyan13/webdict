@@ -1,14 +1,14 @@
 <template>
   <div class="home">
-    <translation-search></translation-search>
+    <translation-home></translation-home>
   </div>
 </template>
 
 <script>
-import TranslationSearch from "@/components/TranslationSearch.vue";
+import translationHome from "@/components/TranslationHome.vue";
 
 export default {
   name: 'Home',
-  components: {TranslationSearch},
+  components: {translationHome},
 }
 </script>

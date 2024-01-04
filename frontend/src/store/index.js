@@ -7,6 +7,7 @@ import profile from './profile.module'
 import role from './role.module'
 import user from './user.module'
 import translation from "./translation.module";
+import translationHome from "./translationHome.module";
 import translationSearch from "./translationSearch.module";
 
 Vue.use(Vuex)
@@ -20,6 +21,7 @@ export default new Vuex.Store({
         role,
         user,
         translation,
+        translationHome,
         translationSearch
     }
 })
