@@ -4,6 +4,8 @@ run:
     format: tab
   skip-dirs:
     - vendor
+  build-tags:
+    - codeanalysis
 
 linters-settings:
   govet:
