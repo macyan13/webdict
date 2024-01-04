@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
@@ -52,9 +53,11 @@ func initTestServer() *HTTPServer {
 		UpdateProfile:     command.NewUpdateProfileHandler(userRepo, cipher, langRepo),
 	}
 
+	validate := validator.New()
+
 	queries := app.Queries{
 		SingleTranslation:  query.NewSingleTranslationHandler(translationRepo),
-		LastTranslations:   query.NewLastTranslationsHandler(translationRepo),
+		SearchTranslations: query.NewSearchTranslationsHandler(translationRepo, validate),
 		RandomTranslations: query.NewRandomTranslationsHandler(translationRepo),
 		SingleTag:          query.NewSingleTagHandler(tagRepo),
 		AllTags:            query.NewAllTagsHandler(tagRepo),

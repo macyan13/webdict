@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/macyan13/webdict/backend/pkg/app"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
 	"github.com/macyan13/webdict/backend/pkg/app/domain/user"
@@ -49,7 +50,7 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL, TranslationCacheTTL: opts.Cache.TranslationCacheTTL, LangCacheTTL: opts.Cache.LangCacheTTL}
+	cacheOpts := cache.Opts{TagCacheTTL: opts.Cache.TagCacheTTL, TranslationCacheTTL: opts.Cache.TranslationCacheTTL, TranslationsSearchCacheTTL: opts.Cache.TranslationsSearchCacheTTL, LangCacheTTL: opts.Cache.LangCacheTTL}
 
 	tagRepo, err := mongo.NewTagRepo(dbConnect)
 	if err != nil {
@@ -95,9 +96,11 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 		UpdateProfile:     command.NewUpdateProfileHandler(userRepo, cipher, cachedLangRepo),
 	}
 
+	validate := validator.New()
+
 	queries := app.Queries{
 		SingleTranslation:  query.NewSingleTranslationHandler(cachedTranslationRepo),
-		LastTranslations:   query.NewLastTranslationsHandler(cachedTranslationRepo),
+		SearchTranslations: query.NewSearchTranslationsHandler(cachedTranslationRepo, validate),
 		RandomTranslations: query.NewRandomTranslationsHandler(cachedTranslationRepo),
 		SingleTag:          query.NewSingleTagHandler(cachedTagRepo),
 		AllTags:            query.NewAllTagsHandler(cachedTagRepo),

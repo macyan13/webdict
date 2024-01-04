@@ -32,7 +32,7 @@ type Commands struct {
 
 type Queries struct {
 	SingleTranslation  query.SingleTranslationHandler
-	LastTranslations   query.LastTranslationsHandler
+	SearchTranslations query.SearchTranslationsHandler
 	RandomTranslations query.RandomTranslationsHandler
 
 	SingleTag query.SingleTagHandler

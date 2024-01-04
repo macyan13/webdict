@@ -42,7 +42,8 @@ type MongoGroup struct {
 
 // CacheGroup defines options group for in memory cache
 type CacheGroup struct {
-	TagCacheTTL         time.Duration `long:"tag_cache_ttl" env:"TAG_CACHE_TTL" default:"3600s" description:"Cache TTL for tags"`
-	TranslationCacheTTL time.Duration `long:"translation_cache_ttl" env:"TRANSLATION_CACHE_TTL" default:"3600s" description:"Cache TTL for translations"`
-	LangCacheTTL        time.Duration `long:"lang_cache_ttl" env:"LANG_CACHE_TTL" default:"3600s" description:"Cache TTL for languages"`
+	TagCacheTTL                time.Duration `long:"tag_cache_ttl" env:"TAG_CACHE_TTL" default:"3600s" description:"Cache TTL for tags"`
+	TranslationCacheTTL        time.Duration `long:"translation_cache_ttl" env:"TRANSLATION_CACHE_TTL" default:"3600s" description:"Cache TTL for translations"`
+	TranslationsSearchCacheTTL time.Duration `long:"translations_search_cache_ttl" env:"TRANSLATIONS_SEARCH_CACHE_TTL" default:"600s" description:"Cache TTL for translations search results"`
+	LangCacheTTL               time.Duration `long:"lang_cache_ttl" env:"LANG_CACHE_TTL" default:"3600s" description:"Cache TTL for languages"`
 }

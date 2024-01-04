@@ -5,6 +5,7 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/domain/translation"
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -93,7 +94,7 @@ func (r *TranslationRepo) DeleteByAuthorID(authorID string) (int, error) {
 	return counter, nil
 }
 
-func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
+func (r *TranslationRepo) GetLastViewsByTags(authorID, langID string, pageSize, page int, tagIds []string) (query.LastTranslationViews, error) {
 	type mapItem struct {
 		t         *translation.Translation
 		createdAt time.Time
@@ -128,7 +129,7 @@ func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page i
 	}
 
 	if len(items) < offset && page != 1 {
-		return query.LastViews{}, fmt.Errorf("can not get translations from DB")
+		return query.LastTranslationViews{}, fmt.Errorf("can not get translations from DB")
 	}
 
 	views := make([]query.TranslationView, 0, len(items))
@@ -140,7 +141,7 @@ func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page i
 			view, err := r.translationToView(v.t)
 
 			if err != nil {
-				return query.LastViews{}, err
+				return query.LastTranslationViews{}, err
 			}
 			views = append(views, view)
 		} else if i >= offset+limit {
@@ -149,7 +150,141 @@ func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page i
 		i++
 	}
 
-	return query.LastViews{
+	return query.LastTranslationViews{
+		Views:        views,
+		TotalRecords: len(items),
+	}, nil
+}
+
+func (r *TranslationRepo) GetLastViewsBySourcePart(authorID, langID, sourcePart string, pageSize, page int) (query.LastTranslationViews, error) {
+	type mapItem struct {
+		t         *translation.Translation
+		createdAt time.Time
+	}
+
+	items := make([]mapItem, 0, len(r.storage))
+
+	for _, v := range r.storage {
+		if v.AuthorID() != authorID || v.LangID() != langID {
+			continue
+		}
+
+		data := v.ToMap()
+
+		source, err := data["source"].(string)
+		if !err {
+			return query.LastTranslationViews{}, fmt.Errorf("can not get translations from DB")
+		}
+
+		if !strings.Contains(source, sourcePart) {
+			continue
+		}
+
+		items = append(items, mapItem{
+			t:         v,
+			createdAt: data["createdAt"].(time.Time),
+		})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].createdAt.After(items[j].createdAt)
+	})
+
+	var offset int
+	if page > 1 {
+		offset = pageSize * page
+	}
+
+	if len(items) < offset && page != 1 {
+		return query.LastTranslationViews{}, fmt.Errorf("can not get translations from DB")
+	}
+
+	views := make([]query.TranslationView, 0, len(items))
+
+	i := 0
+	limit := offset + pageSize
+	for _, v := range items {
+		if i >= offset && i < limit {
+			view, err := r.translationToView(v.t)
+
+			if err != nil {
+				return query.LastTranslationViews{}, err
+			}
+			views = append(views, view)
+		} else if i >= offset+limit {
+			break
+		}
+		i++
+	}
+
+	return query.LastTranslationViews{
+		Views:        views,
+		TotalRecords: len(items),
+	}, nil
+}
+
+func (r *TranslationRepo) GetLastViewsByTargetPart(authorID, langID, targetPart string, pageSize, page int) (query.LastTranslationViews, error) {
+	type mapItem struct {
+		t         *translation.Translation
+		createdAt time.Time
+	}
+
+	items := make([]mapItem, 0, len(r.storage))
+
+	for _, v := range r.storage {
+		if v.AuthorID() != authorID || v.LangID() != langID {
+			continue
+		}
+
+		data := v.ToMap()
+
+		target, err := data["target"].(string)
+		if !err {
+			return query.LastTranslationViews{}, fmt.Errorf("can not get translations from DB")
+		}
+
+		if !strings.Contains(target, targetPart) {
+			continue
+		}
+
+		items = append(items, mapItem{
+			t:         v,
+			createdAt: data["createdAt"].(time.Time),
+		})
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].createdAt.After(items[j].createdAt)
+	})
+
+	var offset int
+	if page > 1 {
+		offset = pageSize * page
+	}
+
+	if len(items) < offset && page != 1 {
+		return query.LastTranslationViews{}, fmt.Errorf("can not get translations from DB")
+	}
+
+	views := make([]query.TranslationView, 0, len(items))
+
+	i := 0
+	limit := offset + pageSize
+	for _, v := range items {
+		if i >= offset && i < limit {
+			view, err := r.translationToView(v.t)
+
+			if err != nil {
+				return query.LastTranslationViews{}, err
+			}
+			views = append(views, view)
+		} else if i >= offset+limit {
+			break
+		}
+		i++
+	}
+
+	return query.LastTranslationViews{
 		Views:        views,
 		TotalRecords: len(items),
 	}, nil

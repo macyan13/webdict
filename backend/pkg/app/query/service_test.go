@@ -48,7 +48,7 @@ func TestRoleConverter_RoleToView(t *testing.T) {
 	}
 }
 
-func Test_richTextSanitizer_SanitizeAndEscape(t *testing.T) {
+func TestRichTextSanitizer_SanitizeAndEscape(t *testing.T) {
 	type args struct {
 		input string
 	}

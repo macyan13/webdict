@@ -108,6 +108,44 @@ func TestServer_DeleteTranslationById(t *testing.T) {
 	assert.Zero(t, len(getExistingTranslations(t, s, langID)))
 }
 
+func TestServer_SearchTranslationByTargetPart(t *testing.T) {
+	s := initTestServer()
+	langID := createLang(t, s, "EN")
+
+	target := "testTarget"
+	jsonValue, _ := json.Marshal(translationRequest{Source: "test", Target: target, LangID: langID})
+	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
+	setAdminAuthToken(t, s, req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
+
+	id := getExistingTranslationsByPart(t, s, langID, target[3:len(target)-3], "")[0].ID
+	req, _ = http.NewRequest("DELETE", v1TranslationAPI+"/"+id, bytes.NewBuffer(jsonValue))
+	setAdminAuthToken(t, s, req)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Zero(t, len(getExistingTranslations(t, s, langID)))
+}
+
+func TestServer_SearchTranslationBySourcePart(t *testing.T) {
+	s := initTestServer()
+	langID := createLang(t, s, "EN")
+
+	source := "testSource"
+	jsonValue, _ := json.Marshal(translationRequest{Source: source, Target: "test", LangID: langID})
+	req, _ := http.NewRequest("POST", v1TranslationAPI, bytes.NewBuffer(jsonValue))
+	setAdminAuthToken(t, s, req)
+	s.engine.ServeHTTP(httptest.NewRecorder(), req)
+
+	id := getExistingTranslationsByPart(t, s, langID, "", source[3:len(source)-3])[0].ID
+	req, _ = http.NewRequest("DELETE", v1TranslationAPI+"/"+id, bytes.NewBuffer(jsonValue))
+	setAdminAuthToken(t, s, req)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Zero(t, len(getExistingTranslations(t, s, langID)))
+}
+
 func TestServer_DeleteTranslationByIdUnauthorised(t *testing.T) {
 	s := initTestServer()
 	langID := createLang(t, s, "EN")
@@ -214,7 +252,20 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 }
 
 func getExistingTranslations(t *testing.T, s *HTTPServer, lang string) []translationResponse {
-	req, _ := http.NewRequest("GET", v1TranslationAPI+"/last?pageSize=10&langId="+lang, http.NoBody)
+	req, _ := http.NewRequest("GET", v1TranslationAPI+"?pageSize=10&page=1&langId="+lang, http.NoBody)
+	setAdminAuthToken(t, s, req)
+	w := httptest.NewRecorder()
+	s.engine.ServeHTTP(w, req)
+
+	var response lastTranslationsResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
+
+	return response.Translations
+}
+
+func getExistingTranslationsByPart(t *testing.T, s *HTTPServer, lang, targetPart, sourcePart string) []translationResponse {
+	req, _ := http.NewRequest("GET", v1TranslationAPI+"?pageSize=10&page=1&langId="+lang+"&sourcePart="+sourcePart+"&targetPart="+targetPart, http.NoBody)
 	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
 	s.engine.ServeHTTP(w, req)

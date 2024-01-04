@@ -50,7 +50,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 	}
 }
 
-func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
+func (s *HTTPServer) SearchTranslations() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
@@ -63,12 +63,14 @@ func (s *HTTPServer) GetLastTranslations() gin.HandlerFunc {
 		pageSize, _ = strconv.Atoi(c.Query("pageSize"))
 		page, _ = strconv.Atoi(c.Query("page"))
 
-		lastViews, err := s.app.Queries.LastTranslations.Handle(query.LastTranslations{
-			AuthorID: user.ID,
-			PageSize: pageSize,
-			Page:     page,
-			TagIds:   c.QueryArray("tagId[]"),
-			LangID:   c.Query("langId"),
+		lastViews, err := s.app.Queries.SearchTranslations.Handle(query.SearchTranslations{
+			AuthorID:   user.ID,
+			PageSize:   pageSize,
+			Page:       page,
+			TagIds:     c.QueryArray("tagId[]"),
+			LangID:     c.Query("langId"),
+			SourcePart: c.Query("sourcePart"),
+			TargetPart: c.Query("targetPart"),
 		})
 
 		if err != nil {

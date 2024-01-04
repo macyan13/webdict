@@ -7,8 +7,10 @@ import (
 	"github.com/macyan13/webdict/backend/pkg/app/query"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"regexp"
 	"time"
 )
 
@@ -72,6 +74,22 @@ func (r *TranslationRepo) initIndexes() error {
 				{Key: "author_id", Value: 1},
 				{Key: "lang_id", Value: 1},
 				{Key: "tag_ids", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "lang_id", Value: 1},
+				{Key: "source", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "author_id", Value: 1},
+				{Key: "lang_id", Value: 1},
+				{Key: "target", Value: 1},
 				{Key: "created_at", Value: -1},
 			},
 		},
@@ -202,67 +220,27 @@ func (r *TranslationRepo) DeleteByAuthorID(authorID string) (int, error) {
 	return int(result.DeletedCount), nil
 }
 
-func (r *TranslationRepo) GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (query.LastViews, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
-	defer cancel()
-
+func (r *TranslationRepo) GetLastViewsByTags(authorID, langID string, pageSize, page int, tagIds []string) (query.LastTranslationViews, error) {
 	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}}
 	if len(tagIds) != 0 {
 		filter = append(filter, bson.E{Key: "tag_ids", Value: bson.D{{Key: "$all", Value: tagIds}}})
 	}
 
-	totalDocuments, err := r.collection.CountDocuments(ctx, filter)
-	if err != nil {
-		return query.LastViews{}, err
-	}
+	return r.getLastViewsByFilter(filter, pageSize, page)
+}
 
-	if totalDocuments == 0 && page == 1 {
-		return query.LastViews{}, nil
-	}
+func (r *TranslationRepo) GetLastViewsBySourcePart(authorID, langID, sourcePart string, pageSize, page int) (query.LastTranslationViews, error) {
+	patter := primitive.Regex{Pattern: fmt.Sprintf(".*%s.*", regexp.QuoteMeta(sourcePart))}
+	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}, {Key: "source", Value: bson.M{"$regex": patter}}}
 
-	totalPages := int(totalDocuments) / pageSize
-	if int(totalDocuments)%pageSize != 0 {
-		totalPages++
-	}
+	return r.getLastViewsByFilter(filter, pageSize, page)
+}
 
-	if totalPages < page {
-		return query.LastViews{}, fmt.Errorf("can not get %d translations page from DB as max page is %d", page, totalPages)
-	}
+func (r *TranslationRepo) GetLastViewsByTargetPart(authorID, langID, targetPart string, pageSize, page int) (query.LastTranslationViews, error) {
+	patter := primitive.Regex{Pattern: fmt.Sprintf(".*%s.*", regexp.QuoteMeta(targetPart))}
+	filter := bson.D{{Key: "author_id", Value: authorID}, {Key: "lang_id", Value: langID}, {Key: "target", Value: bson.M{"$regex": patter}}}
 
-	skip := (page - 1) * pageSize
-	sort := bson.M{"created_at": -1}
-	cursor, err := r.collection.Find(ctx, filter, options.Find().SetSkip(int64(skip)).SetLimit(int64(pageSize)).SetSort(sort))
-	if err != nil {
-		return query.LastViews{}, err
-	}
-
-	var models []TranslationModel
-
-	if err = cursor.All(ctx, &models); err != nil {
-		return query.LastViews{}, err
-	}
-
-	err = cursor.Close(ctx)
-	if err != nil {
-		return query.LastViews{}, err
-	}
-
-	views := make([]query.TranslationView, 0, pageSize)
-
-	for i := range models {
-		view, err := r.fromModelToView(models[i])
-
-		if err != nil {
-			return query.LastViews{}, err
-		}
-
-		views = append(views, view)
-	}
-
-	return query.LastViews{
-		Views:        views,
-		TotalRecords: int(totalDocuments),
-	}, nil
+	return r.getLastViewsByFilter(filter, pageSize, page)
 }
 
 func (r *TranslationRepo) GetView(id, authorID string) (query.TranslationView, error) {
@@ -321,6 +299,64 @@ func (r *TranslationRepo) GetRandomViews(authorID, langID string, tagIds []strin
 	}
 
 	return query.RandomViews{Views: views}, nil
+}
+
+func (r *TranslationRepo) getLastViewsByFilter(filter bson.D, pageSize, page int) (query.LastTranslationViews, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), queryDefaultTimeoutInSec*time.Second)
+	defer cancel()
+
+	totalDocuments, err := r.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return query.LastTranslationViews{}, err
+	}
+
+	if totalDocuments == 0 && page == 1 {
+		return query.LastTranslationViews{}, nil
+	}
+
+	totalPages := int(totalDocuments) / pageSize
+	if int(totalDocuments)%pageSize != 0 {
+		totalPages++
+	}
+
+	if totalPages < page {
+		return query.LastTranslationViews{}, fmt.Errorf("can not get %d translations page from DB as max page is %d", page, totalPages)
+	}
+
+	skip := (page - 1) * pageSize
+	sort := bson.M{"created_at": -1}
+	cursor, err := r.collection.Find(ctx, filter, options.Find().SetSkip(int64(skip)).SetLimit(int64(pageSize)).SetSort(sort))
+	if err != nil {
+		return query.LastTranslationViews{}, err
+	}
+
+	var models []TranslationModel
+
+	if err = cursor.All(ctx, &models); err != nil {
+		return query.LastTranslationViews{}, err
+	}
+
+	err = cursor.Close(ctx)
+	if err != nil {
+		return query.LastTranslationViews{}, err
+	}
+
+	views := make([]query.TranslationView, 0, pageSize)
+
+	for i := range models {
+		view, err := r.fromModelToView(models[i])
+
+		if err != nil {
+			return query.LastTranslationViews{}, err
+		}
+
+		views = append(views, view)
+	}
+
+	return query.LastTranslationViews{
+		Views:        views,
+		TotalRecords: int(totalDocuments),
+	}, nil
 }
 
 // fromDomainToModel converts domain translation to mongo model
