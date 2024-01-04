@@ -5,7 +5,8 @@ export default {
         currentPage: 1,
         totalRecords: 0,
         translations: [],
-        tags: [],
+        target: '',
+        source: '',
     },
     actions: {
         setPageSize({ commit }, newSize) {
@@ -20,20 +21,19 @@ export default {
         setTranslations({ commit }, newTranslations) {
             commit("setTranslations", newTranslations);
         },
-        setTags({ commit }, newTags) {
-            commit("setTags", newTags);
+        setTarget({ commit }, newTarget) {
+            commit("setTarget", newTarget);
+        },
+        setSource({ commit }, newSource) {
+            commit("setSource", newSource);
         },
         resetTranslations({ commit }) {
             commit("setTranslations", []);
             commit("setTotalRecords", 0);
             commit("setCurrentPage", 1);
+            commit("setTarget", '');
+            commit("setSource", '');
         },
-        resetTags({ commit }) {
-            commit("setTags", []);
-            commit("setTranslations", []);
-            commit("setTotalRecords", 0);
-            commit("setCurrentPage", 1);
-        }
     },
     getters: {
         getPageSize: function (state) {
@@ -48,9 +48,12 @@ export default {
         getTranslations: function (state) {
             return state.translations;
         },
-        getTags: function (state) {
-            return state.tags;
-        }
+        getTarget: function (state) {
+            return state.target;
+        },
+        getSource: function (state) {
+            return state.source;
+        },
     },
     mutations: {
         setPageSize(state, newSize) {
@@ -65,8 +68,11 @@ export default {
         setTranslations(state, newTranslations) {
             state.translations = newTranslations;
         },
-        setTags(state, newTags) {
-            state.tags = newTags;
-        }
+        setTarget(state, newTarget) {
+            state.target = newTarget;
+        },
+        setSource(state, newSource) {
+            state.source = newSource;
+        },
     },
 };

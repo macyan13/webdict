@@ -86,6 +86,7 @@ export default {
       this.showDeleteSpinner = true;
       TranslationService.delete(this.idToDelete)
           .then(() => {
+            this.$store.dispatch('translationHome/resetTranslations');
             this.$store.dispatch('translationSearch/resetTranslations');
             this.$emit('onDelete');
           })

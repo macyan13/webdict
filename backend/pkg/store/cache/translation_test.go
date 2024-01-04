@@ -17,7 +17,7 @@ import (
 func TestTranslationRepo_Create(t *testing.T) {
 	type fields struct {
 		domainProxy translation.Repository
-		pageCache   *cache.Cache[string, map[string]query.LastViews]
+		pageCache   *cache.Cache[string, map[string]query.LastTranslationViews]
 	}
 	type args struct {
 		record *translation.Translation
@@ -34,8 +34,8 @@ func TestTranslationRepo_Create(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(fmt.Errorf("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID", map[string]query.LastTranslationViews{"key": {}})
 				return fields{
 					domainProxy: &repo,
 					pageCache:   pageCache,
@@ -46,7 +46,7 @@ func TestTranslationRepo_Create(t *testing.T) {
 			},
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				entry, ok := pageCache.Get("authorID")
 				assert.True(t, ok, i2...)
 				_, ok = entry["key"]
@@ -58,9 +58,9 @@ func TestTranslationRepo_Create(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Create", mock.AnythingOfType("*translation.Translation")).Return(nil)
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
-				pageCache.Set("AuthorID-DE", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
+				pageCache.Set("AuthorID-DE", map[string]query.LastTranslationViews{"key": {}})
 				return fields{
 					domainProxy: &repo,
 					pageCache:   pageCache,
@@ -73,7 +73,7 @@ func TestTranslationRepo_Create(t *testing.T) {
 				return assert.Nil(t, err, i...)
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				_, ok := pageCache.Get("AuthorID-DE")
 				assert.True(t, ok, i2...)
 				_, ok = pageCache.Get("authorID-EN")
@@ -85,12 +85,12 @@ func TestTranslationRepo_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
 			repo := TranslationRepo{
-				domainProxy: f.domainProxy,
-				cacheTTL:    time.Minute,
-				pageCache:   f.pageCache,
+				domainProxy:               f.domainProxy,
+				cacheTTL:                  time.Minute,
+				lastTranslationsPageCache: f.pageCache,
 			}
 			tt.wantErr(t, repo.Create(tt.args.record), fmt.Sprintf("Create(%v)", tt.args.record))
-			tt.wantFn(t, repo.pageCache, fmt.Sprintf("Create(%v)", tt.args.record))
+			tt.wantFn(t, repo.lastTranslationsPageCache, fmt.Sprintf("Create(%v)", tt.args.record))
 		})
 	}
 }
@@ -99,7 +99,7 @@ func TestTranslationRepo_Update(t *testing.T) {
 	type fields struct {
 		domainProxy       translation.Repository
 		singleRecordCache *cache.Cache[string, query.TranslationView]
-		pageCache         *cache.Cache[string, map[string]query.LastViews]
+		pageCache         *cache.Cache[string, map[string]query.LastTranslationViews]
 	}
 	type args struct {
 		record *translation.Translation
@@ -116,8 +116,8 @@ func TestTranslationRepo_Update(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(fmt.Errorf("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				return fields{
@@ -130,7 +130,7 @@ func TestTranslationRepo_Update(t *testing.T) {
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				pageCache, ok := repo.pageCache.Get("authorID")
+				pageCache, ok := repo.lastTranslationsPageCache.Get("authorID")
 				assert.True(t, ok, i2...)
 				_, ok = pageCache["key"]
 				assert.True(t, ok, i2...)
@@ -143,9 +143,9 @@ func TestTranslationRepo_Update(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Update", mock.AnythingOfType("*translation.Translation")).Return(nil)
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
-				pageCache.Set("authorID-DE", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
+				pageCache.Set("authorID-DE", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				singleCache.Set("otherID", query.TranslationView{})
@@ -161,9 +161,9 @@ func TestTranslationRepo_Update(t *testing.T) {
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				_, ok := repo.pageCache.Get("authorID-EN")
+				_, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.False(t, ok, i2...)
-				_, ok = repo.pageCache.Get("authorID-DE")
+				_, ok = repo.lastTranslationsPageCache.Get("authorID-DE")
 				assert.True(t, ok, i2...)
 				_, ok = repo.singleRecordCache.Get("otherID")
 				assert.True(t, ok, i2...)
@@ -176,10 +176,10 @@ func TestTranslationRepo_Update(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
 			repo := TranslationRepo{
-				domainProxy:       f.domainProxy,
-				cacheTTL:          time.Minute,
-				singleRecordCache: f.singleRecordCache,
-				pageCache:         f.pageCache,
+				domainProxy:               f.domainProxy,
+				cacheTTL:                  time.Minute,
+				singleRecordCache:         f.singleRecordCache,
+				lastTranslationsPageCache: f.pageCache,
 			}
 			tt.wantErr(t, repo.Update(tt.args.record), fmt.Sprintf("Update(%v)", tt.args.record))
 			tt.wantFn(t, repo, fmt.Sprintf("Update(%v)", tt.args.record))
@@ -191,7 +191,7 @@ func TestTranslationRepo_Delete(t *testing.T) {
 	type fields struct {
 		domainProxy       translation.Repository
 		singleRecordCache *cache.Cache[string, query.TranslationView]
-		pageCache         *cache.Cache[string, map[string]query.LastViews]
+		pageCache         *cache.Cache[string, map[string]query.LastTranslationViews]
 	}
 	type args struct {
 		id       string
@@ -210,8 +210,8 @@ func TestTranslationRepo_Delete(t *testing.T) {
 				repo := translation.MockRepository{}
 				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN"), nil)
 				repo.On("Delete", "testID", "authorID").Return(fmt.Errorf("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				return fields{
@@ -224,7 +224,7 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				pageCache, ok := repo.pageCache.Get("authorID-EN")
+				pageCache, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = pageCache["key"]
 				assert.True(t, ok, i2...)
@@ -237,8 +237,8 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("Get", "testID", "authorID").Return(nil, fmt.Errorf("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				return fields{
@@ -251,7 +251,7 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				pageCache, ok := repo.pageCache.Get("authorID-EN")
+				pageCache, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = pageCache["key"]
 				assert.True(t, ok, i2...)
@@ -265,9 +265,9 @@ func TestTranslationRepo_Delete(t *testing.T) {
 				repo := translation.MockRepository{}
 				repo.On("Delete", "testID", "authorID").Return(nil)
 				repo.On("Get", "testID", "authorID").Return(createTranslationByAuthorIDAndIDAndLangID("authorID", "testID", "EN"), nil)
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
-				pageCache.Set("authorID-DE", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
+				pageCache.Set("authorID-DE", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				singleCache.Set("otherID", query.TranslationView{})
@@ -283,9 +283,9 @@ func TestTranslationRepo_Delete(t *testing.T) {
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				_, ok := repo.pageCache.Get("authorID-EN")
+				_, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.False(t, ok, i2...)
-				_, ok = repo.pageCache.Get("authorID-DE")
+				_, ok = repo.lastTranslationsPageCache.Get("authorID-DE")
 				assert.True(t, ok, i2...)
 				_, ok = repo.singleRecordCache.Get("otherID")
 				assert.True(t, ok, i2...)
@@ -298,10 +298,10 @@ func TestTranslationRepo_Delete(t *testing.T) {
 		t.Run(tt.name, func(t1 *testing.T) {
 			f := tt.fieldsFn()
 			repo := TranslationRepo{
-				domainProxy:       f.domainProxy,
-				cacheTTL:          time.Minute,
-				singleRecordCache: f.singleRecordCache,
-				pageCache:         f.pageCache,
+				domainProxy:               f.domainProxy,
+				cacheTTL:                  time.Minute,
+				singleRecordCache:         f.singleRecordCache,
+				lastTranslationsPageCache: f.pageCache,
 			}
 			tt.wantErr(t1, repo.Delete(tt.args.id, tt.args.authorID), fmt.Sprintf("Delete(%v, %v)", tt.args.id, tt.args.authorID))
 			tt.wantFn(t, repo, fmt.Sprintf("Delete(%v, %v)", tt.args.id, tt.args.authorID))
@@ -445,7 +445,7 @@ func TestTranslationRepo_GetView(t1 *testing.T) {
 func TestTranslationRepo_GetLastViews(t *testing.T) {
 	type fields struct {
 		queryProxy query.TranslationViewRepository
-		pageCache  *cache.Cache[string, map[string]query.LastViews]
+		pageCache  *cache.Cache[string, map[string]query.LastTranslationViews]
 	}
 	type args struct {
 		authorID string
@@ -458,7 +458,7 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 		name     string
 		fieldsFn func() fields
 		args     args
-		want     query.LastViews
+		want     query.LastTranslationViews
 		wantErr  assert.ErrorAssertionFunc
 		wantFn   assert.ValueAssertionFunc
 	}{
@@ -466,17 +466,17 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Cache is not set, error on DB query",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 1, []string{"tag1", "tag2"}).Return(query.LastViews{}, errors.New("error"))
+				repo.On("GetLastViewsByTags", "authorID", "EN", 10, 1, []string{"tag1", "tag2"}).Return(query.LastTranslationViews{}, errors.New("error"))
 				return fields{
 					queryProxy: &repo,
-					pageCache:  cache.NewContext[string, map[string]query.LastViews](context.TODO()),
+					pageCache:  cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO()),
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 1, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{},
+			query.LastTranslationViews{},
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				_, ok := pageCache.Get("authorID")
 				return assert.False(t, ok, i2...)
 			},
@@ -485,22 +485,22 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Author cache is set, requested page is missed",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalRecords: 5}, nil)
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"1": {}})
+				repo.On("GetLastViewsByTags", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastTranslationViews{TotalRecords: 5}, nil)
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"1": {}})
 				return fields{
 					queryProxy: &repo,
 					pageCache:  pageCache,
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{TotalRecords: 5},
+			query.LastTranslationViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				authorCache, ok := pageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = authorCache["10-2-tag1-tag2"]
@@ -511,20 +511,20 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Cache is not set",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{TotalRecords: 5}, nil)
+				repo.On("GetLastViewsByTags", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastTranslationViews{TotalRecords: 5}, nil)
 				return fields{
 					queryProxy: &repo,
-					pageCache:  cache.NewContext[string, map[string]query.LastViews](context.TODO()),
+					pageCache:  cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO()),
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{TotalRecords: 5},
+			query.LastTranslationViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				authorCache, ok := pageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = authorCache["10-2-tag1-tag2"]
@@ -535,19 +535,19 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 			"Author cache is set, page cache is not set, error on getting requested page",
 			func() fields {
 				repo := query.MockTranslationViewRepository{}
-				repo.On("GetLastViews", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastViews{}, errors.New("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"1": {}})
+				repo.On("GetLastViewsByTags", "authorID", "EN", 10, 2, []string{"tag1", "tag2"}).Return(query.LastTranslationViews{}, errors.New("error"))
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"1": {}})
 				return fields{
 					queryProxy: &repo,
 					pageCache:  pageCache,
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag1", "tag2"}},
-			query.LastViews{},
+			query.LastTranslationViews{},
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				authorCache, ok := pageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = authorCache["10-2-tag1-tag2"]
@@ -557,20 +557,20 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 		{
 			"Page is set",
 			func() fields {
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"10-2-tag1-tag2": {TotalRecords: 5}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"10-2-tag1-tag2": {TotalRecords: 5}})
 				return fields{
 					pageCache: pageCache,
 				}
 			},
 			args{authorID: "authorID", lang: "EN", pageSize: 10, page: 2, tagIds: []string{"tag2", "tag1"}},
-			query.LastViews{TotalRecords: 5},
+			query.LastTranslationViews{TotalRecords: 5},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Nil(t, err, i...)
 				return false
 			},
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
-				pageCache := i.(*cache.Cache[string, map[string]query.LastViews])
+				pageCache := i.(*cache.Cache[string, map[string]query.LastTranslationViews])
 				authorCache, ok := pageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = authorCache["10-2-tag1-tag2"]
@@ -582,15 +582,15 @@ func TestTranslationRepo_GetLastViews(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
 			repo := TranslationRepo{
-				queryProxy: f.queryProxy,
-				pageCache:  f.pageCache,
-				cacheTTL:   time.Minute,
+				queryProxy:                f.queryProxy,
+				lastTranslationsPageCache: f.pageCache,
+				cacheTTL:                  time.Minute,
 			}
-			got, err := repo.GetLastViews(tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)
-			if !tt.wantErr(t, err, fmt.Sprintf("GetLastViews(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)) {
-				assert.Equalf(t, tt.want, got, "GetLastViews(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)
+			got, err := repo.GetLastViewsByTags(tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)
+			if !tt.wantErr(t, err, fmt.Sprintf("GetLastViewsByTags(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)) {
+				assert.Equalf(t, tt.want, got, "GetLastViewsByTags(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds)
 			}
-			tt.wantFn(t, repo.pageCache, fmt.Sprintf("GetLastViews(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds))
+			tt.wantFn(t, repo.lastTranslationsPageCache, fmt.Sprintf("GetLastViewsByTags(%v, %v, %v, %v, %v)", tt.args.authorID, tt.args.lang, tt.args.pageSize, tt.args.page, tt.args.tagIds))
 		})
 	}
 }
@@ -621,7 +621,7 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 	type fields struct {
 		domainProxy       translation.Repository
 		singleRecordCache *cache.Cache[string, query.TranslationView]
-		pageCache         *cache.Cache[string, map[string]query.LastViews]
+		pageCache         *cache.Cache[string, map[string]query.LastTranslationViews]
 	}
 	type args struct {
 		authorID string
@@ -639,8 +639,8 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("DeleteByAuthorID", "authorID").Return(0, fmt.Errorf("error"))
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				return fields{
@@ -654,7 +654,7 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 			assert.Error,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				pageCache, ok := repo.pageCache.Get("authorID-EN")
+				pageCache, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.True(t, ok, i2...)
 				_, ok = pageCache["key"]
 				assert.True(t, ok, i2...)
@@ -667,8 +667,8 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 			func() fields {
 				repo := translation.MockRepository{}
 				repo.On("DeleteByAuthorID", "authorID").Return(5, nil)
-				pageCache := cache.NewContext[string, map[string]query.LastViews](context.TODO())
-				pageCache.Set("authorID-EN", map[string]query.LastViews{"key": {}})
+				pageCache := cache.NewContext[string, map[string]query.LastTranslationViews](context.TODO())
+				pageCache.Set("authorID-EN", map[string]query.LastTranslationViews{"key": {}})
 				singleCache := cache.NewContext[string, query.TranslationView](context.TODO())
 				singleCache.Set("testID", query.TranslationView{})
 				return fields{
@@ -682,7 +682,7 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 			assert.NoError,
 			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
 				repo := i.(TranslationRepo)
-				_, ok := repo.pageCache.Get("authorID-EN")
+				_, ok := repo.lastTranslationsPageCache.Get("authorID-EN")
 				assert.False(t, ok, i2...)
 				_, ok = repo.singleRecordCache.Get("testID")
 				return assert.False(t, ok, i2...)
@@ -693,9 +693,9 @@ func TestTranslationRepo_DeleteByAuthorID(t *testing.T) {
 		t.Run(tt.name, func(t1 *testing.T) {
 			f := tt.fieldsFn()
 			repo := TranslationRepo{
-				domainProxy:       f.domainProxy,
-				singleRecordCache: f.singleRecordCache,
-				pageCache:         f.pageCache,
+				domainProxy:               f.domainProxy,
+				singleRecordCache:         f.singleRecordCache,
+				lastTranslationsPageCache: f.pageCache,
 			}
 			got, err := repo.DeleteByAuthorID(tt.args.authorID)
 			tt.assertCacheFn(t, repo, fmt.Sprintf("DeleteByAuthorID(%v)", tt.args.authorID))

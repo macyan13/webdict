@@ -2,6 +2,7 @@
   <div id="app">
     <div id="nav">
       <span v-if="isLoggedIn"><router-link to="/">Home</router-link> | </span>
+      <span v-if="isLoggedIn"><router-link to="/search">Search</router-link> | </span>
       <span v-if="isLoggedIn"><router-link to="/newTranslation">Add Translation</router-link> | </span>
       <span v-if="isLoggedIn"><router-link to="/newTag">Add Tag</router-link> | </span>
       <span v-if="isLoggedIn"><router-link to="/tags">Tags</router-link> | </span>

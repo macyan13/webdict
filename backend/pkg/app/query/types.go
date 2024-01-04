@@ -6,11 +6,13 @@ import (
 
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
-	GetLastViews(authorID, langID string, pageSize, page int, tagIds []string) (LastViews, error)
+	GetLastViewsByTags(authorID, langID string, pageSize, page int, tagIds []string) (LastTranslationViews, error)
 	GetRandomViews(authorID, langID string, tagIds []string, limit int) (RandomViews, error)
+	GetLastViewsBySourcePart(authorID, langID, sourcePart string, pageSize, page int) (LastTranslationViews, error)
+	GetLastViewsByTargetPart(authorID, langID, targetPart string, pageSize, page int) (LastTranslationViews, error)
 }
 
-type LastViews struct {
+type LastTranslationViews struct {
 	Views        []TranslationView
 	TotalRecords int
 }

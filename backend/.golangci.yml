@@ -4,6 +4,7 @@ run:
     format: tab
   skip-dirs:
     - vendor
+    - pkg/store/inmemory
 
 linters-settings:
   govet:

@@ -93,7 +93,7 @@ client.test("Request executed successfully", function () {
     client.assert(response.status === 200, "Response status is not 200")
 })
 client.test("Response body is correct", function () {
-    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not present")
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not presented")
     client.assert(response.body.name === "John Do", "name from get user by id is not correct")
 })
  %}
@@ -170,7 +170,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.status === 200, "Response status is not 200")
     })
     client.test("Response body is correct", function () {
-        client.assert(response.body.hasOwnProperty("id"), "User ID is not present")
+        client.assert(response.body.hasOwnProperty("id"), "User ID is not presented")
         client.assert(response.body.default_lang.name === "DE", "lang name from get profile is not correct")
         client.assert(response.body.name === "John Dorry", "name from get profile is not correct")
     })
@@ -201,7 +201,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.status === 200, "Response status is not 200")
     })
     client.test("Response body is correct", function () {
-        client.assert(response.body.hasOwnProperty("id"), "Lang ID is not present")
+        client.assert(response.body.hasOwnProperty("id"), "Lang ID is not presented")
         client.assert(response.body.name === "DE", "name from get lang by id is not correct")
     })
 %}
@@ -370,7 +370,7 @@ client.test("Request executed successfully", function () {
     client.assert(response.status === 200, "Response status is not 200")
 })
 client.test("Response body is correct", function () {
-    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not present")
+    client.assert(response.body.hasOwnProperty("id"), "Tag ID is not presented")
     client.assert(response.body.name === "Programming", "Name from get tag by id is not correct")
 })
  %}
@@ -426,7 +426,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 > {%
 client.test("Request executed successfully", function () {
     client.assert(response.status === 201, "Response status is not 201")
-    client.assert(response.body.hasOwnProperty("id"), "ID is not present")
+    client.assert(response.body.hasOwnProperty("id"), "ID is not presented")
 })
 client.global.set("translation1_id", response.body.id)
  %}
@@ -480,8 +480,8 @@ client.test("Request executed successfully", function () {
     client.assert(response.status === 200, "Response status is not 200")
 })
 client.test("Response body is correct", function () {
-    client.assert(response.body.hasOwnProperty("id"), "Translation ID is not present")
-    client.assert(response.body.hasOwnProperty("created_at"), "Translation created_at is not present")
+    client.assert(response.body.hasOwnProperty("id"), "Translation ID is not presented")
+    client.assert(response.body.hasOwnProperty("created_at"), "Translation created_at is not presented")
     client.assert(response.body.source === "Give it a shot", "source from get translation by id is not correct")
     client.assert(response.body.transcription === "[n/a]", "transcription from get translation by id is not correct")
     client.assert(response.body.target === "Попробовать", "translation from get translation by id is not correct")
@@ -512,7 +512,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 > {%
     client.test("Request executed successfully", function () {
         client.assert(response.status === 201, "Response status is not 201")
-        client.assert(response.body.hasOwnProperty("id"), "ID is not present")
+        client.assert(response.body.hasOwnProperty("id"), "ID is not presented")
     })
     client.global.set("translation2_id", response.body.id)
 
@@ -524,22 +524,22 @@ Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
 {
-  "source": "test3",
-  "transcription": "test3",
-  "target": "test3",
-  "example": "test3",
+  "source": "testSource3",
+  "transcription": "testTranscription3",
+  "target": "testTarget3",
+  "example": "testExample3",
   "lang_id": "{{lang_id}}"
 }
 
 > {%
     client.test("Request executed successfully", function () {
         client.assert(response.status === 201, "Response status is not 201")
-        client.assert(response.body.hasOwnProperty("id"), "ID is not present")
+        client.assert(response.body.hasOwnProperty("id"), "ID is not presented")
     })
 %}
 
-### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
+### Get Translations by tags
+GET {{host}}/v1/api/translations?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -548,12 +548,46 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.status === 200, "Response status is not 200")
     })
     client.test("Response body is correct", function () {
-        client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
-        client.assert(response.body.hasOwnProperty("total_records"), "Translation created_at is not present")
+        client.assert(response.body.hasOwnProperty("translations"), "Translations are not presented")
+        client.assert(response.body.hasOwnProperty("total_records"), "total_records property is not presented")
         client.assert(response.body.total_records === 2, "amount of records is not correct")
         client.assert(response.body.translations[0].source === "test2", "Ordering of last translations is not correct")
         client.assert(response.body.translations[0].transcription === "test2", "Ordering of last translations is not correct")
         client.assert(response.body.translations[0].target === "test2", "Ordering of last translations is not correct")
+    })
+%}
+
+### Get Translations by source part
+GET {{host}}/v1/api/translations?pageSize=1&page=1&langId={{lang_id}}&sourcePart=Source3
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.hasOwnProperty("translations"), "Translations are not presented")
+        client.assert(response.body.hasOwnProperty("total_records"), "total_records property is not presented")
+        client.assert(response.body.total_records === 1, "amount of records is not correct")
+        client.assert(response.body.translations[0].source === "testSource3", "Searched translation is not correct")
+    })
+%}
+
+### Get Translations by target part
+GET {{host}}/v1/api/translations?pageSize=1&page=1&langId={{lang_id}}&targetPart=arget3
+Content-Type: application/json
+Authorization: {{user_auth_type}} {{user_auth_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200")
+    })
+    client.test("Response body is correct", function () {
+        client.assert(response.body.hasOwnProperty("translations"), "Translations are not presented")
+        client.assert(response.body.hasOwnProperty("total_records"), "total_records property is not presenteded")
+        client.assert(response.body.total_records === 1, "amount of records is not correct")
+        client.assert(response.body.translations[0].target === "testTarget3", "Searched translation is not correct")
     })
 %}
 
@@ -567,7 +601,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.status === 200, "Response status is not 200")
     })
     client.test("Response body is correct", function () {
-        client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
+        client.assert(response.body.hasOwnProperty("translations"), "Translations are not presented")
         client.assert(response.body.translations.length === 2, "amount of records is not correct")
     })
 %}
@@ -606,7 +640,7 @@ client.test("Request executed successfully", function () {
  %}
 
 ### Get Last Translations
-GET {{host}}/v1/api/translations/last?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
+GET {{host}}/v1/api/translations?pageSize=1&page=1&tagId[]={{tag1_id}}&tagId[]={{tag2_id}}&langId={{lang_id}}
 Content-Type: application/json
 Authorization: {{user_auth_type}} {{user_auth_token}}
 
@@ -615,8 +649,8 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.status === 200, "Response status is not 200")
     })
     client.test("Response body is correct", function () {
-        client.assert(response.body.hasOwnProperty("translations"), "Translations are not present")
-        client.assert(response.body.hasOwnProperty("total_records"), "Translation created_at is not present")
+        client.assert(response.body.hasOwnProperty("translations"), "Translations are not presented")
+        client.assert(response.body.hasOwnProperty("total_records"), "total_records property is not presenteded")
         client.assert(response.body.total_records === 0, "Amount of pages is not correct")
         client.assert(response.body.translations.length === 0, "Amount of translations is not correct")
     })
@@ -707,7 +741,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 > {%
     client.test("Request executed successfully", function () {
         client.assert(response.status === 201, "Response status is not 201")
-        client.assert(response.body.hasOwnProperty("id"), "ID is not present")
+        client.assert(response.body.hasOwnProperty("id"), "ID is not presented")
     })
     client.global.set("translation_id_to_admin_delete", response.body.id)
 %}

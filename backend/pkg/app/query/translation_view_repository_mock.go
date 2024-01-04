@@ -10,23 +10,71 @@ type MockTranslationViewRepository struct {
 	mock.Mock
 }
 
-// GetLastViews provides a mock function with given fields: authorID, langID, pageSize, page, tagIds
-func (_m *MockTranslationViewRepository) GetLastViews(authorID string, langID string, pageSize int, page int, tagIds []string) (LastViews, error) {
+// GetLastViewsBySourcePart provides a mock function with given fields: authorID, langID, sourcePart, pageSize, page
+func (_m *MockTranslationViewRepository) GetLastViewsBySourcePart(authorID string, langID string, sourcePart string, pageSize int, page int) (LastTranslationViews, error) {
+	ret := _m.Called(authorID, langID, sourcePart, pageSize, page)
+
+	var r0 LastTranslationViews
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) (LastTranslationViews, error)); ok {
+		return rf(authorID, langID, sourcePart, pageSize, page)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) LastTranslationViews); ok {
+		r0 = rf(authorID, langID, sourcePart, pageSize, page)
+	} else {
+		r0 = ret.Get(0).(LastTranslationViews)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, string, int, int) error); ok {
+		r1 = rf(authorID, langID, sourcePart, pageSize, page)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetLastViewsByTags provides a mock function with given fields: authorID, langID, pageSize, page, tagIds
+func (_m *MockTranslationViewRepository) GetLastViewsByTags(authorID string, langID string, pageSize int, page int, tagIds []string) (LastTranslationViews, error) {
 	ret := _m.Called(authorID, langID, pageSize, page, tagIds)
 
-	var r0 LastViews
+	var r0 LastTranslationViews
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) (LastViews, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) (LastTranslationViews, error)); ok {
 		return rf(authorID, langID, pageSize, page, tagIds)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) LastViews); ok {
+	if rf, ok := ret.Get(0).(func(string, string, int, int, []string) LastTranslationViews); ok {
 		r0 = rf(authorID, langID, pageSize, page, tagIds)
 	} else {
-		r0 = ret.Get(0).(LastViews)
+		r0 = ret.Get(0).(LastTranslationViews)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string, int, int, []string) error); ok {
 		r1 = rf(authorID, langID, pageSize, page, tagIds)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetLastViewsByTargetPart provides a mock function with given fields: authorID, langID, targetPart, pageSize, page
+func (_m *MockTranslationViewRepository) GetLastViewsByTargetPart(authorID string, langID string, targetPart string, pageSize int, page int) (LastTranslationViews, error) {
+	ret := _m.Called(authorID, langID, targetPart, pageSize, page)
+
+	var r0 LastTranslationViews
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) (LastTranslationViews, error)); ok {
+		return rf(authorID, langID, targetPart, pageSize, page)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) LastTranslationViews); ok {
+		r0 = rf(authorID, langID, targetPart, pageSize, page)
+	} else {
+		r0 = ret.Get(0).(LastTranslationViews)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, string, int, int) error); ok {
+		r1 = rf(authorID, langID, targetPart, pageSize, page)
 	} else {
 		r1 = ret.Error(1)
 	}
