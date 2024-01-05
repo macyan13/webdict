@@ -59,7 +59,7 @@ func TestServer_Refresh(t *testing.T) {
 	assert.NotEmpty(t, response.AccessToken, "Route:SignIn -AccessToken must present")
 }
 
-func getRefreshToken(s *HTTPServer) string {
+func getRefreshToken(s *testHTTPServer) string {
 	request := signInRequest{
 		Email:    s.opts.Admin.AdminEmail,
 		Password: s.opts.Admin.AdminPasswd,

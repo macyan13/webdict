@@ -90,7 +90,7 @@ func TestHTTPServer_TestHTTPServerUnauthorized(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func getProfile(t *testing.T, s *HTTPServer, email, passwd string) userResponse {
+func getProfile(t *testing.T, s *testHTTPServer, email, passwd string) userResponse {
 	var profile userResponse
 	req, _ := http.NewRequest("GET", v1ProfileAPI, http.NoBody)
 	setAuthTokenWithCredentials(t, s, req, email, passwd)

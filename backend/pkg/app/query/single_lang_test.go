@@ -2,6 +2,8 @@ package query
 
 import (
 	"errors"
+	"github.com/go-playground/validator/v10"
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
@@ -20,6 +22,15 @@ func TestSingleLangHandler_Handle(t *testing.T) {
 		want     LangView
 		wantErr  bool
 	}{
+		{
+			"Error on query validation",
+			func() fields {
+				return fields{langRepo: &MockLangViewRepository{}}
+			},
+			args{cmd: SingleLang{ID: "", AuthorID: "testAuthor"}},
+			LangView{},
+			true,
+		},
 		{
 			"Error on DB query",
 			func() fields {
@@ -66,9 +77,11 @@ func TestSingleLangHandler_Handle(t *testing.T) {
 			false,
 		},
 	}
+
+	v := validator.New()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewSingleLangHandler(tt.fieldsFn().langRepo)
+			h := NewSingleLangHandler(tt.fieldsFn().langRepo, v)
 			got, err := h.Handle(tt.args.cmd)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Handle() error = %v, wantErr %v", err, tt.wantErr)
@@ -77,6 +90,55 @@ func TestSingleLangHandler_Handle(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Handle() got = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestSingleLangValidation(t *testing.T) {
+	type args struct {
+		query SingleLang
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "Valid case",
+			args: args{
+				query: SingleLang{
+					ID:       "123",
+					AuthorID: "456",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "Missing ID",
+			args: args{
+				query: SingleLang{
+					AuthorID: "456",
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Missing AuthorID",
+			args: args{
+				query: SingleLang{
+					ID: "123",
+				},
+			},
+			wantErr: assert.Error,
+		},
+	}
+
+	v := validator.New()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := v.Struct(test.args.query)
+			test.wantErr(t, err)
 		})
 	}
 }

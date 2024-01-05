@@ -185,7 +185,7 @@ func TestServer_GetTagsUnauthorised(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func getExistingTags(t *testing.T, s *HTTPServer) []tagResponse {
+func getExistingTags(t *testing.T, s *testHTTPServer) []tagResponse {
 	req, _ := http.NewRequest("GET", v1TagAPI, http.NoBody)
 	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()

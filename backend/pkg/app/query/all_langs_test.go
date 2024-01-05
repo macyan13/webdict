@@ -2,6 +2,7 @@ package query
 
 import (
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"reflect"
 	"testing"
 )
@@ -20,6 +21,15 @@ func TestAllLangsHandler_Handle(t *testing.T) {
 		want     []LangView
 		wantErr  bool
 	}{
+		{
+			"Error validation",
+			func() fields {
+				return fields{langRepo: &MockLangViewRepository{}}
+			},
+			args{cmd: AllLangs{AuthorID: ""}},
+			nil,
+			true,
+		},
 		{
 			"Error on DB query",
 			func() fields {
@@ -66,10 +76,12 @@ func TestAllLangsHandler_Handle(t *testing.T) {
 			false,
 		},
 	}
+
 	for _, tt := range tests {
+		v := validator.New()
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
-			h := NewAllLangsHandler(f.langRepo)
+			h := NewAllLangsHandler(f.langRepo, v)
 			got, err := h.Handle(tt.args.cmd)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Handle() error = %v, wantErr %v", err, tt.wantErr)

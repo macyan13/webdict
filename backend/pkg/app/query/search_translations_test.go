@@ -161,7 +161,7 @@ func TestLastTranslationsHandler_Handle(t *testing.T) {
 	}
 }
 
-func TestSearchTranslations_Validations(t *testing.T) {
+func TestSearchTranslationsValidation(t *testing.T) {
 	type args struct {
 		query SearchTranslations
 	}
@@ -221,6 +221,7 @@ func TestSearchTranslations_Validations(t *testing.T) {
 			assert.NoError,
 		},
 	}
+
 	v := validator.New()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -251,7 +251,7 @@ func TestServer_UpdateTranslationUnauthorised(t *testing.T) {
 	assert.Equal(t, originalTranslation, record.Target)
 }
 
-func getExistingTranslations(t *testing.T, s *HTTPServer, lang string) []translationResponse {
+func getExistingTranslations(t *testing.T, s *testHTTPServer, lang string) []translationResponse {
 	req, _ := http.NewRequest("GET", v1TranslationAPI+"?pageSize=10&page=1&langId="+lang, http.NoBody)
 	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
@@ -264,7 +264,7 @@ func getExistingTranslations(t *testing.T, s *HTTPServer, lang string) []transla
 	return response.Translations
 }
 
-func getExistingTranslationsByPart(t *testing.T, s *HTTPServer, lang, targetPart, sourcePart string) []translationResponse {
+func getExistingTranslationsByPart(t *testing.T, s *testHTTPServer, lang, targetPart, sourcePart string) []translationResponse {
 	req, _ := http.NewRequest("GET", v1TranslationAPI+"?pageSize=10&page=1&langId="+lang+"&sourcePart="+sourcePart+"&targetPart="+targetPart, http.NoBody)
 	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
@@ -277,7 +277,7 @@ func getExistingTranslationsByPart(t *testing.T, s *HTTPServer, lang, targetPart
 	return response.Translations
 }
 
-func createLang(t *testing.T, s *HTTPServer, name string) string {
+func createLang(t *testing.T, s *testHTTPServer, name string) string {
 	user, err := s.userRepo.GetByEmail(s.opts.Admin.AdminEmail)
 	assert.Nil(t, err)
 

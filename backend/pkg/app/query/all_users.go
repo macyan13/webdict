@@ -1,10 +1,5 @@
 package query
 
-// AllUsers get all users
-type AllUsers struct {
-	AuthorID string
-}
-
 // AllUsersHandler get all users
 type AllUsersHandler struct {
 	userRepo  UserViewRepository
