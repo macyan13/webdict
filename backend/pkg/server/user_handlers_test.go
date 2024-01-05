@@ -292,7 +292,7 @@ func TestHTTPServer_DeleteUser(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
+func getUserByID(t *testing.T, s *testHTTPServer, id string) userResponse {
 	req, _ := http.NewRequest("GET", v1UserAPI+"/"+id, http.NoBody)
 	setAdminAuthToken(t, s, req)
 	w := httptest.NewRecorder()
@@ -305,7 +305,7 @@ func getUserByID(t *testing.T, s *HTTPServer, id string) userResponse {
 	return record
 }
 
-func createUser(t *testing.T, s *HTTPServer, name, email, passwd string) idResponse {
+func createUser(t *testing.T, s *testHTTPServer, name, email, passwd string) idResponse {
 	jsonValue, _ := json.Marshal(userRequest{
 		Name:     name,
 		Email:    email,

@@ -26,7 +26,6 @@ type HTTPServer struct {
 	app         *app.Application
 	authHandler *auth.Handler
 	opts        Opts
-	userRepo    user.Repository // todo: need only for tests, remove after query for user
 }
 
 func InitServer(opts Opts) (*HTTPServer, error) {
@@ -99,15 +98,15 @@ func InitServer(opts Opts) (*HTTPServer, error) {
 	validate := validator.New()
 
 	queries := app.Queries{
-		SingleTranslation:  query.NewSingleTranslationHandler(cachedTranslationRepo),
+		SingleTranslation:  query.NewSingleTranslationHandler(cachedTranslationRepo, validate),
 		SearchTranslations: query.NewSearchTranslationsHandler(cachedTranslationRepo, validate),
-		RandomTranslations: query.NewRandomTranslationsHandler(cachedTranslationRepo),
-		SingleTag:          query.NewSingleTagHandler(cachedTagRepo),
-		AllTags:            query.NewAllTagsHandler(cachedTagRepo),
-		SingleUser:         query.NewSingleUserHandler(userRepo),
+		RandomTranslations: query.NewRandomTranslationsHandler(cachedTranslationRepo, validate),
+		SingleTag:          query.NewSingleTagHandler(cachedTagRepo, validate),
+		AllTags:            query.NewAllTagsHandler(cachedTagRepo, validate),
+		SingleUser:         query.NewSingleUserHandler(userRepo, validate),
 		AllUsers:           query.NewAllUsersHandler(userRepo),
-		SingleLang:         query.NewSingleLangHandler(cachedLangRepo),
-		AllLangs:           query.NewAllLangsHandler(cachedLangRepo),
+		SingleLang:         query.NewSingleLangHandler(cachedLangRepo, validate),
+		AllLangs:           query.NewAllLangsHandler(cachedLangRepo, validate),
 		AllRoles:           query.NewAllRolesHandler(),
 	}
 

@@ -2,47 +2,10 @@ package query
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
-
-func TestRandomTranslationsHandler_processLimit(t *testing.T) {
-	type args struct {
-		query RandomTranslations
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-		{
-			"Limit is below min, default value is expecting",
-			args{query: RandomTranslations{Limit: -4}},
-			10,
-		},
-		{
-			"Limit is below min, default value is expecting",
-			args{query: RandomTranslations{Limit: 0}},
-			10,
-		},
-		{
-			"Limit is higher max, default value is expecting",
-			args{query: RandomTranslations{Limit: 101}},
-			10,
-		},
-		{
-			"Limit is in acceptable range",
-			args{query: RandomTranslations{Limit: 54}},
-			54,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := RandomTranslationsHandler{}
-			assert.Equalf(t, tt.want, h.processLimit(tt.args.query), "processLimit(%v)", tt.args.query)
-		})
-	}
-}
 
 func TestRandomTranslationsHandler_Handle(t *testing.T) {
 	type fields struct {
@@ -58,6 +21,15 @@ func TestRandomTranslationsHandler_Handle(t *testing.T) {
 		want     RandomViews
 		wantErr  assert.ErrorAssertionFunc
 	}{
+		{
+			"Error on query validation",
+			func() fields {
+				return fields{translationRepo: &MockTranslationViewRepository{}}
+			},
+			args{RandomTranslations{AuthorID: "authorID", LangID: "EN", TagIds: []string{}, Limit: 0}},
+			RandomViews{},
+			assert.Error,
+		},
 		{
 			"Error on getting random views from db",
 			func() fields {
@@ -96,15 +68,95 @@ func TestRandomTranslationsHandler_Handle(t *testing.T) {
 			assert.NoError,
 		},
 	}
+	v := validator.New()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fieldsFn()
-			h := NewRandomTranslationsHandler(f.translationRepo)
+			h := NewRandomTranslationsHandler(f.translationRepo, v)
 			got, err := h.Handle(tt.args.query)
 			if !tt.wantErr(t, err, fmt.Sprintf("Handle(%v)", tt.args.query)) {
 				return
 			}
 			assert.Equalf(t, tt.want, got, "Handle(%v)", tt.args.query)
+		})
+	}
+}
+
+func TestRandomTranslationsValidation(t *testing.T) {
+	type args struct {
+		query RandomTranslations
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "Valid case",
+			args: args{
+				query: RandomTranslations{
+					AuthorID: "123",
+					LangID:   "en",
+					TagIds:   []string{"tag1", "tag2"},
+					Limit:    100,
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "Missing AuthorID",
+			args: args{
+				query: RandomTranslations{
+					LangID: "en",
+					TagIds: []string{"tag1", "tag2"},
+					Limit:  100,
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Missing LangID",
+			args: args{
+				query: RandomTranslations{
+					AuthorID: "123",
+					TagIds:   []string{"tag1", "tag2"},
+					Limit:    100,
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Invalid Limit (less than 1)",
+			args: args{
+				query: RandomTranslations{
+					AuthorID: "123",
+					LangID:   "en",
+					TagIds:   []string{"tag1", "tag2"},
+					Limit:    0,
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Invalid Limit (greater than 200)",
+			args: args{
+				query: RandomTranslations{
+					AuthorID: "123",
+					LangID:   "en",
+					TagIds:   []string{"tag1", "tag2"},
+					Limit:    201,
+				},
+			},
+			wantErr: assert.Error,
+		},
+	}
+
+	v := validator.New()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := v.Struct(test.args.query)
+			test.wantErr(t, err)
 		})
 	}
 }
