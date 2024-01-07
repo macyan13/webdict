@@ -39,5 +39,6 @@ restart: ## Stops ran containers, destroys them and restart
 	docker compose -f compose-dev-backend.yml up -d
 
 release_latest: ## Creates and pushes imaged to docker hub using the last git tag
+	docker buildx create --use ;\
 	docker buildx build --push --platform linux/amd64,linux/arm64 \
  		-t macyan/webdict:${GITTAG} -t macyan/webdict:latest .
