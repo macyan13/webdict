@@ -107,9 +107,6 @@ export default {
       translations: [],
       source: '',
       target: '',
-      currentPage: 1,
-      pageSize: 20,
-      totalRecords: null,
       hasError: false,
       errorMessage: '',
       showLoadSpinner: false,
@@ -118,7 +115,7 @@ export default {
       showFlashMessage: false,
     };
   },
-  async mounted() {
+  async created() {
     this.showLoadSpinner = true;
     await this.fetchLangs();
     await this.initLang();
@@ -128,6 +125,32 @@ export default {
     if (this.$store.getters["translation/entityStatus"] !== null) {
       this.triggerFlashMessage();
     }
+  },
+  computed: {
+    currentPage: {
+      get() {
+        return this.$store.getters["translationSearch/getCurrentPage"];
+      },
+      set(value) {
+        this.$store.dispatch('translationSearch/setCurrentPage', value);
+      }
+    },
+    pageSize: {
+      get() {
+        return this.$store.getters["translationSearch/getPageSize"];
+      },
+      set(value) {
+        this.$store.dispatch('translationSearch/setPageSize', value);
+      }
+    },
+    totalRecords: {
+      get() {
+        return this.$store.getters["translationSearch/getTotalRecords"];
+      },
+      set(value) {
+        this.$store.dispatch('translationSearch/setTotalRecords', value);
+      }
+    },
   },
   methods: {
     fetchLangs() {
@@ -189,6 +212,10 @@ export default {
       this.$store.dispatch('translationSearch/setTarget', this.target);
       this.$store.dispatch('translationSearch/setSource', this.source);
     },
+    onPaginationChange(page) {
+      this.currentPage = page;
+      this.search();
+    },
     validate() {
       if (!this.lang) {
         this.hasError = true;
@@ -217,7 +244,7 @@ export default {
 
       this.showLoadSpinner = true;
 
-      TranslationService.search(new SearchParams([], this.lang.id, this.$store.getters["translationHome/getCurrentPage"], this.pageSize, this.source, this.target))
+      TranslationService.search(new SearchParams([], this.lang.id, this.currentPage, this.pageSize, this.source, this.target))
           .then(searchResult => {
             this.translations = searchResult.translations;
             this.totalRecords = searchResult.total_records;
