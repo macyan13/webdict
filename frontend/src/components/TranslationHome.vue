@@ -15,7 +15,7 @@
             last-number
             align="center"
             aria-controls="search-results"
-            @change="search"
+            @change="onPaginationChange"
         ></b-pagination>
       </div>
 
@@ -123,9 +123,6 @@ export default {
       translations: [],
       tags: [],
       tagOptions: [],
-      currentPage: 1,
-      pageSize: 20,
-      totalRecords: null,
       hasError: false,
       errorMessage: '',
       showLoadSpinner: false,
@@ -138,7 +135,7 @@ export default {
       showFlashMessage: false,
     };
   },
-  async mounted() {
+  async created() {
     this.showLoadSpinner = true;
     await this.fetchTags();
     await this.fetchLangs();
@@ -150,6 +147,32 @@ export default {
     if (this.$store.getters["translation/entityStatus"] !== null) {
       this.triggerFlashMessage();
     }
+  },
+  computed: {
+    currentPage: {
+      get() {
+        return this.$store.getters["translationHome/getCurrentPage"];
+      },
+      set(value) {
+        this.$store.dispatch('translationHome/setCurrentPage', value);
+      }
+    },
+    pageSize: {
+      get() {
+        return this.$store.getters["translationHome/getPageSize"];
+      },
+      set(value) {
+        this.$store.dispatch('translationHome/setPageSize', value);
+      }
+    },
+    totalRecords: {
+      get() {
+        return this.$store.getters["translationHome/getTotalRecords"];
+      },
+      set(value) {
+        this.$store.dispatch('translationHome/setTotalRecords', value);
+      }
+    },
   },
   methods: {
     fetchLangs() {
@@ -258,6 +281,10 @@ export default {
       this.$store.dispatch('translationHome/setTranslations', this.translations);
       this.$store.dispatch('translationHome/setTags', this.tags);
     },
+    onPaginationChange(page) {
+      this.currentPage = page;
+      this.search();
+    },
     search() {
       if (!this.lang) {
         this.hasError = true;
@@ -268,7 +295,7 @@ export default {
       this.showLoadSpinner = true;
       let tagIds = this.tags.map(x => x.id);
 
-      TranslationService.search(new SearchParams(tagIds, this.lang.id, this.$store.getters["translationHome/getCurrentPage"], this.pageSize))
+      TranslationService.search(new SearchParams(tagIds, this.lang.id, this.currentPage, this.pageSize))
           .then(searchResult => {
             this.translations = searchResult.translations;
             this.totalRecords = searchResult.total_records;
