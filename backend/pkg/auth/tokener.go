@@ -30,7 +30,7 @@ func (t jwtTokener) parseToken(signedToken string) (*JWTClaim, error) {
 	_, err := jwt.ParseWithClaims(
 		signedToken,
 		&claims,
-		func(token *jwt.Token) (interface{}, error) {
+		func(_ *jwt.Token) (interface{}, error) {
 			return []byte(t.params.Secret), nil
 		},
 	)
