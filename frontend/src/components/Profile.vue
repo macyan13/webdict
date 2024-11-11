@@ -104,6 +104,18 @@
             ></VueMultiselect>
           </div>
         </b-form-group>
+
+        <b-form-group
+            id="translations-view-options-group"
+            label="Translations view options:"
+        >
+          <div style="display: flex; justify-content: center;">
+            <b-form-checkbox v-model="translationViewOptions.hideTranscription">
+              Hide transcription
+            </b-form-checkbox>
+          </div>
+        </b-form-group>
+
         <div v-if="!newPasswordsEqual" style="color: red;">New and Repeated passwords are not identical</div>
         <b-button type="submit" variant="primary">
           Save
@@ -121,6 +133,7 @@
 <script>
 import VueMultiselect from 'vue-multiselect'
 import ProfileService from "@/services/profile.service";
+import { ListOptions } from "@/models/profile";
 import Profile from "@/models/profile";
 import FlashMessage from "@/components/FlashMessage.vue";
 import EntityStatusService from "@/services/entity-status.service";
@@ -139,6 +152,9 @@ export default {
       currentPassword: '',
       newPassword: '',
       newPasswordRepeat: '',
+      translationViewOptions: {
+        hideTranscription: false,
+      },
       showLoadSpinner: false,
       hasError: false,
       errorMessage: '',
@@ -167,6 +183,7 @@ export default {
             this.name = data.name;
             this.email = data.email;
             this.defaultLang = data.default_lang && data.default_lang.id ? data.default_lang : null;
+            this.translationViewOptions.hideTranscription = data.list_options.show_transcription;
           })
           .catch((error) => {
             this.hasError = true;
@@ -223,7 +240,16 @@ export default {
 
       this.showLoadSpinner = true;
       let languageId = this.defaultLang ? this.defaultLang.id : null;
-      ProfileService.update(new Profile(this.id, this.name, this.email, this.currentPassword, this.newPassword, languageId))
+      ProfileService.update(
+          new Profile(
+              this.id,
+              this.name,
+              this.email,
+              this.currentPassword,
+              this.newPassword,
+              languageId,
+              new ListOptions(this.translationViewOptions.hideTranscription)
+          ))
           .then(() => {
             this.$store.dispatch('profile/setEntityStatus', EntityStatusService.updated());
             this.triggerFlashMessage();

@@ -4,7 +4,7 @@
       <thead>
       <tr>
         <th>Source</th>
-        <th>Transcription</th>
+        <th v-if="!hideTranscription">Transcription</th>
         <th>Target</th>
         <th>Tags</th>
         <th>Actions</th>
@@ -13,7 +13,7 @@
       <tbody>
       <tr v-for="translation in translations" :key="translation.id" :id="translation.id">
         <td>{{ translation.source }}</td>
-        <td>{{ translation.transcription }}</td>
+        <td v-if="!hideTranscription">{{ translation.transcription }}</td>
         <td><vue-markdown>{{translation.target}}</vue-markdown></td>
         <td>
           <span v-for="tag in translation.tags" :key="tag.id" class="badge badge-primary">{{ tag.name }}</span>
@@ -68,9 +68,27 @@ export default {
       showConfirmationModal: false,
       showDeleteSpinner: false,
       idToDelete: null,
+      hideTranscription: false,
     };
   },
+  mounted() {
+    this.fetchProfile();
+  },
   methods: {
+    fetchProfile() {
+      this.showLoadSpinner = true;
+      this.$store.dispatch('profile/fetchProfile')
+          .then((profile) => {
+            this.hideTranscription = profile.translationViewOptions.hideTranscription;
+          })
+          .catch((error) => {
+            this.hasError = true;
+            this.errorMessage = "Can not get user data from server: " + error;
+          })
+          .finally(() => {
+            this.showLoadSpinner = false;
+          });
+    },
     editTranslation(id) {
       this.$router.push(`/editTranslation/${id}`)
     },
