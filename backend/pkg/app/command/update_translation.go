@@ -14,7 +14,7 @@ type UpdateTranslation struct {
 	Target        string
 	AuthorID      string
 	Example       string
-	TagIds        []string
+	TagIDs        []string
 	LangID        string
 }
 
@@ -34,7 +34,7 @@ func NewUpdateTranslationHandler(translationRep translation.Repository, tagRepo 
 // Handle apply changes from cmd to existing translation
 func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 	if err := h.validator.validate(translationData{
-		TagIds:   cmd.TagIds,
+		TagIDs:   cmd.TagIDs,
 		LangID:   cmd.LangID,
 		AuthorID: cmd.AuthorID,
 		Source:   cmd.Source,
@@ -48,7 +48,7 @@ func (h UpdateTranslationHandler) Handle(cmd UpdateTranslation) error {
 		return err
 	}
 
-	if err = tr.ApplyChanges(cmd.Source, cmd.Transcription, cmd.Target, cmd.Example, cmd.TagIds, cmd.LangID); err != nil {
+	if err = tr.ApplyChanges(cmd.Source, cmd.Transcription, cmd.Target, cmd.Example, cmd.TagIDs, cmd.LangID); err != nil {
 		return err
 	}
 

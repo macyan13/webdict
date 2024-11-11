@@ -43,11 +43,11 @@ func TestLangRepo_Create(t *testing.T) {
 				assert.Nil(t, err)
 				return args{lang: ln}
 			},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
+			func(t assert.TestingT, err error, _ ...interface{}) bool {
 				assert.Equal(t, "testErr", err.Error())
 				return false
 			},
-			func(t assert.TestingT, i interface{}, i2 ...interface{}) bool {
+			func(t assert.TestingT, _ interface{}, i2 ...interface{}) bool {
 				cacheMap, _ := i2[0].(*cache.Cache[string, map[string]query.LangView]).Get("testAuthor")
 				_, ok := cacheMap["lang1"]
 				assert.True(t, ok, i2)

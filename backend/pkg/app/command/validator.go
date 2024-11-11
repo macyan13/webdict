@@ -13,7 +13,7 @@ type validator struct {
 }
 
 type translationData struct {
-	TagIds   []string
+	TagIDs   []string
 	LangID   string
 	AuthorID string
 	Source   string
@@ -36,17 +36,17 @@ func (v validator) validate(data translationData) error {
 }
 
 func (v validator) validateTags(data translationData) error {
-	if len(data.TagIds) == 0 {
+	if len(data.TagIDs) == 0 {
 		return nil
 	}
 
-	exist, err := v.tagRepo.AllExist(data.TagIds, data.AuthorID)
+	exist, err := v.tagRepo.AllExist(data.TagIDs, data.AuthorID)
 	if err != nil {
 		return err
 	}
 
 	if !exist {
-		return fmt.Errorf("some of passed tags: %v are not found", data.TagIds)
+		return fmt.Errorf("some of passed tags: %v are not found", data.TagIDs)
 	}
 
 	return nil

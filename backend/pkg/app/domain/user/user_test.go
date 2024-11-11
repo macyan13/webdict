@@ -106,7 +106,7 @@ func TestNewUser(t *testing.T) {
 				"12345678",
 				Admin,
 			},
-			func(t assert.TestingT, err error, i ...interface{}) bool {
+			func(t assert.TestingT, err error, _ ...interface{}) bool {
 				assert.Nil(t, err)
 				return false
 			},

@@ -32,7 +32,7 @@ func (s *HTTPServer) CreateTranslation() gin.HandlerFunc {
 			Target:        request.Target,
 			Source:        request.Source,
 			Example:       request.Example,
-			TagIds:        request.TagIds,
+			TagIDs:        request.TagIds,
 			AuthorID:      user.ID,
 			LangID:        request.LangID,
 		})
@@ -136,7 +136,7 @@ func (s *HTTPServer) UpdateTranslation() gin.HandlerFunc {
 			Transcription: request.Transcription,
 			Source:        request.Source,
 			Example:       request.Example,
-			TagIds:        request.TagIds,
+			TagIDs:        request.TagIds,
 			AuthorID:      user.ID,
 			LangID:        request.LangID,
 		}); err != nil {

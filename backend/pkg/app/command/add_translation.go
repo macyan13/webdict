@@ -12,7 +12,7 @@ type AddTranslation struct {
 	Target        string
 	Source        string
 	Example       string
-	TagIds        []string
+	TagIDs        []string
 	AuthorID      string
 	LangID        string
 }
@@ -33,7 +33,7 @@ func NewAddTranslationHandler(translationRep translation.Repository, tagRepo tag
 // Handle performs translation creation cmd
 func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 	if err := h.validator.validate(translationData{
-		TagIds:   cmd.TagIds,
+		TagIDs:   cmd.TagIDs,
 		LangID:   cmd.LangID,
 		AuthorID: cmd.AuthorID,
 		Source:   cmd.Source,
@@ -47,7 +47,7 @@ func (h AddTranslationHandler) Handle(cmd AddTranslation) (string, error) {
 		cmd.Target,
 		cmd.AuthorID,
 		cmd.Example,
-		cmd.TagIds,
+		cmd.TagIDs,
 		cmd.LangID,
 	)
 	if err != nil {
