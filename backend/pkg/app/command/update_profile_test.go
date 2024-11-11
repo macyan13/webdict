@@ -305,6 +305,7 @@ func TestUpdateProfileHandler_Handle_PositiveCases(t *testing.T) {
 		CurrentPassword: currentPasswd,
 		NewPassword:     newPasswd,
 		DefaultLangID:   langID,
+		ListOptions:     user.NewListOptions(true),
 	}
 
 	handler := NewUpdateProfileHandler(&usrRepo, &cipher, &langRepo)
@@ -312,9 +313,11 @@ func TestUpdateProfileHandler_Handle_PositiveCases(t *testing.T) {
 
 	updatedUsr := usrRepo.Calls[1].Arguments[0].(*user.User)
 	data := updatedUsr.ToMap()
+	listData := updatedUsr.ListOptions()
 
 	assert.Equal(t, cmd.Name, data["name"])
 	assert.Equal(t, cmd.Email, data["email"])
 	assert.Equal(t, newHash, data["password"])
 	assert.Equal(t, langID, data["defaultLangID"])
+	assert.Equal(t, true, listData.ToMap()["showTranscription"])
 }

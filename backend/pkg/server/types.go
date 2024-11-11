@@ -23,11 +23,16 @@ type userRequest struct {
 }
 
 type updateProfileRequest struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	CurrentPassword string `json:"current_password"`
-	NewPassword     string `json:"new_password"`
-	DefaultLangID   string `json:"default_lang_id"`
+	Name            string             `json:"name"`
+	Email           string             `json:"email"`
+	CurrentPassword string             `json:"current_password"`
+	NewPassword     string             `json:"new_password"`
+	DefaultLangID   string             `json:"default_lang_id"`
+	ListOptions     profileListOptions `json:"list_options"`
+}
+
+type profileListOptions struct {
+	ShowTranscription bool `json:"show_transcription"`
 }
 
 type langRequest struct {
@@ -70,11 +75,12 @@ type langResponse struct {
 }
 
 type userResponse struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Email       string       `json:"email"`
-	Role        roleResponse `json:"role"`
-	DefaultLang langResponse `json:"default_lang"`
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Email       string             `json:"email"`
+	Role        roleResponse       `json:"role"`
+	DefaultLang langResponse       `json:"default_lang"`
+	ListOptions profileListOptions `json:"list_options"`
 }
 
 type roleResponse struct {

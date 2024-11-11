@@ -32,7 +32,7 @@ func (h UpdateUserHandler) Handle(cmd UpdateUser) error {
 		return err
 	}
 
-	if err = usr.ApplyChanges(cmd.Name, cmd.Email, passwd, cmd.Role, usr.DefaultLangID()); err != nil {
+	if err = usr.ApplyChanges(cmd.Name, cmd.Email, passwd, cmd.Role, usr.DefaultLangID(), usr.ListOptions()); err != nil {
 		return err
 	}
 

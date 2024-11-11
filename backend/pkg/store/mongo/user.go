@@ -21,12 +21,18 @@ type UserRepo struct {
 
 // UserModel represents mongo user document
 type UserModel struct {
-	ID            string `bson:"_id"`
-	Name          string `bson:"name"`
-	Email         string `bson:"email"`
-	Password      string `bson:"password"`
-	Role          int    `bson:"role"`
-	DefaultLangID string `bson:"default_lang_id"`
+	ID            string           `bson:"_id"`
+	Name          string           `bson:"name"`
+	Email         string           `bson:"email"`
+	Password      string           `bson:"password"`
+	Role          int              `bson:"role"`
+	DefaultLangID string           `bson:"default_lang_id"`
+	ListOptions   ListOptionsModel `bson:"list_options"`
+}
+
+// ListOptionsModel represents the nested list options in the mongo user document
+type ListOptionsModel struct {
+	ShowTranscription bool `bson:"show_transcription"`
 }
 
 // NewUserRepo creates new UserRepo
@@ -213,6 +219,9 @@ func (r *UserRepo) fromModelToView(model UserModel) (query.UserView, error) {
 		Email:       model.Email,
 		Role:        role,
 		DefaultLang: query.LangView{},
+		ListOptions: query.UserListOptionsView{
+			ShowTranscription: model.ListOptions.ShowTranscription,
+		},
 	}
 
 	if model.DefaultLangID != "" {
@@ -234,7 +243,8 @@ func (r *UserRepo) fromModelToDomain(model UserModel) *user.User {
 		model.Name,
 		model.Email,
 		model.Password,
-		model.Role,
+		user.Role(model.Role),
 		model.DefaultLangID,
+		user.NewListOptions(model.ListOptions.ShowTranscription),
 	)
 }

@@ -90,6 +90,11 @@ type UserView struct {
 	Email       string
 	Role        RoleView
 	DefaultLang LangView
+	ListOptions UserListOptionsView
+}
+
+type UserListOptionsView struct {
+	ShowTranscription bool
 }
 
 func (v *UserView) sanitize(sanitizer *strictSanitizer) {

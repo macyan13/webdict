@@ -151,7 +151,10 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
 {
   "name": "John Dorry",
   "email": "{{userEmail}}",
-  "default_lang_id": "{{lang_id}}"
+  "default_lang_id": "{{lang_id}}",
+  "list_options": {
+    "show_transcription": true
+  }
 }
 
 > {%
@@ -173,6 +176,7 @@ Authorization: {{user_auth_type}} {{user_auth_token}}
         client.assert(response.body.hasOwnProperty("id"), "User ID is not presented")
         client.assert(response.body.default_lang.name === "DE", "lang name from get profile is not correct")
         client.assert(response.body.name === "John Dorry", "name from get profile is not correct")
+        client.assert(response.body.list_options.show_transcription === true, "List options - show transcription from get profile is not correct")
     })
 %}
 

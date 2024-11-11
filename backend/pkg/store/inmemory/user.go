@@ -90,11 +90,14 @@ func (u *UserRepo) GetView(id string) (query.UserView, error) {
 			return query.UserView{}, err
 		}
 
+		listOptions := userData["listOptions"].(map[string]interface{})
+
 		return query.UserView{
-			ID:    userData["id"].(string),
-			Name:  userData["name"].(string),
-			Email: userData["email"].(string),
-			Role:  role,
+			ID:          userData["id"].(string),
+			Name:        userData["name"].(string),
+			Email:       userData["email"].(string),
+			Role:        role,
+			ListOptions: query.UserListOptionsView{ShowTranscription: listOptions["showTranscription"].(bool)},
 		}, nil
 	}
 
