@@ -24,6 +24,9 @@ class ProfileService {
                     current_password: profile.currentPassword,
                     new_password: profile.newPassword,
                     default_lang_id: profile.defaultLangId,
+                    list_options: {
+                        "hide_transcription": profile.listOptions.hideTranscription
+                    }
                 }, {headers: authHeader()})
                 .then(response => {
                     resolve(response.data);

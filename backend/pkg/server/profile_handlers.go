@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/macyan13/webdict/backend/pkg/app/command"
@@ -52,8 +53,9 @@ func (s *HTTPServer) UpdateProfile() gin.HandlerFunc {
 			CurrentPassword: request.CurrentPassword,
 			NewPassword:     request.NewPassword,
 			DefaultLangID:   request.DefaultLangID,
+			ListOptions:     user.NewListOptions(request.ListOptions.HideTranscription),
 		}); err != nil {
-			if err == user.ErrEmailAlreadyExists {
+			if errors.Is(err, user.ErrEmailAlreadyExists) {
 				s.badRequest(c, fmt.Errorf("user with email %s already exists", request.Email))
 				return
 			}

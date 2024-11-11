@@ -55,20 +55,20 @@ func (t *Translation) LangID() string {
 	return t.langID
 }
 
-func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIds []string, langID string) error {
+func (t *Translation) ApplyChanges(source, transcription, target, example string, tagIDs []string, langID string) error {
 	updated := *t
-	updated.applyChanges(source, transcription, target, example, tagIds, langID)
+	updated.applyChanges(source, transcription, target, example, tagIDs, langID)
 
 	if err := updated.validate(); err != nil {
 		return err
 	}
 
-	t.applyChanges(source, transcription, target, example, tagIds, langID)
+	t.applyChanges(source, transcription, target, example, tagIDs, langID)
 	return nil
 }
 
-func (t *Translation) applyChanges(source, transcription, target, example string, tagIds []string, langID string) {
-	t.tagIDs = tagIds
+func (t *Translation) applyChanges(source, transcription, target, example string, tagIDs []string, langID string) {
+	t.tagIDs = tagIDs
 	t.transcription = transcription
 	t.source = source
 	t.target = target

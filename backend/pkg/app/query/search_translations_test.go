@@ -196,7 +196,7 @@ func TestSearchTranslationsValidation(t *testing.T) {
 			assert.Error,
 		},
 		{
-			"Error on conflicting TagIds and SourcePart",
+			"Error on conflicting TagIDs and SourcePart",
 			args{SearchTranslations{AuthorID: "123", LangID: "EN", PageSize: 10, Page: 1, TagIds: []string{"tag1", "tag2"}, SourcePart: "source"}},
 			assert.Error,
 		},

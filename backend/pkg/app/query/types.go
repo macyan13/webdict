@@ -6,8 +6,8 @@ import (
 
 type TranslationViewRepository interface {
 	GetView(id, authorID string) (TranslationView, error)
-	GetLastViewsByTags(authorID, langID string, pageSize, page int, tagIds []string) (LastTranslationViews, error)
-	GetRandomViews(authorID, langID string, tagIds []string, limit int) (RandomViews, error)
+	GetLastViewsByTags(authorID, langID string, pageSize, page int, tagIDs []string) (LastTranslationViews, error)
+	GetRandomViews(authorID, langID string, tagIDs []string, limit int) (RandomViews, error)
 	GetLastViewsBySourcePart(authorID, langID, sourcePart string, pageSize, page int) (LastTranslationViews, error)
 	GetLastViewsByTargetPart(authorID, langID, targetPart string, pageSize, page int) (LastTranslationViews, error)
 }
@@ -90,6 +90,11 @@ type UserView struct {
 	Email       string
 	Role        RoleView
 	DefaultLang LangView
+	ListOptions UserListOptionsView
+}
+
+type UserListOptionsView struct {
+	HideTranscription bool
 }
 
 func (v *UserView) sanitize(sanitizer *strictSanitizer) {

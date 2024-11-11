@@ -29,7 +29,7 @@ func TestAddTranslationHandler_Handle_NegativeCases(t *testing.T) {
 					validator: newFailValidator(),
 				}
 			},
-			args{cmd: AddTranslation{TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{cmd: AddTranslation{TagIDs: []string{"tag1"}, AuthorID: "testAuthor"}},
 			assert.Error,
 		},
 		{
@@ -91,7 +91,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 		Target:        "target",
 		Source:        source,
 		Example:       "example",
-		TagIds:        tags,
+		TagIDs:        tags,
 		AuthorID:      authorID,
 		LangID:        langID,
 	}
@@ -106,7 +106,7 @@ func TestAddTranslationHandler_Handle_PositiveCase(t *testing.T) {
 	assert.Equal(t, cmd.Target, data["target"])
 	assert.Equal(t, cmd.Transcription, data["transcription"])
 	assert.Equal(t, cmd.Source, data["source"])
-	assert.Equal(t, cmd.TagIds, data["tagIDs"])
+	assert.Equal(t, cmd.TagIDs, data["tagIDs"])
 	assert.Equal(t, cmd.AuthorID, data["authorID"])
 	assert.Equal(t, cmd.LangID, data["langID"])
 }

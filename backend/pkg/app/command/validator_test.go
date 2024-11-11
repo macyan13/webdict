@@ -32,7 +32,7 @@ func Test_validator_validateTags(t *testing.T) {
 					tagRepo: &tagRepo,
 				}
 			},
-			args{data: translationData{TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{data: translationData{TagIDs: []string{"tag1"}, AuthorID: "testAuthor"}},
 			assert.Error,
 		},
 		{
@@ -44,7 +44,7 @@ func Test_validator_validateTags(t *testing.T) {
 					tagRepo: &tagRepo,
 				}
 			},
-			args{data: translationData{TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{data: translationData{TagIDs: []string{"tag1"}, AuthorID: "testAuthor"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.Equal(t, "some of passed tags: [tag1] are not found", err.Error(), i)
 				return true
@@ -59,7 +59,7 @@ func Test_validator_validateTags(t *testing.T) {
 					tagRepo: &tagRepo,
 				}
 			},
-			args{data: translationData{TagIds: []string{"tag1"}, AuthorID: "testAuthor"}},
+			args{data: translationData{TagIDs: []string{"tag1"}, AuthorID: "testAuthor"}},
 			assert.NoError,
 		},
 	}
@@ -162,7 +162,7 @@ func Test_validator_validate(t *testing.T) {
 					langRepo: &langRepo,
 				}
 			},
-			args{data: translationData{TagIds: []string{"tagID"}, LangID: "langID", AuthorID: "testAuthor", Source: "source"}},
+			args{data: translationData{TagIDs: []string{"tagID"}, LangID: "langID", AuthorID: "testAuthor", Source: "source"}},
 			func(t assert.TestingT, err error, i ...interface{}) bool {
 				assert.True(t, strings.Contains(err.Error(), "some of passed tags: [tagID] are not found"), i)
 				assert.True(t, strings.Contains(err.Error(), "lang with id: langID is not found"), i)
@@ -181,7 +181,7 @@ func Test_validator_validate(t *testing.T) {
 					langRepo: &langRepo,
 				}
 			},
-			args{data: translationData{TagIds: []string{"tagID"}, LangID: "langID", AuthorID: "testAuthor", Source: "source"}},
+			args{data: translationData{TagIDs: []string{"tagID"}, LangID: "langID", AuthorID: "testAuthor", Source: "source"}},
 			assert.NoError,
 		},
 	}

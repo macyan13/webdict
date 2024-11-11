@@ -14,8 +14,11 @@ func TestUserRepo_fromDomainToModel(t *testing.T) {
 	password := "12345678"
 	role := user.Admin
 	usr, err := user.NewUser(name, email, password, role)
-
 	assert.Nil(t, err)
+
+	err = usr.ApplyChanges(name, email, password, role, usr.DefaultLangID(), user.NewListOptions(true))
+	assert.Nil(t, err)
+
 	repo := UserRepo{}
 
 	model, err := repo.fromDomainToModel(usr)
@@ -25,6 +28,7 @@ func TestUserRepo_fromDomainToModel(t *testing.T) {
 	assert.Equal(t, email, model.Email)
 	assert.Equal(t, password, model.Password)
 	assert.Equal(t, int(role), model.Role)
+	assert.Equal(t, true, model.ListOptions.HideTranscription)
 }
 
 func TestUserRepo_fromModelToView(t *testing.T) {
@@ -82,12 +86,12 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 				langRepo.On("GetView", "langID", "authorID").Return(query.LangView{Name: "test"}, nil)
 				return fields{langRepo: &langRepo, roleConverter: query.NewRoleMapper()}
 			},
-			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1}},
+			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1, ListOptions: ListOptionsModel{HideTranscription: true}}},
 			query.UserView{ID: "authorID", DefaultLang: query.LangView{Name: "test"}, Role: query.RoleView{
 				ID:      1,
 				Name:    "Admin",
 				IsAdmin: true,
-			}},
+			}, ListOptions: query.UserListOptionsView{HideTranscription: true}},
 			assert.NoError,
 		},
 	}
@@ -105,4 +109,25 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 			assert.Equalf(t, tt.want, got, "fromModelToView(%v)", tt.args.model)
 		})
 	}
+}
+
+func TestUserRepo_fromModelToDomain(t *testing.T) {
+	model := UserModel{
+		ID:       "authorID",
+		Name:     "John",
+		Email:    "John@do.com",
+		Password: "testPassword",
+		Role:     1,
+	}
+
+	repo := UserRepo{}
+	usr := repo.fromModelToDomain(model)
+	listOptions := usr.ListOptions()
+
+	assert.Equal(t, model.ID, usr.ID())
+	assert.Equal(t, model.Email, usr.Email())
+	assert.Equal(t, model.Password, usr.Password())
+	assert.Equal(t, user.Role(model.Role), usr.Role())
+	assert.Equal(t, model.DefaultLangID, usr.DefaultLangID())
+	assert.Equal(t, false, listOptions.ToMap()["hideTranscription"])
 }

@@ -14,6 +14,7 @@ type UpdateProfile struct {
 	CurrentPassword string
 	NewPassword     string
 	DefaultLangID   string
+	ListOptions     user.ListOptions
 }
 
 type UpdateProfileHandler struct {
@@ -41,7 +42,7 @@ func (h UpdateProfileHandler) Handle(cmd UpdateProfile) error {
 		return err
 	}
 
-	if err = usr.ApplyChanges(cmd.Name, cmd.Email, passwd, usr.Role(), cmd.DefaultLangID); err != nil {
+	if err = usr.ApplyChanges(cmd.Name, cmd.Email, passwd, usr.Role(), cmd.DefaultLangID, cmd.ListOptions); err != nil {
 		return err
 	}
 

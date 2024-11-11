@@ -129,10 +129,11 @@ func (s *HTTPServer) userViewsToResponses(users []query.UserView) []userResponse
 
 func (s *HTTPServer) userViewToResponse(usr query.UserView) userResponse {
 	response := userResponse{
-		ID:    usr.ID,
-		Name:  usr.Name,
-		Email: usr.Email,
-		Role:  s.roleViewToResponse(usr.Role),
+		ID:          usr.ID,
+		Name:        usr.Name,
+		Email:       usr.Email,
+		Role:        s.roleViewToResponse(usr.Role),
+		ListOptions: profileListOptions{HideTranscription: usr.ListOptions.HideTranscription},
 	}
 
 	if usr.DefaultLang.ID != "" {

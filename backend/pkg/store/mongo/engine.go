@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"time"
 )
 
@@ -20,7 +21,10 @@ const queryDefaultTimeoutInSec = 3
 
 func InitDatabase(ctx context.Context, opts Opts) (*mongo.Database, error) {
 	clientOpts := options.Client()
-	clientOpts.ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d", opts.Username, opts.Passwd, opts.Host, opts.Port))
+
+	// Set the write concern
+	wc := writeconcern.New(writeconcern.WMajority())
+	clientOpts.ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d", opts.Username, opts.Passwd, opts.Host, opts.Port)).SetWriteConcern(wc)
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
