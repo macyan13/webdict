@@ -1,4 +1,4 @@
-FROM golang:1.20.4-bullseye as build-backend
+FROM golang:1.20.4-bullseye AS build-backend
 
 ARG SKIP_BACKEND_TEST=1
 
