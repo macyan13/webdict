@@ -39,17 +39,16 @@ linters:
     - govet
     - unconvert
     - megacheck
-    - structcheck
+#    - structcheck
     - gas
     - gocyclo
     - dupl
     - misspell
     - unparam
-    - varcheck
-    - deadcode
+#    - varcheck
+#    - deadcode
     - typecheck
     - ineffassign
-    - varcheck
     - stylecheck
     - gochecknoinits
     - exportloopref
