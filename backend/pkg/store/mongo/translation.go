@@ -27,11 +27,11 @@ type TranslationModel struct {
 	AuthorID      string    `bson:"author_id"`
 	CreatedAt     time.Time `bson:"created_at"`
 	UpdatedAt     time.Time `bson:"updatedAt"`
-	Transcription string    `bson:"transcription,omitempty"`
+	Transcription string    `bson:"transcription"`
 	Target        string    `bson:"target"`
 	Source        string    `bson:"source"`
-	Example       string    `bson:"example,omitempty"`
-	TagIDs        []string  `bson:"tag_ids,omitempty"`
+	Example       string    `bson:"example"`
+	TagIDs        []string  `bson:"tag_ids"`
 	LangID        string    `bson:"lang_id"`
 }
 
