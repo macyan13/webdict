@@ -122,7 +122,7 @@ func TestNewUser(t *testing.T) {
 			assert.Equal(t, got.password, tt.args.password)
 			assert.Equal(t, got.email, tt.args.email)
 			assert.Equal(t, got.role, tt.args.role)
-			assert.Equal(t, false, got.listOptions.showTranscription)
+			assert.Equal(t, false, got.listOptions.hideTranscription)
 		})
 	}
 }
@@ -135,7 +135,7 @@ func TestUnmarshalFromDB(t *testing.T) {
 		password:      "testPassword",
 		role:          Role(0),
 		defaultLangID: "testLang",
-		listOptions:   ListOptions{showTranscription: true},
+		listOptions:   ListOptions{hideTranscription: true},
 	}
 
 	assert.Equal(t, &user, UnmarshalFromDB(user.id, user.name, user.email, user.password, user.role, user.defaultLangID, user.listOptions))
@@ -199,14 +199,14 @@ func TestUser_ApplyChanges(t *testing.T) {
 				email:       "test@mail.com",
 				password:    "testPasswd",
 				role:        Admin,
-				listOptions: ListOptions{showTranscription: true},
+				listOptions: ListOptions{hideTranscription: true},
 			},
 			args{
 				name:        "name",
 				email:       "invalidEmail",
 				passwd:      "testPasswd",
 				role:        Author,
-				listOptions: ListOptions{showTranscription: false},
+				listOptions: ListOptions{hideTranscription: false},
 			},
 			func(t assert.TestingT, err error, usr *User, details string) {
 				assert.True(t, strings.Contains(err.Error(), "email is not valid"), details)
@@ -223,7 +223,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				email:       "test@mail.com",
 				password:    "testPasswd",
 				role:        Admin,
-				listOptions: ListOptions{showTranscription: true},
+				listOptions: ListOptions{hideTranscription: true},
 			},
 			args{
 				name:          "name",
@@ -231,7 +231,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				passwd:        "updatedPasswd",
 				role:          Author,
 				defaultLangID: "langID",
-				listOptions:   ListOptions{showTranscription: false},
+				listOptions:   ListOptions{hideTranscription: false},
 			},
 			func(t assert.TestingT, err error, usr *User, details string) {
 				assert.Nil(t, err, details)
@@ -240,7 +240,7 @@ func TestUser_ApplyChanges(t *testing.T) {
 				assert.Equal(t, "updatedPasswd", usr.password)
 				assert.Equal(t, Author, usr.role)
 				assert.Equal(t, "langID", usr.defaultLangID)
-				assert.Equal(t, false, usr.listOptions.showTranscription)
+				assert.Equal(t, false, usr.listOptions.hideTranscription)
 			},
 		},
 	}

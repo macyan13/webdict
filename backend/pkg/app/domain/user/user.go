@@ -9,16 +9,16 @@ import (
 )
 
 type ListOptions struct {
-	showTranscription bool
+	hideTranscription bool
 }
 
-func NewListOptions(showTranscription bool) ListOptions {
-	return ListOptions{showTranscription: showTranscription}
+func NewListOptions(hideTranscription bool) ListOptions {
+	return ListOptions{hideTranscription: hideTranscription}
 }
 
 func (l *ListOptions) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"showTranscription": l.showTranscription,
+		"hideTranscription": l.hideTranscription,
 	}
 }
 
@@ -51,7 +51,7 @@ func NewUser(name, email, password string, role Role) (*User, error) {
 		password: password,
 		role:     role,
 		listOptions: ListOptions{
-			showTranscription: false,
+			hideTranscription: false,
 		},
 	}
 

@@ -183,7 +183,7 @@ export default {
             this.name = data.name;
             this.email = data.email;
             this.defaultLang = data.default_lang && data.default_lang.id ? data.default_lang : null;
-            this.translationViewOptions.hideTranscription = data.list_options.show_transcription;
+            this.translationViewOptions.hideTranscription = data.list_options.hide_transcription;
           })
           .catch((error) => {
             this.hasError = true;

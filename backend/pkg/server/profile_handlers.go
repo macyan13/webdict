@@ -53,7 +53,7 @@ func (s *HTTPServer) UpdateProfile() gin.HandlerFunc {
 			CurrentPassword: request.CurrentPassword,
 			NewPassword:     request.NewPassword,
 			DefaultLangID:   request.DefaultLangID,
-			ListOptions:     user.NewListOptions(request.ListOptions.ShowTranscription),
+			ListOptions:     user.NewListOptions(request.ListOptions.HideTranscription),
 		}); err != nil {
 			if errors.Is(err, user.ErrEmailAlreadyExists) {
 				s.badRequest(c, fmt.Errorf("user with email %s already exists", request.Email))

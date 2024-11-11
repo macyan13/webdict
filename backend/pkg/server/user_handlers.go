@@ -133,7 +133,7 @@ func (s *HTTPServer) userViewToResponse(usr query.UserView) userResponse {
 		Name:        usr.Name,
 		Email:       usr.Email,
 		Role:        s.roleViewToResponse(usr.Role),
-		ListOptions: profileListOptions{ShowTranscription: usr.ListOptions.ShowTranscription},
+		ListOptions: profileListOptions{HideTranscription: usr.ListOptions.HideTranscription},
 	}
 
 	if usr.DefaultLang.ID != "" {

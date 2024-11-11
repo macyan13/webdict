@@ -24,7 +24,7 @@ func TestHTTPServer_GetProfile(t *testing.T) {
 	assert.Equal(t, name, profile.Name)
 	assert.Equal(t, email, profile.Email)
 	assert.Equal(t, int(user.Author), profile.Role.ID)
-	assert.Equal(t, false, profile.ListOptions.ShowTranscription)
+	assert.Equal(t, false, profile.ListOptions.HideTranscription)
 }
 
 func TestHTTPServer_GetProfile_Unauthorized(t *testing.T) {
@@ -52,7 +52,7 @@ func TestHTTPServer_TestHTTPServer_UpdateProfile(t *testing.T) {
 		Email:           updatedEmail,
 		CurrentPassword: currentPasswd,
 		NewPassword:     newPasswd,
-		ListOptions:     profileListOptions{ShowTranscription: true},
+		ListOptions:     profileListOptions{HideTranscription: true},
 	}
 
 	jsonValue, _ := json.Marshal(updRequest)
@@ -65,7 +65,7 @@ func TestHTTPServer_TestHTTPServer_UpdateProfile(t *testing.T) {
 	profile := getProfile(t, s, updatedEmail, newPasswd)
 	assert.Equal(t, updatedName, profile.Name)
 	assert.Equal(t, updatedEmail, profile.Email)
-	assert.Equal(t, true, profile.ListOptions.ShowTranscription)
+	assert.Equal(t, true, profile.ListOptions.HideTranscription)
 }
 
 func TestHTTPServer_TestHTTPServerUnauthorized(t *testing.T) {

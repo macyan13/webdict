@@ -32,7 +32,7 @@ type UserModel struct {
 
 // ListOptionsModel represents the nested list options in the mongo user document
 type ListOptionsModel struct {
-	ShowTranscription bool `bson:"show_transcription"`
+	HideTranscription bool `bson:"hide_transcription"`
 }
 
 // NewUserRepo creates new UserRepo
@@ -220,7 +220,7 @@ func (r *UserRepo) fromModelToView(model UserModel) (query.UserView, error) {
 		Role:        role,
 		DefaultLang: query.LangView{},
 		ListOptions: query.UserListOptionsView{
-			ShowTranscription: model.ListOptions.ShowTranscription,
+			HideTranscription: model.ListOptions.HideTranscription,
 		},
 	}
 
@@ -245,6 +245,6 @@ func (r *UserRepo) fromModelToDomain(model UserModel) *user.User {
 		model.Password,
 		user.Role(model.Role),
 		model.DefaultLangID,
-		user.NewListOptions(model.ListOptions.ShowTranscription),
+		user.NewListOptions(model.ListOptions.HideTranscription),
 	)
 }

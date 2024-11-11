@@ -28,7 +28,7 @@ func TestUserRepo_fromDomainToModel(t *testing.T) {
 	assert.Equal(t, email, model.Email)
 	assert.Equal(t, password, model.Password)
 	assert.Equal(t, int(role), model.Role)
-	assert.Equal(t, true, model.ListOptions.ShowTranscription)
+	assert.Equal(t, true, model.ListOptions.HideTranscription)
 }
 
 func TestUserRepo_fromModelToView(t *testing.T) {
@@ -86,12 +86,12 @@ func TestUserRepo_fromModelToView(t *testing.T) {
 				langRepo.On("GetView", "langID", "authorID").Return(query.LangView{Name: "test"}, nil)
 				return fields{langRepo: &langRepo, roleConverter: query.NewRoleMapper()}
 			},
-			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1, ListOptions: ListOptionsModel{ShowTranscription: true}}},
+			args{model: UserModel{ID: "authorID", DefaultLangID: "langID", Role: 1, ListOptions: ListOptionsModel{HideTranscription: true}}},
 			query.UserView{ID: "authorID", DefaultLang: query.LangView{Name: "test"}, Role: query.RoleView{
 				ID:      1,
 				Name:    "Admin",
 				IsAdmin: true,
-			}, ListOptions: query.UserListOptionsView{ShowTranscription: true}},
+			}, ListOptions: query.UserListOptionsView{HideTranscription: true}},
 			assert.NoError,
 		},
 	}
@@ -129,5 +129,5 @@ func TestUserRepo_fromModelToDomain(t *testing.T) {
 	assert.Equal(t, model.Password, usr.Password())
 	assert.Equal(t, user.Role(model.Role), usr.Role())
 	assert.Equal(t, model.DefaultLangID, usr.DefaultLangID())
-	assert.Equal(t, false, listOptions.ToMap()["showTranscription"])
+	assert.Equal(t, false, listOptions.ToMap()["hideTranscription"])
 }

@@ -97,7 +97,7 @@ func (u *UserRepo) GetView(id string) (query.UserView, error) {
 			Name:        userData["name"].(string),
 			Email:       userData["email"].(string),
 			Role:        role,
-			ListOptions: query.UserListOptionsView{ShowTranscription: listOptions["showTranscription"].(bool)},
+			ListOptions: query.UserListOptionsView{HideTranscription: listOptions["hideTranscription"].(bool)},
 		}, nil
 	}
 

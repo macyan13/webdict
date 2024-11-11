@@ -32,7 +32,7 @@ type updateProfileRequest struct {
 }
 
 type profileListOptions struct {
-	ShowTranscription bool `json:"show_transcription"`
+	HideTranscription bool `json:"hide_transcription"`
 }
 
 type langRequest struct {

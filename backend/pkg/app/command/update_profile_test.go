@@ -319,5 +319,5 @@ func TestUpdateProfileHandler_Handle_PositiveCases(t *testing.T) {
 	assert.Equal(t, cmd.Email, data["email"])
 	assert.Equal(t, newHash, data["password"])
 	assert.Equal(t, langID, data["defaultLangID"])
-	assert.Equal(t, true, listData.ToMap()["showTranscription"])
+	assert.Equal(t, true, listData.ToMap()["hideTranscription"])
 }

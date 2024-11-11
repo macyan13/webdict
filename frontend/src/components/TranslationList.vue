@@ -79,7 +79,7 @@ export default {
       this.showLoadSpinner = true;
       this.$store.dispatch('profile/fetchProfile')
           .then((profile) => {
-            this.hideTranscription = profile.translationViewOptions.hideTranscription;
+            this.hideTranscription = profile.list_options.hide_transcription;
           })
           .catch((error) => {
             this.hasError = true;

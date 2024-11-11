@@ -94,7 +94,7 @@ type UserView struct {
 }
 
 type UserListOptionsView struct {
-	ShowTranscription bool
+	HideTranscription bool
 }
 
 func (v *UserView) sanitize(sanitizer *strictSanitizer) {
